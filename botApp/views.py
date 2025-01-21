@@ -174,6 +174,46 @@ def descargar_excel(request):
         response['Content-Disposition'] = f'attachment; filename={nombre_archivo}'
         return response
 # --------------------- Reporteria --------------------- #
+
+def generar_grafico_usuario_por_edad():
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad ASC"
+        )
+        resultados = cursor.fetchall()
+
+    edades = []
+    cantidades = []
+
+    for resultado in resultados:
+        edad, cantidad = resultado
+        edades.append(edad)
+        cantidades.append(cantidad)
+
+    plt.figure(figsize=[13,5])
+    plt.bar(edades, cantidades, color="blue")
+    plt.xlabel("Edad")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Usuarias por edad")
+    plt.xticks(range(18,71,1))
+    
+
+    # Agregar etiquetas en las barras
+    for edad, cantidad in zip(edades, cantidades):
+        plt.text(edad, cantidad, str(cantidad), ha='center', va='bottom')
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+
 def generar_grafico_anio_nacimiento():
     with connection.cursor() as cursor:
         cursor.execute(
@@ -189,6 +229,7 @@ def generar_grafico_anio_nacimiento():
         anios.append(anio)
         cantidades.append(cantidad)
 
+    plt.figure(figsize=[10,7])
     plt.bar(anios, cantidades, color="blue")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
@@ -572,6 +613,7 @@ def generar_grafico_pregunta6():
 @login_required
 def reportes(request):
     data = {
+        "imagen_base64_edad": generar_grafico_usuario_por_edad(),
         "imagen_base64_ingresos": generar_grafico_respuestas_por_dia(),
         "imagen_base64_genero":  generar_grafico_personas_por_genero(),
         "imagen_base64_ingresos_comuna": generar_grafico_ingresos_por_comuna(),
