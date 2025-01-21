@@ -4,6 +4,7 @@ from django.db import models
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from datetime import date
 
 
 
@@ -71,7 +72,7 @@ class Ocupacion(models.Model):
 
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
-    AnioNacimiento = models.CharField(max_length=200, verbose_name="Fecha de Nacimiento")
+    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
     Whatsapp = models.CharField(max_length=200)
@@ -81,10 +82,23 @@ class Usuario(models.Model):
     SistemaSalud_Usuario = models.ForeignKey(SistemaSalud, on_delete=models.CASCADE)
     Ocupacion_Usuario = models.ForeignKey(Ocupacion, on_delete=models.CASCADE)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
+    edad = models.IntegerField(default=0)
+
+    #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
+    def calculo_edad (self):
+        fecha_actual = date.today()
+        edad =  fecha_actual.year - self.AnioNacimiento.year
+        edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
+        return edad
+    
+    #Guardar edad con método save
+    def save(self, *args, **kwargs):
+        self.edad = self.calculo_edad()  
+        super().save(*args, **kwargs) #Llama al método save
 
     def __str__(self):
         return str(self.id)
-
+    
 
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")

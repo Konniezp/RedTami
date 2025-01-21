@@ -15,6 +15,7 @@ class UsuarioAdmin(admin.ModelAdmin):
         "SistemaSalud_Usuario",
         "Ocupacion_Usuario",
         "Fecha_Ingreso",
+        "edad"
     )
     search_fields = (
         "id",
