@@ -616,7 +616,7 @@ def generar_grafico_mamografia_si_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botapp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8)
             GROUP BY edad ORDER BY edad ASC
             """
@@ -662,7 +662,7 @@ def generar_grafico_mamografia_no_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botapp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (9)
             GROUP BY edad ORDER BY edad ASC
             """
@@ -707,7 +707,7 @@ def experimento_mamografias():
             """
             SELECT us.edad, COUNT(*) as Cantidad, id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botapp_usuario us ON ur.Rut = us.Rut
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8,9)
             GROUP BY edad, id_opc_respuesta_id 
             ORDER BY edad ASC
