@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 from io import BytesIO
 import requests
-
+import numpy as np
 
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
@@ -771,7 +771,83 @@ def experimento_mamografias():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def experimento_mamografias_barras_agrupadas():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(*) as Cantidad, id_opc_respuesta_id
+            FROM botApp_usuariorespuesta ur 
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (8,9)
+            GROUP BY edad, id_opc_respuesta_id 
+            ORDER BY edad ASC
+            """
+        )
+        resultados = cursor.fetchall()
 
+    edades = []
+    cantidades_si = []
+    cantidades_no = []
+
+    # Diccionario para almacenar las cantidades por edad
+    datos = {}
+
+    for resultado in resultados:
+        edad, cantidad, respuesta = resultado
+
+        if edad not in datos:
+            datos[edad] = {"si": 0, "no": 0}
+
+        if respuesta == 8:
+            datos[edad]["si"] += cantidad
+        elif respuesta == 9:
+            datos[edad]["no"] += cantidad
+
+    # Para ordenar por edades
+    edades = sorted(datos.keys())
+    cantidades_si = [datos[edad]["si"] for edad in edades]
+    cantidades_no = [datos[edad]["no"] for edad in edades]
+
+    # Creación del gráfico
+    fig, ax = plt.subplots(figsize=(18, 8))
+    width = 0.25  # Tamaño del ancho de las barras
+    rects1 = ax.bar([edad - width / 2 for edad in edades], cantidades_si, width, label='Cantidad Sí', color='blue') #Para desplazar a la izq
+    rects2 = ax.bar([edad + width / 2 for edad in edades], cantidades_no, width, label='Cantidad No', color='red') #Para desplazar a la der
+
+    ax.set_xlabel("Edad")
+    ax.set_ylabel("Número de Usuarias")
+    ax.set_title("Mamografías por Edad")
+    ax.set_xticks(range(min(edades), max(edades) + 1, 1))
+    ax.set_xticklabels(range(min(edades), max(edades) + 1, 1))
+    ax.legend()
+    plt.tight_layout()
+
+    # Para agregar etiquetas en las barras utilizando ax.annotate
+    for rect in rects1:
+        height = rect.get_height()
+        ax.annotate(f'{height}',
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  #desplaza etiquetas para que no se solapen
+                    textcoords="offset points",
+                    ha='center', va='bottom', color='black')
+
+    for rect in rects2:
+        height = rect.get_height()
+        ax.annotate(f'{height}',
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),
+                    textcoords="offset points",
+                    ha='center', va='bottom', color='black')
+    
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
        
 @login_required
 def reportes(request):
@@ -791,6 +867,7 @@ def reportes(request):
         "imagen_base64_mamografia_si_por_edad":generar_grafico_mamografia_si_por_edad(),
         "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
         "imagen_base64_experimento_mamografia": experimento_mamografias(),  
+        "imagen_base64_experimento_mamografia_barras_agrupadas": experimento_mamografias_barras_agrupadas()
             }
     return render(request, "reportes.html", data)
 
