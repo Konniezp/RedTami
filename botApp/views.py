@@ -179,7 +179,7 @@ def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad ASC"
+            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad "
         )
         resultados = cursor.fetchall()
 
@@ -217,7 +217,7 @@ def generar_grafico_usuario_por_edad():
 def generar_grafico_anio_nacimiento():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT SUBSTRING_INDEX(AnioNacimiento, '-', -1), COUNT(*) FROM botApp_usuario GROUP BY SUBSTRING_INDEX(AnioNacimiento, '-', -1)"
+            "SELECT YEAR(AnioNacimiento) as anio, COUNT(*) FROM botApp_usuario GROUP BY YEAR(AnioNacimiento) ORDER BY anio ASC;"
         )
         resultados = cursor.fetchall()
 
@@ -234,6 +234,9 @@ def generar_grafico_anio_nacimiento():
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
     plt.title("Usuarios por Año de Nacimiento")
+    plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
+
+   
 
     # Agregar etiquetas en las barras
     for anio, cantidad in zip(anios, cantidades):
@@ -268,6 +271,7 @@ def generar_grafico_respuestas_por_dia():
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
     plt.title("Respuestas por Día")
+    
 
     # Agregar los valores de cada punto
     for fecha, cantidad in zip(fechas, cantidades):
@@ -616,7 +620,7 @@ def generar_grafico_mamografia_si_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botapp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8)
             GROUP BY edad ORDER BY edad ASC
             """
@@ -662,7 +666,7 @@ def generar_grafico_mamografia_no_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botapp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (9)
             GROUP BY edad ORDER BY edad ASC
             """
@@ -707,7 +711,7 @@ def experimento_mamografias():
             """
             SELECT us.edad, COUNT(*) as Cantidad, id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botapp_usuario us ON ur.Rut = us.Rut
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8,9)
             GROUP BY edad, id_opc_respuesta_id 
             ORDER BY edad ASC
