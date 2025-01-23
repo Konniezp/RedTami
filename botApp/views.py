@@ -179,7 +179,7 @@ def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad ASC"
+            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad "
         )
         resultados = cursor.fetchall()
 
@@ -217,7 +217,7 @@ def generar_grafico_usuario_por_edad():
 def generar_grafico_anio_nacimiento():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT SUBSTRING_INDEX(AnioNacimiento, '-', -1), COUNT(*) FROM botApp_usuario GROUP BY SUBSTRING_INDEX(AnioNacimiento, '-', -1)"
+            "SELECT YEAR(AnioNacimiento) as anio, COUNT(*) FROM botApp_usuario GROUP BY YEAR(AnioNacimiento) ORDER BY anio ASC;"
         )
         resultados = cursor.fetchall()
 
@@ -234,6 +234,9 @@ def generar_grafico_anio_nacimiento():
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
     plt.title("Usuarios por Año de Nacimiento")
+    plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
+
+   
 
     # Agregar etiquetas en las barras
     for anio, cantidad in zip(anios, cantidades):
@@ -268,6 +271,7 @@ def generar_grafico_respuestas_por_dia():
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
     plt.title("Respuestas por Día")
+    
 
     # Agregar los valores de cada punto
     for fecha, cantidad in zip(fechas, cantidades):
