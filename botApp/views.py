@@ -196,7 +196,7 @@ def generar_grafico_usuario_por_edad():
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Usuarias por edad")
-    plt.xticks(range(18,71,1))
+    plt.xticks(range(min(edades), max(edades) + 1, 1))
     
 
     # Agregar etiquetas en las barras
@@ -610,6 +610,169 @@ def generar_grafico_pregunta6():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def generar_grafico_mamografia_si_por_edad():
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(*) as Cantidad 
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (8)
+            GROUP BY edad ORDER BY edad ASC
+            """
+
+
+        )
+        resultados = cursor.fetchall()
+
+    edades = []
+    cantidades = []
+
+    for resultado in resultados:
+        edad, cantidad = resultado
+        edades.append(edad)
+        cantidades.append(cantidad)
+
+    plt.figure(figsize=[13,5])
+    plt.bar(edades, cantidades, color="blue")
+    plt.xlabel("Edad")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Mamografías por edad Respuesta Si")
+    plt.xticks(range(min(edades), max(edades) + 1, 1))
+    plt.yticks(range(0,11,1))
+
+    
+    # Agregar etiquetas en las barras
+    for edad, cantidad in zip(edades, cantidades):
+        plt.text(edad, cantidad, str(cantidad), ha='center', va='bottom')
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def generar_grafico_mamografia_no_por_edad():
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(*) as Cantidad 
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (9)
+            GROUP BY edad ORDER BY edad ASC
+            """
+
+
+        )
+        resultados = cursor.fetchall()
+
+    edades = []
+    cantidades = []
+
+    for resultado in resultados:
+        edad, cantidad = resultado
+        edades.append(edad)
+        cantidades.append(cantidad)
+
+    plt.figure(figsize=[13,5])
+    plt.bar(edades, cantidades, color="red")
+    plt.xlabel("Edad")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Mamografías por edad Respuesta No")
+    plt.xticks(range(min(edades), max(edades) + 1, 1))
+
+    
+    # Agregar etiquetas en las barras
+    for edad, cantidad in zip(edades, cantidades):
+        plt.text(edad, cantidad, str(cantidad), ha='center', va='bottom')
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def experimento_mamografias():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(*) as Cantidad, id_opc_respuesta_id
+            FROM botApp_usuariorespuesta ur 
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (8,9)
+            GROUP BY edad, id_opc_respuesta_id 
+            ORDER BY edad ASC
+            """
+        )
+        resultados = cursor.fetchall()
+
+    edades = []
+    cantidades_si = []
+    cantidades_no = []
+
+    # Iteramos sobre los resultados
+    for resultado in resultados:
+        edad, cantidad, respuesta = resultado
+
+        # Si la edad no está en la lista, la agregamos con inicialización de cantidades
+        if edad not in edades:
+            edades.append(edad)
+            cantidades_si.append(0)  
+            cantidades_no.append(0)  
+
+        # Obtenemos el índice correspondiente a la edad
+        index = edades.index(edad)
+
+        
+        if respuesta == 8:
+            cantidades_si[index] += cantidad
+        elif respuesta == 9: 
+            cantidades_no[index] += cantidad
+
+    # Crear el gráfico
+    plt.figure(figsize=[18, 8])
+    plt.bar(edades, cantidades_si, color="blue", label="Cantidad Sí")
+    plt.bar(edades, cantidades_no, color="red", bottom=cantidades_si, label="Cantidad No")
+    plt.xlabel("Edad")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Mamografías por Edad")
+    plt.xticks(range(min(edades), max(edades) + 1, 1))  # Ajuste dinámico del rango de edades
+    plt.legend()
+
+    # Agregar etiquetas para las barras de cantidades_si
+    for edad, cantidad_si, cantidad_no in zip(edades, cantidades_si, cantidades_no):
+        if cantidad_si > 0:
+            plt.text(edad, cantidad_si - cantidad_si / 2,  
+                 str(cantidad_si), ha='center', va='bottom', color='black')
+
+    # Agregar etiquetas para las barras de cantidades_no
+    for edad, cantidad_si, cantidad_no in zip(edades, cantidades_si, cantidades_no):
+        if cantidad_no > 0:
+            plt.text(edad, cantidad_si + cantidad_no - cantidad_no / 2,  
+                str(cantidad_no), ha='center', va='top', color='black')
+
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+
+       
 @login_required
 def reportes(request):
     data = {
@@ -624,7 +787,10 @@ def reportes(request):
         "imagen_base64_pregunta5": generar_grafico_pregunta5(),
         "imagen_base64_pregunta6": generar_grafico_pregunta6(),  
         "imagen_base64_referencias": generar_grafico_referencias(), 
-        "imagen_base64_anios_nacimiento": generar_grafico_anio_nacimiento(),   
+        "imagen_base64_anios_nacimiento": generar_grafico_anio_nacimiento(),
+        "imagen_base64_mamografia_si_por_edad":generar_grafico_mamografia_si_por_edad(),
+        "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
+        "imagen_base64_experimento_mamografia": experimento_mamografias(),  
             }
     return render(request, "reportes.html", data)
 
