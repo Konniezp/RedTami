@@ -264,13 +264,16 @@ def generar_grafico_respuestas_por_dia():
 
     for resultado in resultados:
         fecha, cantidad = resultado
-        fechas.append(datetime.strftime(fecha, "%Y-%m-%d"))
+        fechas.append(datetime.strftime(fecha, "%d-%m-%Y"))
         cantidades.append(cantidad)
 
     plt.plot(fechas, cantidades, marker="o", linestyle="-", color="blue")
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
     plt.title("Respuestas por Día")
+    plt.xticks(rotation = 90)
+    plt.tight_layout() 
+    
     
 
     # Agregar los valores de cada punto
