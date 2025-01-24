@@ -200,7 +200,7 @@ def generar_grafico_usuario_por_edad():
         cantidades.append(cantidad)
 
     plt.figure(figsize=[13,5])
-    plt.bar(edades, cantidades, color="blue")
+    plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Usuarias por edad", pad=20)
@@ -238,7 +238,7 @@ def generar_grafico_anio_nacimiento():
         cantidades.append(cantidad)
 
     plt.figure(figsize=[10,7])
-    plt.bar(anios, cantidades, color="blue")
+    plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
     plt.title("Usuarios por Año de Nacimiento", pad=20)
@@ -275,7 +275,7 @@ def generar_grafico_respuestas_por_dia():
         fechas.append(datetime.strftime(fecha, "%d-%m-%Y"))
         cantidades.append(cantidad)
 
-    plt.plot(fechas, cantidades, marker="o", linestyle="-", color="blue")
+    plt.plot(fechas, cantidades, marker="o", linestyle="-", color="#79addc")
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
     plt.title("Respuestas por Día", pad=20)
@@ -313,7 +313,7 @@ def generar_grafico_personas_por_genero():
         cantidades.append(cantidad)
 
     # Crear gráfico de barras con diferentes colores para cada barra
-    colores = {'Masculino': 'blue', 'Femenino': 'pink', 'Otro': 'green'}
+    colores = {'Masculino': '#79addc', 'Femenino': 'pink', 'Otro': 'green'}
     plt.bar(generos, cantidades, color=[colores[genero] for genero in generos])
 
     # Agregar los valores de cada barra
@@ -649,7 +649,7 @@ def generar_grafico_mamografia_si_por_edad():
         cantidades.append(cantidad)
 
     plt.figure(figsize=[13,5])
-    plt.bar(edades, cantidades, color="blue")
+    plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por edad Respuesta Si", pad=20)
@@ -810,7 +810,7 @@ def generar_grafico_tiempo_trascurrido():
             cantidades[2] += cantidad
 
     plt.figure(figsize=[13,5])
-    plt.bar(opciones_anios, cantidades, color="blue")
+    plt.bar(opciones_anios, cantidades, color="#79addc")
     plt.xlabel("Años transcurridos")
     plt.ylabel("Cantidad de usuarias")
     plt.title("Tiempo transcurrido desde última mamografía", pad=20)
