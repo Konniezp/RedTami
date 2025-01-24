@@ -160,4 +160,3 @@ class ultima_mamografia_anio(models.Model):
 
     def _str_(self):
         return f"{self.Rut} - {self.anio_ult_mamografia}"
-
