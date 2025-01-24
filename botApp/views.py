@@ -795,24 +795,26 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-    anios_transc = []
-    cantidades = []
+    opciones_anios = ["1", "2", "Más de 2"]
+    cantidades = [0, 0, 0]
 
     for resultado in resultados:
         anio, cantidad = resultado
-        anios_transc.append(anio)
-        cantidades.append(cantidad)
+        if anio == 1:
+            cantidades[0] += cantidad
+        elif anio == 2:
+            cantidades[1] += cantidad
+        elif anio > 2:
+            cantidades[2] += cantidad
 
     plt.figure(figsize=[13,5])
-    plt.bar(anios_transc, cantidades, color="blue")
+    plt.bar(opciones_anios, cantidades, color="blue")
     plt.xlabel("Años transcurridos")
     plt.ylabel("Cantidad de usuarias")
     plt.title("Tiempo transcurrido desde última mamografía", pad=20)
-    plt.xticks(range(min(anios_transc), max(anios_transc) + 1, 1))
-    
 
     # Agregar etiquetas en las barras
-    for anio, cantidad in zip(anios_transc, cantidades):
+    for anio, cantidad in enumerate(cantidades):
         plt.text(anio, cantidad, str(cantidad), ha='center', va='bottom')
 
     # Guardar la imagen en un buffer
@@ -825,7 +827,6 @@ def generar_grafico_tiempo_trascurrido():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-       
 @login_required
 def reportes(request):
     data = {
@@ -845,6 +846,7 @@ def reportes(request):
         "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
         "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),  
         "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido()
+
             }
     return render(request, "reportes.html", data)
 
