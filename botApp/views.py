@@ -695,7 +695,7 @@ def generar_grafico_mamografia_no_por_edad():
         cantidades.append(cantidad)
 
     plt.figure(figsize=[13,5])
-    plt.bar(edades, cantidades, color="red")
+    plt.bar(edades, cantidades, color="#EFB0C9")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por edad Respuesta No", pad=20)
@@ -755,8 +755,8 @@ def mamografia_por_edad_si_no():
 
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
-    plt.bar(edades, cantidades_si, color="blue", label="Cantidad Sí")
-    plt.bar(edades, cantidades_no, color="red", bottom=cantidades_si, label="Cantidad No")
+    plt.bar(edades, cantidades_si, color="#79addc", label="Cantidad Sí")
+    plt.bar(edades, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por Edad", pad=20)
@@ -775,8 +775,7 @@ def mamografia_por_edad_si_no():
             plt.text(edad, cantidad_si + cantidad_no - cantidad_no / 2,  
                 str(cantidad_no), ha='center', va='top', color='black')
 
-
-    # Guardar la imagen en un buffer
+   # Guardar la imagen en un buffer
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
     buffer.seek(0)
@@ -817,8 +816,55 @@ def generar_grafico_tiempo_trascurrido():
     plt.title("Tiempo transcurrido desde última mamografía", pad=20)
 
     # Agregar etiquetas en las barras
-    for anio, cantidad in enumerate(cantidades):
-        plt.text(anio, cantidad, str(cantidad), ha='center', va='bottom')
+    for i, cantidad in enumerate(cantidades):
+        plt.text(i, cantidad, str(cantidad), ha='center', va='bottom')
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+
+def generar_grafico_por_rango_edad():
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT edad, COUNT(*) 
+            FROM botApp_usuario 
+            GROUP BY edad ORDER BY edad
+            """
+        )
+        resultados = cursor.fetchall()
+
+    opciones_edad = ["Menor de 50 años", "Entre 50 y 69 años", "Mayor a 69 años"]
+    cantidades = [0, 0, 0]
+
+    for resultado in resultados:
+        edad, cantidad = resultado
+        if edad <50:
+            cantidades[0] += cantidad
+        elif edad >=50 and edad <= 69:
+            cantidades[1] += cantidad
+        elif edad > 69 :
+            cantidades[2] += cantidad
+
+    plt.figure(figsize=[10,5])
+    plt.bar(opciones_edad, cantidades, color="#79addc")
+    plt.xlabel("Rangos de edad")
+    plt.ylabel("Cantidad de usuarias")
+    plt.title("Cantidad de usuarias por rango de edad", pad=20)
+
+    # Agregar etiquetas en las barras
+    for i, cantidad in enumerate(cantidades):
+        plt.text(i, cantidad, str(cantidad), ha='center', va='bottom')
+
+
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -847,8 +893,9 @@ def reportes(request):
         "imagen_base64_anios_nacimiento": generar_grafico_anio_nacimiento(),
         "imagen_base64_mamografia_si_por_edad":generar_grafico_mamografia_si_por_edad(),
         "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
-        "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),  
-        "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido()
+        "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),
+        "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido(),
+        "imagen_base64_rango_edad": generar_grafico_por_rango_edad(),
 
             }
     return render(request, "reportes.html", data)
