@@ -179,6 +179,9 @@ def descargar_excel(request):
 plt.rcParams['font.family'] = 'sans-serif'  
 plt.rcParams['font.sans-serif'] = 'Calibri' 
 plt.rcParams['font.size'] = 11
+plt.rcParams['axes.titlesize'] =20
+plt.rcParams['axes.labelsize']= 13
+plt.rcParams['axes.labelpad']=10
 
 def generar_grafico_usuario_por_edad():
 
