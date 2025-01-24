@@ -864,6 +864,8 @@ def generar_grafico_por_rango_edad():
     for i, cantidad in enumerate(cantidades):
         plt.text(i, cantidad, str(cantidad), ha='center', va='bottom')
 
+
+
     # Guardar la imagen en un buffer
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
@@ -874,7 +876,6 @@ def generar_grafico_por_rango_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-       
 @login_required
 def reportes(request):
     data = {
@@ -892,9 +893,10 @@ def reportes(request):
         "imagen_base64_anios_nacimiento": generar_grafico_anio_nacimiento(),
         "imagen_base64_mamografia_si_por_edad":generar_grafico_mamografia_si_por_edad(),
         "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
-        "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),  
+        "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),
         "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido(),
         "imagen_base64_rango_edad": generar_grafico_por_rango_edad(),
+
             }
     return render(request, "reportes.html", data)
 
