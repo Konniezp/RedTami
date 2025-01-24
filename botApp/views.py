@@ -175,6 +175,11 @@ def descargar_excel(request):
         return response
 # --------------------- Reporteria --------------------- #
 
+# Configuración global para fuentes de gráficos
+plt.rcParams['font.family'] = 'sans-serif'  
+plt.rcParams['font.sans-serif'] = 'Calibri' 
+plt.rcParams['font.size'] = 11
+
 def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
@@ -195,7 +200,7 @@ def generar_grafico_usuario_por_edad():
     plt.bar(edades, cantidades, color="blue")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
-    plt.title("Usuarias por edad")
+    plt.title("Usuarias por edad", pad=20)
     plt.xticks(range(min(edades), max(edades) + 1, 1))
     
 
@@ -233,7 +238,7 @@ def generar_grafico_anio_nacimiento():
     plt.bar(anios, cantidades, color="blue")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
-    plt.title("Usuarios por Año de Nacimiento")
+    plt.title("Usuarios por Año de Nacimiento", pad=20)
     plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
 
    
@@ -270,7 +275,7 @@ def generar_grafico_respuestas_por_dia():
     plt.plot(fechas, cantidades, marker="o", linestyle="-", color="blue")
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
-    plt.title("Respuestas por Día")
+    plt.title("Respuestas por Día", pad=20)
     plt.xticks(rotation = 90)
     plt.tight_layout() 
     
@@ -314,7 +319,7 @@ def generar_grafico_personas_por_genero():
 
     plt.xlabel("Género")
     plt.ylabel("Número de Personas")
-    plt.title("Ingresos por Género")
+    plt.title("Ingresos por Género", pad=20)
 
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
@@ -341,7 +346,7 @@ def generar_grafico_ingresos_por_comuna():
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
     ax.axis('equal')  # Asegura que el gráfico sea un círculo en lugar de una elipse
-    ax.set_title('Distribución de Ingresos por Comuna')
+    ax.set_title('Distribución de Ingresos por Comuna', pad=20)
 
     # Ajustar el tamaño de la fuente en los textos
     for text, autotext in zip(texts, autotexts):
@@ -373,7 +378,7 @@ def generar_grafico_referencias():
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=referencias, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
     ax.axis('equal')  # Asegura que el gráfico sea un círculo en lugar de una elipse
-    ax.set_title('Distribución de Ingresos por Referencia')
+    ax.set_title('Distribución de Ingresos por Referencia', pad=20)
 
     # Ajustar el tamaño de la fuente en los textos
     for text, autotext in zip(texts, autotexts):
@@ -415,7 +420,7 @@ def generar_grafico_pregunta1():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Te has realizado una mamografía?')
+    plt.title('¿Te has realizado una mamografía?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -453,7 +458,7 @@ def generar_grafico_pregunta2():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Recuerdas cuando fue tu última mamografía?')
+    plt.title('¿Recuerdas cuando fue tu última mamografía?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -491,7 +496,7 @@ def generar_grafico_pregunta3():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('Fecha de la última mamografía')
+    plt.title('Fecha de la última mamografía', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -529,7 +534,7 @@ def generar_grafico_pregunta4():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Tienes los archivos e informe de tu última mamografía?')
+    plt.title('¿Tienes los archivos e informe de tu última mamografía?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -567,7 +572,7 @@ def generar_grafico_pregunta5():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Te gustaría recibir más información sobre el cuidado y prevención del cáncer de mama?')
+    plt.title('¿Te gustaría recibir más información sobre el cuidado y prevención del cáncer de mama?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -605,7 +610,7 @@ def generar_grafico_pregunta6():
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Tienes un familiar directo con cáncer de mama? (hermana, mama, tía, abuela)')
+    plt.title('¿Tienes un familiar directo con cáncer de mama? (hermana, mama, tía, abuela)', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -644,7 +649,7 @@ def generar_grafico_mamografia_si_por_edad():
     plt.bar(edades, cantidades, color="blue")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por edad Respuesta Si")
+    plt.title("Mamografías por edad Respuesta Si", pad=20)
     plt.xticks(range(min(edades), max(edades) + 1, 1))
     plt.yticks(range(0,11,1))
 
@@ -690,7 +695,7 @@ def generar_grafico_mamografia_no_por_edad():
     plt.bar(edades, cantidades, color="red")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por edad Respuesta No")
+    plt.title("Mamografías por edad Respuesta No", pad=20)
     plt.xticks(range(min(edades), max(edades) + 1, 1))
 
     
@@ -708,7 +713,7 @@ def generar_grafico_mamografia_no_por_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-def experimento_mamografias():
+def mamografia_por_edad_si_no():
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -751,7 +756,7 @@ def experimento_mamografias():
     plt.bar(edades, cantidades_no, color="red", bottom=cantidades_si, label="Cantidad No")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por Edad")
+    plt.title("Mamografías por Edad", pad=20)
     plt.xticks(range(min(edades), max(edades) + 1, 1))  # Ajuste dinámico del rango de edades
     plt.legend()
 
@@ -778,74 +783,38 @@ def experimento_mamografias():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-def experimento_mamografias_barras_agrupadas():
+def generar_grafico_tiempo_trascurrido():
+
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, id_opc_respuesta_id
-            FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (8,9)
-            GROUP BY edad, id_opc_respuesta_id 
-            ORDER BY edad ASC
+            SELECT tiempo_transc_ult_mamografia, COUNT(*) 
+            FROM botApp_ultima_mamografia_anio  
+            GROUP BY tiempo_transc_ult_mamografia ORDER BY tiempo_transc_ult_mamografia ASC 
             """
         )
         resultados = cursor.fetchall()
 
-    edades = []
-    cantidades_si = []
-    cantidades_no = []
-
-    # Diccionario para almacenar las cantidades por edad
-    datos = {}
+    anios_transc = []
+    cantidades = []
 
     for resultado in resultados:
-        edad, cantidad, respuesta = resultado
+        anio, cantidad = resultado
+        anios_transc.append(anio)
+        cantidades.append(cantidad)
 
-        if edad not in datos:
-            datos[edad] = {"si": 0, "no": 0}
-
-        if respuesta == 8:
-            datos[edad]["si"] += cantidad
-        elif respuesta == 9:
-            datos[edad]["no"] += cantidad
-
-    # Para ordenar por edades
-    edades = sorted(datos.keys())
-    cantidades_si = [datos[edad]["si"] for edad in edades]
-    cantidades_no = [datos[edad]["no"] for edad in edades]
-
-    # Creación del gráfico
-    fig, ax = plt.subplots(figsize=(18, 8))
-    width = 0.25  # Tamaño del ancho de las barras
-    rects1 = ax.bar([edad - width / 2 for edad in edades], cantidades_si, width, label='Cantidad Sí', color='blue') #Para desplazar a la izq
-    rects2 = ax.bar([edad + width / 2 for edad in edades], cantidades_no, width, label='Cantidad No', color='red') #Para desplazar a la der
-
-    ax.set_xlabel("Edad")
-    ax.set_ylabel("Número de Usuarias")
-    ax.set_title("Mamografías por Edad")
-    ax.set_xticks(range(min(edades), max(edades) + 1, 1))
-    ax.set_xticklabels(range(min(edades), max(edades) + 1, 1))
-    ax.legend()
-    plt.tight_layout()
-
-    # Para agregar etiquetas en las barras utilizando ax.annotate
-    for rect in rects1:
-        height = rect.get_height()
-        ax.annotate(f'{height}',
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3),  #desplaza etiquetas para que no se solapen
-                    textcoords="offset points",
-                    ha='center', va='bottom', color='black')
-
-    for rect in rects2:
-        height = rect.get_height()
-        ax.annotate(f'{height}',
-                    xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3),
-                    textcoords="offset points",
-                    ha='center', va='bottom', color='black')
+    plt.figure(figsize=[13,5])
+    plt.bar(anios_transc, cantidades, color="blue")
+    plt.xlabel("Años transcurridos")
+    plt.ylabel("Cantidad de usuarias")
+    plt.title("Tiempo transcurrido desde última mamografía", pad=20)
+    plt.xticks(range(min(anios_transc), max(anios_transc) + 1, 1))
     
+
+    # Agregar etiquetas en las barras
+    for anio, cantidad in zip(anios_transc, cantidades):
+        plt.text(anio, cantidad, str(cantidad), ha='center', va='bottom')
+
     # Guardar la imagen en un buffer
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
@@ -855,6 +824,7 @@ def experimento_mamografias_barras_agrupadas():
     # Convertir la imagen a base64
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
+
        
 @login_required
 def reportes(request):
@@ -873,8 +843,8 @@ def reportes(request):
         "imagen_base64_anios_nacimiento": generar_grafico_anio_nacimiento(),
         "imagen_base64_mamografia_si_por_edad":generar_grafico_mamografia_si_por_edad(),
         "imagen_base64_mamografia_no_por_edad":generar_grafico_mamografia_no_por_edad(),
-        "imagen_base64_experimento_mamografia": experimento_mamografias(),  
-        "imagen_base64_experimento_mamografia_barras_agrupadas": experimento_mamografias_barras_agrupadas()
+        "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),  
+        "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido()
             }
     return render(request, "reportes.html", data)
 

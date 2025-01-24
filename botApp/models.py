@@ -140,3 +140,23 @@ class MensajeContenido(models.Model):
     texto = models.CharField(max_length=200)
     Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
     fecha = models.DateField(verbose_name="Fecha")
+
+class ultima_mamografia_anio(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
+    Rut = models.CharField(max_length=10)
+    anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
+    tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
+
+    # Función para calcular tiempo transcurrido desde la última mamografía
+    def calculo_tiempo_transc_ult_mamografia(self):
+        anio_actual = int(date.today().year)
+        tiempo_transc_ult_mamografia = anio_actual - self.anio_ult_mamografia
+        return tiempo_transc_ult_mamografia
+
+    # Guardar tiempo transcurrido con método save
+    def save(self, *args, **kwargs):
+        self.tiempo_transc_ult_mamografia = self.calculo_tiempo_transc_ult_mamografia()
+        super().save(*args, **kwargs)
+
+    def _str_(self):
+        return f"{self.Rut} - {self.anio_ult_mamografia}"
