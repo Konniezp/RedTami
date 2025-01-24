@@ -112,6 +112,10 @@ class MensajeContenidoAdmin(admin.ModelAdmin):
     search_fields = ("id", "texto", "fecha", "Genero_Usuario")
     list_filter = ("id", "texto", "fecha", "Genero_Usuario")
 
+class ultima_mamografia_anioAdmin(admin.ModelAdmin):
+    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
+    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
+    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
@@ -123,3 +127,4 @@ admin.site.register(SistemaSalud, SistemaSaludAdmin)
 admin.site.register(Ocupacion, OcupacionAdmin)
 admin.site.register(UsuarioTextoPregunta, UsuarioTextoPreguntaAdmin)
 admin.site.register(MensajeContenido, MensajeContenidoAdmin)
+admin.site.register(ultima_mamografia_anio, ultima_mamografia_anioAdmin)
