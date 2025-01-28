@@ -804,9 +804,9 @@ def generar_grafico_tiempo_trascurrido():
 
     for resultado in resultados:
         anio, cantidad = resultado
-        if anio == num_rango_uno:
+        if anio == 1:
             cantidades[0] += cantidad
-        elif anio == num_rango_dos:
+        elif anio == 2:
             cantidades[1] += cantidad
         elif anio == 3:
             cantidades[2] += cantidad
