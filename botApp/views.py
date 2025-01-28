@@ -347,7 +347,7 @@ def generar_grafico_ingresos_por_comuna():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
+    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+0.5)} ingresos", startangle=90)
     ax.axis('equal')  # Asegura que el gráfico sea un círculo en lugar de una elipse
     ax.set_title('Distribución de Ingresos por Comuna', pad=20)
 
@@ -797,16 +797,22 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-    opciones_anios = ["1", "2", "Más de 2"]
+    rango_uno_texto= "1"
+    rango_dos_texto= "2"
+    rango_tres_texto= "Más de dos"
+    opciones_anios = [rango_uno_texto, rango_dos_texto, rango_tres_texto]
     cantidades = [0, 0, 0]
+
+    num_rango_uno = 1
+    num_rango_dos = 2
 
     for resultado in resultados:
         anio, cantidad = resultado
-        if anio == 1:
+        if anio == num_rango_uno:
             cantidades[0] += cantidad
-        elif anio == 2:
+        elif anio == num_rango_dos:
             cantidades[1] += cantidad
-        elif anio > 2:
+        elif anio > num_rango_dos:
             cantidades[2] += cantidad
 
     plt.figure(figsize=[13,5])
@@ -876,6 +882,72 @@ def generar_grafico_por_rango_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def mamografia_por_edad_si_no_rango_edad():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            FROM botApp_usuariorespuesta ur 
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (8,9)
+            GROUP BY edad, ur.id_opc_respuesta_id 
+            ORDER BY edad ASC
+            """
+        )
+        resultados = cursor.fetchall()
+
+    opciones_anios = ["Menores de 50", "50 a 69", "Desde los 70"]
+    cantidades_si = [0, 0, 0]
+    cantidades_no = [0, 0, 0]
+
+    # Iteramos sobre los resultados
+    for resultado in resultados:
+        edad, cantidad, respuesta = resultado
+
+        if edad < 50 and respuesta == 8:
+            cantidades_si[0] += cantidad
+        elif edad >= 50 and edad <= 69 and respuesta == 8:
+            cantidades_si[1] += cantidad
+        elif edad > 69 and respuesta == 8:
+            cantidades_si[2] += cantidad 
+        elif edad < 50 and respuesta == 9:
+            cantidades_no[0] += cantidad
+        elif edad >= 50 and edad <= 69 and respuesta == 9:
+            cantidades_no[1] += cantidad
+        elif edad > 69 and respuesta == 9:
+            cantidades_no[2] += cantidad 
+
+    # Crear el gráfico
+    plt.figure(figsize=[18, 8])
+    plt.bar(opciones_anios, cantidades_si, color="#79addc", label="Cantidad Sí")
+    plt.bar(opciones_anios, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
+    plt.xlabel("Rango de edad guía clínica")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.legend()
+
+    # Agregar etiquetas para las barras de cantidades_si
+    for edad, cantidad_si, cantidad_no in zip(opciones_anios, cantidades_si, cantidades_no):
+        if cantidad_si > 0:
+            plt.text(edad, cantidad_si - cantidad_si / 2,  
+                 str(cantidad_si), ha='center', va='bottom', color='black')
+
+    # Agregar etiquetas para las barras de cantidades_no
+    for edad, cantidad_si, cantidad_no in zip(opciones_anios, cantidades_si, cantidades_no):
+        if cantidad_no > 0:
+            plt.text(edad, cantidad_si + cantidad_no - cantidad_no / 2,  
+                str(cantidad_no), ha='center', va='top', color='black')
+
+   # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
 @login_required
 def reportes(request):
     data = {
@@ -896,7 +968,7 @@ def reportes(request):
         "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),
         "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido(),
         "imagen_base64_rango_edad": generar_grafico_por_rango_edad(),
-
+        "imagen_base64_mamografia_si_no_rango_edad": mamografia_por_edad_si_no_rango_edad()
             }
     return render(request, "reportes.html", data)
 
