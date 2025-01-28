@@ -335,10 +335,12 @@ def generar_grafico_personas_por_genero():
 def generar_grafico_ingresos_por_comuna():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT c.Nombre_Comuna, COUNT(*) AS TotalIngresos "
-            "FROM botApp_usuario u "
-            "JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.id "
-            "GROUP BY c.Nombre_Comuna"
+            """
+            SELECT c.Nombre_Comuna, COUNT(*) AS TotalIngresos 
+            FROM botApp_usuario u
+            JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.id 
+            GROUP BY c.Nombre_Comuna
+            """
         )
         resultados = cursor.fetchall()
 
@@ -347,7 +349,7 @@ def generar_grafico_ingresos_por_comuna():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
+    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+ 0.5)} ingresos", startangle=90)
     ax.axis('equal')  # Asegura que el gráfico sea un círculo en lugar de una elipse
     ax.set_title('Distribución de Ingresos por Comuna', pad=20)
 
