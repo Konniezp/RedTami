@@ -335,10 +335,12 @@ def generar_grafico_personas_por_genero():
 def generar_grafico_ingresos_por_comuna():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT c.Nombre_Comuna, COUNT(*) AS TotalIngresos "
-            "FROM botApp_usuario u "
-            "JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.id "
-            "GROUP BY c.Nombre_Comuna"
+            """
+            SELECT c.Nombre_Comuna, COUNT(*) AS TotalIngresos 
+            FROM botApp_usuario u
+            JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.id 
+            GROUP BY c.Nombre_Comuna
+            """
         )
         resultados = cursor.fetchall()
 
@@ -347,7 +349,7 @@ def generar_grafico_ingresos_por_comuna():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+0.5)} ingresos", startangle=90)
+    wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+ 0.5)} ingresos", startangle=90)
     ax.axis('equal')  # Asegura que el gráfico sea un círculo en lugar de una elipse
     ax.set_title('Distribución de Ingresos por Comuna', pad=20)
 
@@ -720,7 +722,7 @@ def mamografia_por_edad_si_no():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8,9)
@@ -797,23 +799,19 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-    rango_uno_texto= "1"
-    rango_dos_texto= "2"
-    rango_tres_texto= "Más de dos"
-    opciones_anios = [rango_uno_texto, rango_dos_texto, rango_tres_texto]
-    cantidades = [0, 0, 0]
-
-    num_rango_uno = 1
-    num_rango_dos = 2
+    opciones_anios = ["1", "2", "3", "Más de 3"]
+    cantidades = [0, 0, 0, 0]
 
     for resultado in resultados:
         anio, cantidad = resultado
-        if anio == num_rango_uno:
+        if anio == 1:
             cantidades[0] += cantidad
-        elif anio == num_rango_dos:
+        elif anio == 2:
             cantidades[1] += cantidad
-        elif anio > num_rango_dos:
+        elif anio == 3:
             cantidades[2] += cantidad
+        elif anio > 3:
+            cantidades[3] += cantidad
 
     plt.figure(figsize=[13,5])
     plt.bar(opciones_anios, cantidades, color="#79addc")
