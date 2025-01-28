@@ -720,7 +720,7 @@ def mamografia_por_edad_si_no():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (8,9)
@@ -797,8 +797,8 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-    opciones_anios = ["1", "2", "Más de 2"]
-    cantidades = [0, 0, 0]
+    opciones_anios = ["1", "2", "3", "Más de 3"]
+    cantidades = [0, 0, 0, 0]
 
     for resultado in resultados:
         anio, cantidad = resultado
@@ -806,8 +806,10 @@ def generar_grafico_tiempo_trascurrido():
             cantidades[0] += cantidad
         elif anio == 2:
             cantidades[1] += cantidad
-        elif anio > 2:
+        elif anio == 3:
             cantidades[2] += cantidad
+        elif anio > 3:
+            cantidades[3] += cantidad
 
     plt.figure(figsize=[13,5])
     plt.bar(opciones_anios, cantidades, color="#79addc")
