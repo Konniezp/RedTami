@@ -417,7 +417,7 @@ def generar_grafico_pregunta1():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -455,7 +455,7 @@ def generar_grafico_pregunta2():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral','lightblue' ])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -493,7 +493,7 @@ def generar_grafico_pregunta3():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue', 'lightyellow'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#DE8F5F', '#FFB26F', '#FFB38E', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -531,7 +531,7 @@ def generar_grafico_pregunta4():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue', 'lightyellow'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9','#A5F8CE', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -569,7 +569,7 @@ def generar_grafico_pregunta5():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -607,7 +607,7 @@ def generar_grafico_pregunta6():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -700,13 +700,13 @@ def generar_grafico_mamo_si_por_familiar_directo():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('Cantidad de usuarias que se han realizado mamografías y tiene antecedentes familiares', pad=20)
+    plt.title('Cantidad de usuarias que si se han realizado mamografías y tiene antecedentes familiares', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -793,13 +793,13 @@ def generar_grafico_mamo_no_por_familiar_directo():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('Cantidad de usuarias que se han realizado mamografías y tiene antecedentes familiares', pad=20)
+    plt.title('Cantidad de usuarias que no se han realizado mamografías y tiene antecedentes familiares', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
