@@ -199,7 +199,7 @@ def generar_grafico_usuario_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
-    plt.figure(figsize=[13,5])
+    plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
@@ -237,14 +237,12 @@ def generar_grafico_anio_nacimiento():
         anios.append(anio)
         cantidades.append(cantidad)
 
-    plt.figure(figsize=[10,7])
+    plt.figure(figsize=[18, 8])
     plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
     plt.title("Usuarios por Año de Nacimiento", pad=20)
     plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
-
-   
 
     # Agregar etiquetas en las barras
     for anio, cantidad in zip(anios, cantidades):
@@ -637,8 +635,6 @@ def generar_grafico_mamografia_si_por_edad():
             WHERE id_opc_respuesta_id IN (8)
             GROUP BY edad ORDER BY edad ASC
             """
-
-
         )
         resultados = cursor.fetchall()
 
@@ -650,7 +646,7 @@ def generar_grafico_mamografia_si_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
-    plt.figure(figsize=[13,5])
+    plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
@@ -658,7 +654,6 @@ def generar_grafico_mamografia_si_por_edad():
     plt.xticks(range(min(edades), max(edades) + 1, 1))
     plt.yticks(range(0,11,1))
 
-    
     # Agregar etiquetas en las barras
     for edad, cantidad in zip(edades, cantidades):
         plt.text(edad, cantidad, str(cantidad), ha='center', va='bottom')
@@ -734,8 +729,6 @@ def generar_grafico_mamografia_no_por_edad():
             WHERE id_opc_respuesta_id IN (9)
             GROUP BY edad ORDER BY edad ASC
             """
-
-
         )
         resultados = cursor.fetchall()
 
@@ -747,14 +740,13 @@ def generar_grafico_mamografia_no_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
-    plt.figure(figsize=[13,5])
+    plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#EFB0C9")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por edad Respuesta No", pad=20)
     plt.xticks(range(min(edades), max(edades) + 1, 1))
-
-    
+ 
     # Agregar etiquetas en las barras
     for edad, cantidad in zip(edades, cantidades):
         plt.text(edad, cantidad, str(cantidad), ha='center', va='bottom')
@@ -850,7 +842,6 @@ def mamografia_por_edad_si_no():
         # Obtenemos el índice correspondiente a la edad
         index = edades.index(edad)
 
-        
         if respuesta == 8:
             cantidades_si[index] += cantidad
         elif respuesta == 9: 
@@ -900,13 +891,11 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-
     rango_uno_etiqueta = "1"
     rango_dos_etiqueta = "2"
     rango_tres_etiqueta = "3"
-    rango_cuatro_etiqueta ="4"
+    rango_cuatro_etiqueta = "Más de 3"
 
-    
     opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta, rango_cuatro_etiqueta]
     cantidades = [0, 0, 0, 0]
 
@@ -921,7 +910,7 @@ def generar_grafico_tiempo_trascurrido():
         elif anio > 3:
             cantidades[3] += cantidad
 
-    plt.figure(figsize=[13,5])
+    plt.figure(figsize=[18, 8])
     plt.bar(opciones_anios, cantidades, color="#79addc")
     plt.xlabel("Años transcurridos")
     plt.ylabel("Cantidad de usuarias")
@@ -954,29 +943,33 @@ def generar_grafico_por_rango_edad():
         )
         resultados = cursor.fetchall()
 
-    opciones_edad = ["Menor de 50 años", "Entre 50 y 69 años", "Mayor a 69 años"]
+    r_uno_edad_eti = "Menor de 50 años"
+    r_dos_edad_eti = "Entre 50 y 69 años"
+    r_tres_edad_eti = "Mayor a 69 años"
+    opciones_edad = [r_uno_edad_eti, r_dos_edad_eti, r_tres_edad_eti]
     cantidades = [0, 0, 0]
+
+    edad_min = 50
+    edad_max = 69
 
     for resultado in resultados:
         edad, cantidad = resultado
-        if edad <50:
+        if edad <edad_min:
             cantidades[0] += cantidad
-        elif edad >=50 and edad <= 69:
+        elif edad >= edad_min and edad <= edad_max:
             cantidades[1] += cantidad
-        elif edad > 69 :
+        elif edad > edad_max :
             cantidades[2] += cantidad
 
-    plt.figure(figsize=[10,5])
+    plt.figure(figsize=[18, 8])
     plt.bar(opciones_edad, cantidades, color="#79addc")
-    plt.xlabel("Rangos de edad")
+    plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Cantidad de usuarias")
     plt.title("Cantidad de usuarias por rango de edad", pad=20)
 
     # Agregar etiquetas en las barras
     for i, cantidad in enumerate(cantidades):
         plt.text(i, cantidad, str(cantidad), ha='center', va='bottom')
-
-
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -1002,32 +995,38 @@ def mamografia_por_edad_si_no_rango_edad():
         )
         resultados = cursor.fetchall()
 
-    opciones_anios = ["Menores de 50", "50 a 69", "Desde los 70"]
+    r_uno_edad_eti = "Menor de 50 años"
+    r_dos_edad_eti = "Entre 50 y 69 años"
+    r_tres_edad_eti = "Mayor a 69 años"
+    opciones_anios = [r_uno_edad_eti, r_dos_edad_eti, r_tres_edad_eti]
     cantidades_si = [0, 0, 0]
     cantidades_no = [0, 0, 0]
+
+    edad_min = 50
+    edad_max = 69
 
     # Iteramos sobre los resultados
     for resultado in resultados:
         edad, cantidad, respuesta = resultado
 
-        if edad < 50 and respuesta == 8:
+        if edad < edad_min and respuesta == 8:
             cantidades_si[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 8:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 8:
             cantidades_si[1] += cantidad
-        elif edad > 69 and respuesta == 8:
+        elif edad > edad_max and respuesta == 8:
             cantidades_si[2] += cantidad 
-        elif edad < 50 and respuesta == 9:
+        elif edad < edad_min and respuesta == 9:
             cantidades_no[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 9:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 9:
             cantidades_no[1] += cantidad
-        elif edad > 69 and respuesta == 9:
+        elif edad > edad_max and respuesta == 9:
             cantidades_no[2] += cantidad 
 
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
     plt.bar(opciones_anios, cantidades_si, color="#79addc", label="Cantidad Sí")
     plt.bar(opciones_anios, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
-    plt.xlabel("Rango de edad guía clínica")
+    plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por rango de Edad", pad=20)
     plt.legend()
