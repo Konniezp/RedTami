@@ -673,6 +673,57 @@ def generar_grafico_mamografia_si_por_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def generar_grafico_mamo_si_por_familiar_directo():
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT ur.id_opc_respuesta_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_usuariorespuesta ur
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE ur.id_opc_respuesta_id IN (25, 26, 27)
+            AND us.Rut IN (
+            SELECT ur2.Rut 
+            FROM botApp_usuariorespuesta ur2 
+            WHERE ur2.id_opc_respuesta_id = 8
+            )
+            GROUP BY ur.id_opc_respuesta_id; """
+
+        )
+        resultados = cursor.fetchall()
+
+    labels = []
+    sizes = []
+    counts = []
+
+    for resultado in resultados:
+        id_opc_respuesta, cantidad = resultado
+        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.OPC_Respuesta)
+        sizes.append(cantidad)
+        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+
+    # Configurar el gráfico circular
+    fig, ax = plt.subplots()
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    
+    # Configurar las etiquetas del gráfico
+    ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    
+    # Mostrar el gráfico
+    plt.title('Cantidad de usuarias que se han realizado mamografías y tiene antecedentes familiares', pad=20)
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches='tight')
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+
 def generar_grafico_mamografia_no_por_edad():
 
     with connection.cursor() as cursor:
@@ -711,6 +762,56 @@ def generar_grafico_mamografia_no_por_edad():
     # Guardar la imagen en un buffer
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def generar_grafico_mamo_no_por_familiar_directo():
+    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT ur.id_opc_respuesta_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_usuariorespuesta ur
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE ur.id_opc_respuesta_id IN (25, 26, 27)
+            AND us.Rut IN (
+            SELECT ur2.Rut 
+            FROM botApp_usuariorespuesta ur2 
+            WHERE ur2.id_opc_respuesta_id = 9
+            )
+            GROUP BY ur.id_opc_respuesta_id; """
+
+        )
+        resultados = cursor.fetchall()
+
+    labels = []
+    sizes = []
+    counts = []
+
+    for resultado in resultados:
+        id_opc_respuesta, cantidad = resultado
+        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.OPC_Respuesta)
+        sizes.append(cantidad)
+        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+
+    # Configurar el gráfico circular
+    fig, ax = plt.subplots()
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral', 'lightblue'])
+    
+    # Configurar las etiquetas del gráfico
+    ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    
+    # Mostrar el gráfico
+    plt.title('Cantidad de usuarias que se han realizado mamografías y tiene antecedentes familiares', pad=20)
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches='tight')
     buffer.seek(0)
     plt.close()
 
@@ -799,7 +900,14 @@ def generar_grafico_tiempo_trascurrido():
         )
         resultados = cursor.fetchall()
 
-    opciones_anios = ["1", "2", "3", "Más de 3"]
+
+    rango_uno_etiqueta = "1"
+    rango_dos_etiqueta = "2"
+    rango_tres_etiqueta = "3"
+    rango_cuatro_etiqueta ="4"
+
+    
+    opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta, rango_cuatro_etiqueta]
     cantidades = [0, 0, 0, 0]
 
     for resultado in resultados:
@@ -966,7 +1074,10 @@ def reportes(request):
         "imagen_base64_mamografia_por_edad_si_no": mamografia_por_edad_si_no(),
         "imagen_base64_tiempo_transc": generar_grafico_tiempo_trascurrido(),
         "imagen_base64_rango_edad": generar_grafico_por_rango_edad(),
-        "imagen_base64_mamografia_si_no_rango_edad": mamografia_por_edad_si_no_rango_edad()
+        "imagen_base64_mamografia_si_no_rango_edad": mamografia_por_edad_si_no_rango_edad(),
+        "imagen_base64_mamo_si_por_familiar_directo":generar_grafico_mamo_si_por_familiar_directo(),
+        "imagen_base64_mamo_no_por_familiar_directo":generar_grafico_mamo_no_por_familiar_directo(),
+    
             }
     return render(request, "reportes.html", data)
 
