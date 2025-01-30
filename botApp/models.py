@@ -160,3 +160,29 @@ class ultima_mamografia_anio(models.Model):
 
     def _str_(self):
         return f"{self.Rut} - {self.anio_ult_mamografia}"
+
+class region(models.Model):
+    id = models.AutoField (primary_key=True, verbose_name="ID región")
+    cod_region = models.CharField(max_length=2)
+    nombre_region = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.cod_region
+
+class provincia(models.Model):
+    id = models.AutoField (primary_key=True, verbose_name="ID provincia")
+    cod_provincia = models.CharField(max_length=4)
+    nombre_provincia = models.CharField(max_length=200)
+    cod_region = models.ForeignKey(region,on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.cod_provincia
+
+class comuna_chile(models.Model):
+    id = models.AutoField (primary_key=True, verbose_name="ID comuna")
+    cod_comuna = models.CharField(max_length=6)
+    nombre_comuna = models.CharField (max_length=200)
+    cod_provincia = models.ForeignKey (provincia, on_delete = models.CASCADE)
+
+    def __str__(self):
+        return self.nombre_comuna
