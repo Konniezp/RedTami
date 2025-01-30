@@ -811,6 +811,92 @@ def generar_grafico_mamo_no_por_familiar_directo():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def generar_grafico_familiar_directo_por_tiemp_transc():
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT tiempo_transc_ult_mamografia, COUNT(*), ur.id_opc_respuesta_id
+            FROM bd_practica.botapp_ultima_mamografia_anio um
+            JOIN bd_practica.botapp_usuariorespuesta ur ON um.Rut=ur.Rut
+            WHERE id_opc_respuesta_id IN (25, 26, 27)
+            GROUP BY tiempo_transc_ult_mamografia, id_opc_respuesta_id;
+            """
+        )
+        resultados = cursor.fetchall()
+
+    opciones_mamog = ["Sí", "No","No lo sé"]
+    cantidades_si = [0, 0, 0]
+    cantidades_no = [0, 0, 0]
+    cantidades_no_lo_se = [0, 0, 0]
+    
+
+    # Iteramos sobre los resultados
+    for resultado in resultados:
+        tiempo, cantidad, respuesta = resultado
+
+        if tiempo == 1 and respuesta == 25:
+            cantidades_si[0]+= cantidad
+        elif tiempo == 1 and respuesta == 26: 
+            cantidades_no[1] += cantidad
+        elif tiempo == 1 and respuesta == 27:
+            cantidades_no_lo_se[2] += cantidad
+        elif tiempo == 2 and respuesta == 25: 
+            cantidades_si[0] += cantidad
+        elif tiempo == 2 and respuesta == 26:
+            cantidades_no[1] += cantidad
+        elif tiempo == 2 and respuesta == 27:
+            cantidades_no_lo_se[2] += cantidad
+        elif tiempo == 3 and respuesta == 25: 
+            cantidades_si[0] += cantidad
+        elif tiempo == 3 and respuesta == 26:
+            cantidades_no[1] += cantidad
+        elif tiempo == 3 and respuesta == 27:
+            cantidades_no_lo_se[2] += cantidad
+        elif tiempo > 3 and respuesta == 25: 
+            cantidades_si[0] += cantidad
+        elif tiempo > 3 and respuesta == 26:
+            cantidades_no[1] += cantidad
+        elif tiempo > 3 and respuesta == 27:
+            cantidades_no_lo_se[2] += cantidad
+
+    # Crear el gráfico
+    plt.figure(figsize=[18, 8])
+    plt.bar(opciones_mamog, cantidades_si, color="#79addc", label="Cantidad Sí")
+    plt.bar(opciones_mamog, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
+    plt.bar(opciones_mamog, cantidades_no_lo_se, color="#A5F8CE", bottom=np.add(cantidades_si, cantidades_no), label="Cantidad No lo sé")
+    plt.xlabel("Tiene familiar directo")
+    plt.ylabel("Tiempo transcurrido")
+    plt.title("Familiar directo por tiempo transcurrido", pad=20)
+    plt.legend()
+
+    # Agregar etiquetas para las barras de cantidades_si
+    for i, cantidad_si in enumerate(cantidades_si):
+        if cantidad_si > 0:
+            plt.text(i, cantidad_si / 2, str(cantidad_si), ha='center', va='center', color='black', weight='bold')
+
+    # Agregar etiquetas para las barras de cantidades_no
+    for i, cantidad_no in enumerate(cantidades_no):
+        if cantidad_no > 0:
+            plt.text(i, cantidades_si[i] + cantidad_no / 2, str(cantidad_no), ha='center', va='center', color='black', weight='bold')
+    
+    # Agregar etiquetas para las barras de cantidades_no_lo_se
+    for i, cantidad_no_lo_se in enumerate(cantidades_no_lo_se):
+        if cantidad_no_lo_se > 0:
+            plt.text(i, cantidades_si[i] + cantidades_no[i] + cantidad_no_lo_se / 2, 
+                     str(cantidad_no_lo_se), ha='center', va='center', color='black', weight='bold')
+
+   # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+    
+
 def mamografia_por_edad_si_no():
     with connection.cursor() as cursor:
         cursor.execute(
@@ -1053,6 +1139,70 @@ def mamografia_por_edad_si_no_rango_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def mamografia_por_edad_si_no_rango_edad_agrupado():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            FROM botApp_usuariorespuesta ur 
+            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            WHERE id_opc_respuesta_id IN (8,9)
+            GROUP BY edad, ur.id_opc_respuesta_id 
+            ORDER BY edad ASC
+            """
+        )
+        resultados = cursor.fetchall()
+
+    opciones_anios = ["Menores de 50", "50 a 69", "Desde los 70"]
+    cantidades_si = [0, 0, 0]
+    cantidades_no = [0, 0, 0]
+
+    # Iteramos sobre los resultados
+    for resultado in resultados:
+        edad, cantidad, respuesta = resultado
+
+        if edad < 50 and respuesta == 8:
+            cantidades_si[0] += cantidad
+        elif edad >= 50 and edad <= 69 and respuesta == 8:
+            cantidades_si[1] += cantidad
+        elif edad > 69 and respuesta == 8:
+            cantidades_si[2] += cantidad 
+        elif edad < 50 and respuesta == 9:
+            cantidades_no[0] += cantidad
+        elif edad >= 50 and edad <= 69 and respuesta == 9:
+            cantidades_no[1] += cantidad
+        elif edad > 69 and respuesta == 9:
+            cantidades_no[2] += cantidad 
+
+    x = np.arange(len(opciones_anios))  
+    width = 0.35  
+
+    fig, ax = plt.subplots(figsize=[18, 8])
+    rects1 = ax.bar(x - width/2, cantidades_si, width, label='Cantidad Sí', color = '#79addc')
+    rects2 = ax.bar(x + width/2, cantidades_no, width, label='Cantidad No', color="#EFB0C9")
+
+    ax.set_xlabel("Rango de edad guía clínica")
+    ax.set_ylabel("Número de Usuarias")
+    ax.set_title("Mamografías por rango de Edad", pad=20)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(opciones_anios)
+    plt.legend()
+
+    # Etiquetas en las barras
+    ax.bar_label(rects1, padding=3, color="black")
+    ax.bar_label(rects2, padding=3, color="black")
+
+   # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
 @login_required
 def reportes(request):
     data = {
@@ -1076,7 +1226,8 @@ def reportes(request):
         "imagen_base64_mamografia_si_no_rango_edad": mamografia_por_edad_si_no_rango_edad(),
         "imagen_base64_mamo_si_por_familiar_directo":generar_grafico_mamo_si_por_familiar_directo(),
         "imagen_base64_mamo_no_por_familiar_directo":generar_grafico_mamo_no_por_familiar_directo(),
-    
+        "imagen_base64_familiar_directo_por_tiempo_transc": generar_grafico_familiar_directo_por_tiemp_transc(),
+        "imagen_base64_mamografia_si_no_rango_edad_agrupadas": mamografia_por_edad_si_no_rango_edad_agrupado()
             }
     return render(request, "reportes.html", data)
 
