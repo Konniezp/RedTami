@@ -817,8 +817,8 @@ def generar_grafico_familiar_directo_por_tiemp_transc():
         cursor.execute(
             """
             SELECT tiempo_transc_ult_mamografia, COUNT(*), ur.id_opc_respuesta_id
-            FROM bd_practica.botApp_ultima_mamografia_anio um
-            JOIN bd_practica.botApp_usuariorespuesta ur ON um.Rut=ur.Rut
+            FROM botApp_ultima_mamografia_anio um
+            JOIN botApp_usuariorespuesta ur ON um.Rut=ur.Rut
             WHERE id_opc_respuesta_id IN (25, 26, 27)
             GROUP BY tiempo_transc_ult_mamografia, id_opc_respuesta_id;
             """
