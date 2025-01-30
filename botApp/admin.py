@@ -117,6 +117,22 @@ class ultima_mamografia_anioAdmin(admin.ModelAdmin):
     search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
     list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
 
+class regionAdmin(admin.ModelAdmin):
+    list_display =("id", "cod_region", "nombre_region")
+    search_fields=("id", "cod_region", "nombre_region")
+    list_filter=("id", "cod_region", "nombre_region")
+
+class provinciaAdmin(admin.ModelAdmin):
+    list_display=("id", "cod_provincia", "nombre_provincia", "cod_region")
+    search_fields=("id", "cod_provincia", "nombre_provincia", "cod_region")
+    list_filter=("id", "cod_provincia", "nombre_provincia", "cod_region")
+
+class comuna_chileAdmin(admin.ModelAdmin):
+    list_display=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
+    search_fields=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
+    list_filter=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
+
+
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
 admin.site.register(UsuarioRespuesta, UsuarioRespuestaAdmin)
@@ -128,3 +144,6 @@ admin.site.register(Ocupacion, OcupacionAdmin)
 admin.site.register(UsuarioTextoPregunta, UsuarioTextoPreguntaAdmin)
 admin.site.register(MensajeContenido, MensajeContenidoAdmin)
 admin.site.register(ultima_mamografia_anio, ultima_mamografia_anioAdmin)
+admin.site.register(region, regionAdmin)
+admin.site.register(provincia, provinciaAdmin)
+admin.site.register(comuna_chile, comuna_chileAdmin)
