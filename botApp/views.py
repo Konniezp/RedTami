@@ -1122,7 +1122,7 @@ def grafico_prev_salud_por_rango_edad():
         cursor.execute(
             """
             SELECT edad, COUNT(*) as Cantidad, SistemaSalud_Usuario_id
-            FROM botapp_usuario
+            FROM botApp_usuario
             GROUP BY edad, SistemaSalud_Usuario_id 
             ORDER BY edad ASC;
             """
