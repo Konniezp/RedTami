@@ -416,7 +416,7 @@ def generar_grafico_pregunta1():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
     
     # Configurar las etiquetas del gráfico
@@ -454,7 +454,7 @@ def generar_grafico_pregunta2():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
@@ -492,7 +492,7 @@ def generar_grafico_pregunta3():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#DE8F5F', '#FFB26F', '#FFB38E', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
@@ -1117,6 +1117,75 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def grafico_prev_salud_por_rango_edad():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT edad, COUNT(*) as Cantidad, SistemaSalud_Usuario_id
+            FROM botapp_usuario
+            GROUP BY edad, SistemaSalud_Usuario_id 
+            ORDER BY edad ASC;
+            """
+        )
+        resultados = cursor.fetchall()
+
+    r_uno_edad_eti = "Menor de 50 años"
+    r_dos_edad_eti = "Entre 50 y 69 años"
+    r_tres_edad_eti = "Mayor a 69 años"
+    opciones_anios = [r_uno_edad_eti, r_dos_edad_eti, r_tres_edad_eti]
+    cantidades_fonasa = [0, 0, 0]
+    cantidades_isapre = [0, 0, 0]
+    cantidades_otro = [0, 0, 0]
+
+    edad_min = 50
+    edad_max = 69
+
+    # Iteramos sobre los resultados
+    for edad, cantidad, respuesta in resultados:
+        index = 0 if edad < edad_min else (1 if edad <= edad_max else 2)
+        
+        if respuesta == 1:
+            cantidades_fonasa[index] += cantidad
+        elif respuesta == 2:
+            cantidades_isapre[index] += cantidad
+        elif respuesta == 3:
+            cantidades_otro[index] += cantidad
+
+    # Crear el gráfico
+    plt.figure(figsize=[18, 8])
+    plt.bar(opciones_anios, cantidades_fonasa, color="#a0b3a8", label="Cantidad Fonasa")
+    plt.bar(opciones_anios, cantidades_isapre, color="#c6a78f", bottom=cantidades_fonasa, label="Cantidad Isapre")
+    plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
+    plt.xlabel("Rango de edad según guía clínica")
+    plt.ylabel("Número de Usuarias")
+    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.legend()
+
+    # Agregar etiquetas para las barras de cantidades_fonasa
+    for i, (edad, cantidad_fonasa) in enumerate(zip(opciones_anios, cantidades_fonasa)):
+        if cantidad_fonasa > 0:
+            plt.text(i, cantidad_fonasa / 2, str(cantidad_fonasa), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+
+    # Agregar etiquetas para las barras de cantidades_isapre
+    for i, (edad, cantidad_fonasa, cantidad_isapre) in enumerate(zip(opciones_anios, cantidades_fonasa, cantidades_isapre)):
+        if cantidad_isapre > 0:
+            plt.text(i, cantidad_fonasa + cantidad_isapre / 2, str(cantidad_isapre), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+
+    # Agregar etiquetas para la barra de cantidades_otro
+    for i, (edad, cantidad_fonasa, cantidad_isapre, cantidad_otro) in enumerate(zip(opciones_anios, cantidades_fonasa, cantidades_isapre, cantidades_otro)):
+        if cantidad_otro > 0:
+            plt.text(i, cantidad_fonasa + cantidad_isapre + cantidad_otro / 2, str(cantidad_otro), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches="tight", dpi=300)
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
 @login_required
 def reportes(request):
     data = {
@@ -1140,7 +1209,8 @@ def reportes(request):
         "imagen_base64_mamografia_si_no_rango_edad": mamografia_por_edad_si_no_rango_edad(),
         "imagen_base64_mamo_si_por_familiar_directo":generar_grafico_mamo_si_por_familiar_directo(),
         "imagen_base64_mamo_no_por_familiar_directo":generar_grafico_mamo_no_por_familiar_directo(),
-        "imagen_base64_mamografia_si_no_rango_edad_agrupadas": mamografia_por_edad_si_no_rango_edad_agrupado()
+        "imagen_base64_mamografia_si_no_rango_edad_agrupadas": mamografia_por_edad_si_no_rango_edad_agrupado(),
+        "imagen_base64_grafico_prev_salud_por_rango_edad":grafico_prev_salud_por_rango_edad(),
             }
     return render(request, "reportes.html", data)
 
