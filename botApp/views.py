@@ -530,14 +530,14 @@ def generar_grafico_pregunta4():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9','#A5F8CE', '#DEB3EB'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Tienes los archivos e informe de tu última mamografía?', pad=20)
+    plt.title('¿Tienes los archivos e informe \nde tu última mamografía?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -568,14 +568,14 @@ def generar_grafico_pregunta5():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Te gustaría recibir más información sobre el cuidado y prevención del cáncer de mama?', pad=20)
+    plt.title('¿Te gustaría recibir más información \nsobre el cuidado y prevención del cáncer de mama?', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -606,14 +606,14 @@ def generar_grafico_pregunta6():
         counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
 
     # Configurar el gráfico circular
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 8))
     wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
     
     # Mostrar el gráfico
-    plt.title('¿Tienes un familiar directo con cáncer de mama? (hermana, mama, tía, abuela)', pad=20)
+    plt.title('¿Tienes un familiar directo con cáncer de mama?\n(hermana, mama, tía, abuela)', pad=20)
 
     # Guardar la imagen en un buffer
     buffer = BytesIO()
