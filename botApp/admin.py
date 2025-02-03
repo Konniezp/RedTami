@@ -148,7 +148,35 @@ class RespUsuarioFactorRiesgoModAdmin(admin.ModelAdmin):
     search_fields=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
     list_filter=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
 
+class PregFactorRiesgoNoModAdmin(admin.ModelAdmin):
+    list_display=("id", "pregunta_FRNM")
+    search_fields=("id", "pregunta_FRNM")
+    list_filter=("id", "pregunta_FRNM")
 
+class OpcFactorRiesgoNoModAdmin(admin.ModelAdmin):
+    list_display=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
+    search_fields=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
+    list_filter=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
+
+class RespUsuarioFactorRiesgoNoModAdmin(admin.ModelAdmin):
+    list_display=("id", "Rut", "respuesta_FRNM", "fecha_respuesta")
+    search_fields=("id", "Rut", "respuesta_FRNM", "fecha_respuesta")
+    list_filter=("id", "Rut", "respuesta_FRNM",  "fecha_respuesta")
+
+class PregDeterSaludAdmin(admin.ModelAdmin):
+    list_display =("id", "pregunta_DS")
+    search_fields=("id", "pregunta_DS")
+    list_filter=("id", "pregunta_DS")
+
+class OpcDeterSaludAdmin(admin.ModelAdmin):
+    list_display =("id", "opc_respuesta_DS", "id_pregunta_DS")
+    search_fields=("id", "opc_respuesta_DS", "id_pregunta_DS")
+    list_filter=("id", "opc_respuesta_DS", "id_pregunta_DS")
+
+class RespDeterSaludAdmin(admin.ModelAdmin):
+    list_display =("id", "Rut", "respuesta_DS", "fecha_respuesta")
+    search_fields=("id", "Rut", "respuesta_DS", "fecha_respuesta")
+    list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
 
 
 admin.site.register(Usuario, UsuarioAdmin)
@@ -168,3 +196,12 @@ admin.site.register(comuna_chile, comuna_chileAdmin)
 admin.site.register(PregFactorRiesgoMod, PregFactorRiesgoModAdmin)
 admin.site.register(OpcFactorRiesgoMod, OpcFactorRiesgoModAdmin)
 admin.site.register(RespUsuarioFactorRiesgoMod, RespUsuarioFactorRiesgoModAdmin)
+admin.site.register(PregFactorRiesgoNoMod, PregFactorRiesgoNoModAdmin)
+admin.site.register(OpcFactorRiesgoNoMod, OpcFactorRiesgoNoModAdmin)
+admin.site.register(RespUsuarioFactorRiesgoNoMod, RespUsuarioFactorRiesgoNoModAdmin)
+admin.site.register(PregDeterSalud, PregDeterSaludAdmin)
+admin.site.register(OpcDeterSalud, OpcDeterSaludAdmin)
+admin.site.register(RespDeterSalud, RespDeterSaludAdmin)
+
+
+
