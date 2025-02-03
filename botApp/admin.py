@@ -133,6 +133,24 @@ class comuna_chileAdmin(admin.ModelAdmin):
     list_filter=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
 
 
+class PregFactorRiesgoModAdmin(admin.ModelAdmin):
+    list_display=("id", "pregunta_FRM")
+    search_fields=("id", "pregunta_FRM")
+    list_filter=("id", "pregunta_FRM")
+
+class OpcFactorRiesgoModAdmin(admin.ModelAdmin):
+    list_display=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
+    search_fields=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
+    list_filter=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
+
+class RespUsuarioFactorRiesgoModAdmin(admin.ModelAdmin):
+    list_display=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
+    search_fields=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
+    list_filter=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
+
+
+
+
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
 admin.site.register(UsuarioRespuesta, UsuarioRespuestaAdmin)
@@ -147,3 +165,6 @@ admin.site.register(ultima_mamografia_anio, ultima_mamografia_anioAdmin)
 admin.site.register(region, regionAdmin)
 admin.site.register(provincia, provinciaAdmin)
 admin.site.register(comuna_chile, comuna_chileAdmin)
+admin.site.register(PregFactorRiesgoMod, PregFactorRiesgoModAdmin)
+admin.site.register(OpcFactorRiesgoMod, OpcFactorRiesgoModAdmin)
+admin.site.register(RespUsuarioFactorRiesgoMod, RespUsuarioFactorRiesgoModAdmin)
