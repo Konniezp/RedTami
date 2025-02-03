@@ -186,3 +186,32 @@ class comuna_chile(models.Model):
 
     def __str__(self):
         return self.nombre_comuna
+    
+class PregFactorRiesgoMod(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
+    pregunta_FRM = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.pregunta_FRM
+
+
+class OpcFactorRiesgoMod(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Opc Riesgo Mod")
+    opc_respuesta_FRM = models.CharField(max_length=200)
+    id_pregunta_FRM = models.ForeignKey(PregFactorRiesgoMod, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id_pregunta_FRM} - {self.opc_Respuesta_FRM}"
+
+
+class RespUsuarioFactorRiesgoMod (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
+    Rut = models.CharField(max_length=10)
+    respuesta_FRM = models.ForeignKey(OpcFactorRiesgoMod, on_delete=models.CASCADE)
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.Rut} - {self.respuesta_FRM}"
+
+   
+
