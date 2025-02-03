@@ -186,3 +186,79 @@ class comuna_chile(models.Model):
 
     def __str__(self):
         return self.nombre_comuna
+    
+class PregFactorRiesgoMod(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
+    pregunta_FRM = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.pregunta_FRM
+
+
+class OpcFactorRiesgoMod(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Opc Riesgo Mod")
+    opc_respuesta_FRM = models.CharField(max_length=200)
+    id_pregunta_FRM = models.ForeignKey(PregFactorRiesgoMod, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id_pregunta_FRM} - {self.opc_respuesta_FRM}"
+
+
+class RespUsuarioFactorRiesgoMod (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
+    Rut = models.CharField(max_length=10)
+    respuesta_FRM = models.ForeignKey(OpcFactorRiesgoMod, on_delete=models.CASCADE)
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.Rut} - {self.respuesta_FRM}"
+
+class PregFactorRiesgoNoMod(models.Model):
+    id = models.AutoField(primary_key= True, verbose_name= "ID Factor de Riesgo No Mod")
+    pregunta_FRNM = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.pregunta_FRNM
+
+
+class OpcFactorRiesgoNoMod(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Opc Riesgo No Mod")
+    opc_respuesta_FRNM = models.CharField(max_length=200)
+    id_pregunta_FRNM = models.ForeignKey(PregFactorRiesgoNoMod, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id_pregunta_FRNM} - {self.opc_respuesta_FRNM}"
+
+
+class RespUsuarioFactorRiesgoNoMod (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
+    Rut = models.CharField(max_length=10)
+    respuesta_FRNM = models.ForeignKey(OpcFactorRiesgoNoMod, on_delete=models.CASCADE)
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+    
+
+class PregDeterSalud(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
+    pregunta_DS = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.pregunta_DS
+    
+class OpcDeterSalud(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Opc determinantes salud")
+    opc_respuesta_DS = models.CharField(max_length=200)
+    id_pregunta_DS = models.ForeignKey(PregDeterSalud, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.id_pregunta_DS} - {self.opc_respuesta_DS}"
+    
+class RespDeterSalud (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID Resp determinante salud")
+    Rut = models.CharField(max_length=10)
+    respuesta_DS = models.ForeignKey(OpcDeterSalud, on_delete=models.CASCADE)
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.Rut} - {self.respuesta_DS}"
+   
+
