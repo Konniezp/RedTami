@@ -241,7 +241,7 @@ class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
     pregunta_DS = models.CharField(max_length=200)
 
-    def _str_(self):
+    def __str__(self):
         return self.pregunta_DS
     
 class OpcDeterSalud(models.Model):
@@ -249,7 +249,7 @@ class OpcDeterSalud(models.Model):
     opc_respuesta_DS = models.CharField(max_length=200)
     id_pregunta_DS = models.ForeignKey(PregDeterSalud, on_delete=models.CASCADE)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.id_pregunta_DS} - {self.opc_respuesta_DS}"
     
 class RespDeterSalud (models.Model):
@@ -258,7 +258,7 @@ class RespDeterSalud (models.Model):
     respuesta_DS = models.ForeignKey(OpcDeterSalud, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
-    def _str_(self):
+    def __str__(self):
         return f"{self.Rut} - {self.respuesta_DS}"
    
 
