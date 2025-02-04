@@ -206,12 +206,14 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, us.Whatsapp, us.edad, ult.tiempo_transc_ult_mamografia, rnm.respuesta_FRNM_id  
-            FROM botApp_usuario us 
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
-            LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON ult.Rut = rnm.Rut
-            WHERE rnm.respuesta_FRNM_id IN (1,2) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+            SELECT us.id, us.Rut, Whatsapp, edad,  
+            COALESCE(opc_respuesta_FRNM, 'No aplica') as Antecedentes_Familiar,
+            COALESCE(tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
+            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut 
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON rnm.Rut = ult.Rut  
+            LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
+            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
+            ORDER BY tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
