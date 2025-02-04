@@ -1158,7 +1158,7 @@ def grafico_prev_salud_por_rango_edad():
     plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.title("Usuarias por tipo de sistema de salud", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_fonasa
