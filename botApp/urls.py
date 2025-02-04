@@ -32,6 +32,8 @@ urlpatterns = [
 
     # Descargar Excel
     path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
+    path('crear_excel_listado_ordenable/', views.crear_excel_listado_ordenable, name='crear_excel_listado_ordenable'),
+
     
     # Mensajes
     path('home_mensajes/', views.homeMensajes, name='mensajesHome'),

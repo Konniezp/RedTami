@@ -101,7 +101,6 @@ def datosListadoOrdenado(request):
         datos = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos})
-    
 
 def crear_excel_desde_db():
     # Crear un nuevo libro de trabajo de Excel
@@ -190,6 +189,51 @@ def descargar_excel(request):
         response = HttpResponse(excel_file.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = f'attachment; filename={nombre_archivo}'
         return response
+
+def crear_excel_listado_ordenable(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT us.id, us.Rut, us.Whatsapp, us.edad, ult.tiempo_transc_ult_mamografia, rnm.respuesta_FRNM_id  
+            FROM botApp_usuario us 
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
+            LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON ult.Rut = rnm.Rut
+            WHERE rnm.respuesta_FRNM_id IN (1,2) OR rnm.respuesta_FRNM_id IS NULL
+            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+        """)
+        columns = [col[0] for col in cursor.description]
+        data = cursor.fetchall()
+
+    # Crear un archivo Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Listado Ordenable"
+
+    # Agregar encabezados
+    ws.append(columns)
+
+    # Agregar los datos fila por fila
+    for row in data:
+        ws.append(row)
+
+    for col in ws.columns:
+        max_length = 0
+        col_letter = col[0].column_letter
+        for cell in col:
+            try:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        ws.column_dimensions[col_letter].width = max_length + 2
+
+    # Preparar la respuesta HTTP
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="ListadoOrdenable.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
 # --------------------- Reporteria --------------------- #
 
 # Configuración global para fuentes de gráficos
@@ -1175,7 +1219,7 @@ def grafico_prev_salud_por_rango_edad():
     plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
-    plt.title("Usuarias por tipo de sistema de salud", pad=20)
+    plt.title("Mamografías por rango de Edad", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_fonasa
@@ -1359,9 +1403,7 @@ def reportes(request):
         "imagen_base64_grafico_prev_salud_por_rango_edad":grafico_prev_salud_por_rango_edad(),
         "imagen_base64_grafico_consumo_alcohol":grafico_frecuencia_alcohol(),
         "imagen_base64_grafico_escolaridad":grafico_escolaridad(),
-        "imagen_base64_grafico_genero_nuevo":generar_grafico_personas_por_genero_NUEVO(),
-        
-        
+        "imagen_base64_grafico_genero_nuevo":generar_grafico_personas_por_genero_NUEVO(), 
         
         }
     return render(request, "reportes.html", data)
