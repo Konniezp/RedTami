@@ -22,7 +22,8 @@ urlpatterns = [
     path('datosPerfil/', views.datosPerfil, name='datosPerfil'),
     path('datosPreguntas/', views.datosPreguntas, name='datosPreguntas'),
     path('datosTextoPreguntas/', views.datosTextoPreguntas, name='datosTextoPreguntas'),
-    
+    path('datosListadoOrdenado/', views.datosListadoOrdenado, name='datosListadoOrdenado'),
+
     # Preguntas
     path('listarPreguntas/', views.listarPreguntas, name='listarPreguntas'),
     path('modificarPregunta/<id>/', views.modificarPregunta, name='modificarPregunta'),
@@ -31,6 +32,8 @@ urlpatterns = [
 
     # Descargar Excel
     path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
+    path('crear_excel_listado_ordenable/', views.crear_excel_listado_ordenable, name='crear_excel_listado_ordenable'),
+
     
     # Mensajes
     path('home_mensajes/', views.homeMensajes, name='mensajesHome'),
