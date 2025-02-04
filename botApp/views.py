@@ -86,6 +86,23 @@ def datosTextoPreguntas(request):
     }
     return render(request, "respuestas/datosPreguntasEspecialistas.html", data)
 
+@login_required
+def datosListadoOrdenado(request):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT us.id, us.Rut, us.Whatsapp, us.edad, ult.tiempo_transc_ult_mamografia, rnm.respuesta_FRNM_id  
+            FROM botApp_usuario us 
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
+            LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON ult.Rut = rnm.Rut
+            WHERE rnm.respuesta_FRNM_id IN (1,2) OR rnm.respuesta_FRNM_id IS NULL
+            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+        """)
+        columns = [col[0] for col in cursor.description]
+        datos = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos})
+    
+
 def crear_excel_desde_db():
     # Crear un nuevo libro de trabajo de Excel
     wb = Workbook()

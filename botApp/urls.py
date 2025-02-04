@@ -22,7 +22,8 @@ urlpatterns = [
     path('datosPerfil/', views.datosPerfil, name='datosPerfil'),
     path('datosPreguntas/', views.datosPreguntas, name='datosPreguntas'),
     path('datosTextoPreguntas/', views.datosTextoPreguntas, name='datosTextoPreguntas'),
-    
+    path('datosListadoOrdenado/', views.datosListadoOrdenado, name='datosListadoOrdenado'),
+
     # Preguntas
     path('listarPreguntas/', views.listarPreguntas, name='listarPreguntas'),
     path('modificarPregunta/<id>/', views.modificarPregunta, name='modificarPregunta'),
