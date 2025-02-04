@@ -1158,7 +1158,7 @@ def grafico_prev_salud_por_rango_edad():
     plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.title("Usuarias por tipo de sistema de salud", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_fonasa
@@ -1186,6 +1186,135 @@ def grafico_prev_salud_por_rango_edad():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def grafico_escolaridad():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT respuesta_DS_id, COUNT(*) 
+            FROM botApp_respdetersalud       
+            WHERE respuesta_DS_id IN (12,13,14) 
+            GROUP BY respuesta_DS_id
+            """
+        )
+        resultados = cursor.fetchall()
+
+    labels = []
+    sizes = []
+    counts = []
+
+    for resultado in resultados:
+        id_opc_respuesta, cantidad = resultado
+        opcion_respuesta = OpcDeterSalud.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_DS)
+        sizes.append(cantidad)
+        counts.append(f"{opcion_respuesta.opc_respuesta_DS} - {cantidad}")
+
+    # Configurar el gráfico circular
+    fig, ax = plt.subplots(figsize=(8, 8))
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
+    
+    # Configurar las etiquetas del gráfico
+    ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    
+    # Mostrar el gráfico
+    plt.title('Nivel de estudio usuarias', pad=20)
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches='tight')
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def grafico_frecuencia_alcohol():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT respuesta_FRM_id, COUNT(*) 
+            FROM botApp_respusuariofactorriesgomod
+            WHERE respuesta_FRM_id IN (8,9,10) 
+            GROUP BY respuesta_FRM_id
+            """
+        )
+        resultados = cursor.fetchall()
+
+    labels = []
+    sizes = []
+    counts = []
+
+    for resultado in resultados:
+        id_opc_respuesta, cantidad = resultado
+        opcion_respuesta = OpcFactorRiesgoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRM)
+        sizes.append(cantidad)
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRM} - {cantidad}")
+
+    # Configurar el gráfico circular
+    fig, ax = plt.subplots(figsize=(8, 8))
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
+    
+    # Configurar las etiquetas del gráfico
+    ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    
+    # Mostrar el gráfico
+    plt.title('Consumo de Alcohol', pad=20)
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches='tight')
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def generar_grafico_personas_por_genero_NUEVO():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT respuesta_FRNM_id, Count(*)
+            FROM botApp_respusuariofactorriesgonomod
+            WHERE respuesta_FRNM_id IN(1,2)
+            group by respuesta_FRNM_id; """
+            
+        )
+        resultados = cursor.fetchall()
+
+    generos = []
+    cantidades = []
+
+    for resultado in resultados:
+        genero_id, cantidad = resultado
+        genero = OpcFactorRiesgoNoMod.objects.get(id=genero_id)
+        generos.append(genero.opc_respuesta_FRNM)
+        cantidades.append(cantidad)
+
+    # Crear gráfico de barras con diferentes colores para cada barra
+    colores = {'Masculino': '#79addc', 'Femenino': 'pink', 'Otro': 'green'}
+    plt.bar(generos, cantidades, color=[colores[genero] for genero in generos])
+
+    # Agregar los valores de cada barra
+    for i in range(len(generos)):
+        plt.text(i, cantidades[i], str(cantidades[i]), ha='center', va='bottom')
+
+    plt.xlabel("Género")
+    plt.ylabel("Número de Personas")
+    plt.title("Ingresos por Género", pad=20)
+
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+
+
 @login_required
 def reportes(request):
     data = {
@@ -1211,7 +1340,13 @@ def reportes(request):
         "imagen_base64_mamo_no_por_familiar_directo":generar_grafico_mamo_no_por_familiar_directo(),
         "imagen_base64_mamografia_si_no_rango_edad_agrupadas": mamografia_por_edad_si_no_rango_edad_agrupado(),
         "imagen_base64_grafico_prev_salud_por_rango_edad":grafico_prev_salud_por_rango_edad(),
-            }
+        "imagen_base64_grafico_consumo_alcohol":grafico_frecuencia_alcohol(),
+        "imagen_base64_grafico_escolaridad":grafico_escolaridad(),
+        "imagen_base64_grafico_genero_nuevo":generar_grafico_personas_por_genero_NUEVO(),
+        
+        
+        
+        }
     return render(request, "reportes.html", data)
 
 
