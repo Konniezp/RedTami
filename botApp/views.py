@@ -30,8 +30,8 @@ from .forms import *
 from .models import *
 from .serializer import *
 
-
-
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import PatternFill
     
 @login_required
 def home(request):
@@ -102,32 +102,46 @@ def datosListadoOrdenado(request):
 
     return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos})
 
+#Ajustar anchos de columnas según el largo de la celda
+def ajustar_ancho_columnas(ws):
+    for col in ws.columns:
+        max_length = 0
+        col_letter = get_column_letter(col[0].column)
+
+        for cell in col:
+            try:
+                if cell.value: 
+                    max_length = max(max_length, len(str(cell.value)))
+            except:
+                pass
+        
+        ws.column_dimensions[col_letter].width = max_length + 2  
+
+# Aplica color a la primera fila de encabezados 
+def background_colors(ws):
+    color = "00a0b3a8" 
+    fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+
+    for cell in ws[1]: 
+        cell.fill = fill
+
 def crear_excel_desde_db():
-    # Crear un nuevo libro de trabajo de Excel
     wb = Workbook()
 
-    # Hoja para respuestas de usuarios
+    # Hoja 1: Respuestas Usuario
     ws_respuestas_usuario = wb.active
     ws_respuestas_usuario.title = 'Respuestas Usuario'
 
-    # Obtener todas las preguntas y almacenarlas en una lista
     preguntas = Pregunta.objects.all()
     lista_preguntas = ['Rut'] + [pregunta.pregunta for pregunta in preguntas]
-
-    # Agregar las preguntas a la primera fila del archivo Excel
     ws_respuestas_usuario.append(lista_preguntas)
 
-    # Obtener los datos de los usuarios y sus respuestas
     usuarios_respuestas = UsuarioRespuesta.objects.select_related('id_opc_respuesta', 'id_opc_respuesta__id_pregunta').values(
-        'Rut',
-        'id_opc_respuesta__id_pregunta__pregunta',
-        'id_opc_respuesta__OPC_Respuesta'
+        'Rut', 'id_opc_respuesta__id_pregunta__pregunta', 'id_opc_respuesta__OPC_Respuesta'
     )
 
-    # Crear un diccionario para almacenar las respuestas de los usuarios
     dict_respuestas = {}
 
-    # Agregar las respuestas de los usuarios al diccionario
     for respuesta in usuarios_respuestas:
         rut = respuesta['Rut']
         pregunta = respuesta['id_opc_respuesta__id_pregunta__pregunta']
@@ -136,7 +150,6 @@ def crear_excel_desde_db():
             dict_respuestas[rut] = {}
         dict_respuestas[rut][pregunta] = respuesta_usuario
 
-    # Agregar las respuestas de los usuarios al archivo Excel
     for rut, respuestas_usuario in dict_respuestas.items():
         fila = [rut]
         for pregunta in preguntas:
@@ -144,37 +157,37 @@ def crear_excel_desde_db():
             fila.append(respuesta)
         ws_respuestas_usuario.append(fila)
 
-    # Hoja para datos del perfil de usuario
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_respuestas_usuario)
+    background_colors(ws_respuestas_usuario)
+
+    # Hoja 2: Datos Perfil
     ws_datos_perfil = wb.create_sheet(title='Datos Perfil')
-
-    # Obtener los nombres de los campos del modelo Usuario
     campos_usuario = [field.name for field in Usuario._meta.fields if field.name not in ['Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']]
-
-    # Agregar los nombres de los campos a la primera fila del archivo Excel
     ws_datos_perfil.append(campos_usuario)
 
-    # Obtener los datos de los usuarios y agregarlos al archivo Excel
     for usuario in Usuario.objects.all():
-        # Convertir la fecha a formato de texto para evitar problemas con zonas horarias
         datos_usuario = [str(getattr(usuario, campo)) for campo in campos_usuario]
         ws_datos_perfil.append(datos_usuario)
 
-    # Hoja para preguntas al especialista
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_datos_perfil)
+    background_colors(ws_datos_perfil)
+
+    # Hoja 3: Preguntas Especialista
     ws_preguntas_especialista = wb.create_sheet(title='Preguntas al especialista')
-
-    # Obtener los nombres de los campos del modelo UsuarioTextoPregunta
     campos_preguntas_especialista = [field.name for field in UsuarioTextoPregunta._meta.fields if field.name != 'id']
-
-    # Agregar los nombres de los campos a la primera fila del archivo Excel
     ws_preguntas_especialista.append(campos_preguntas_especialista)
 
-    # Obtener los datos de las preguntas al especialista y agregarlos al archivo Excel
     for pregunta in UsuarioTextoPregunta.objects.all():
-        # Convertir la fecha a formato de texto para evitar problemas con zonas horarias
         datos_pregunta = [str(getattr(pregunta, campo)) for campo in campos_preguntas_especialista]
         ws_preguntas_especialista.append(datos_pregunta)
 
-    # Guardar el libro de trabajo en un archivo
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_preguntas_especialista)
+    background_colors(ws_preguntas_especialista)
+
+    # Guardar el archivo
     nombre_archivo = 'reporte_respuestas.xlsx'
     wb.save(nombre_archivo)
 
@@ -215,16 +228,9 @@ def crear_excel_listado_ordenable(request):
     for row in data:
         ws.append(row)
 
-    for col in ws.columns:
-        max_length = 0
-        col_letter = col[0].column_letter
-        for cell in col:
-            try:
-                if cell.value:
-                    max_length = max(max_length, len(str(cell.value)))
-            except:
-                pass
-        ws.column_dimensions[col_letter].width = max_length + 2
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws)
+    background_colors(ws)
 
     # Preparar la respuesta HTTP
     response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
