@@ -189,6 +189,46 @@ def crear_excel_desde_db():
     ajustar_ancho_columnas(ws_preguntas_especialista)
     background_colors(ws_preguntas_especialista)
 
+    # Hoja 4: Factores riesgo modificables 
+    ws_FRM = wb.create_sheet(title='Factores riesgo modificables')
+    campos_usuario_FRM = [field.name for field in RespUsuarioFactorRiesgoMod._meta.fields if field.name != 'id']
+    ws_FRM.append(campos_usuario_FRM)
+
+    for respuesta in RespUsuarioFactorRiesgoMod.objects.all():
+        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_FRM]
+        ws_FRM.append(datos_usuario)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM)
+    background_colors(ws_FRM)
+
+    # Hoja 5: Factores riesgo No modificables 
+    ws_FRNM = wb.create_sheet(title='Factores riesgo No modificables')
+    campos_usuario_FRNM = [field.name for field in RespUsuarioFactorRiesgoNoMod._meta.fields if field.name != 'id']
+    ws_FRNM.append(campos_usuario_FRNM)
+
+    for respuesta in RespUsuarioFactorRiesgoNoMod.objects.all():
+        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_FRNM]
+        ws_FRNM.append(datos_usuario)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM)
+    background_colors(ws_FRNM)
+
+    # Hoja 6: Determinantes de Salud 
+    ws_DS = wb.create_sheet(title='Determinantes de Salud')
+    campos_usuario_DS = [field.name for field in RespDeterSalud._meta.fields if field.name != 'id']
+    ws_DS.append(campos_usuario_DS)
+
+    for respuesta in RespDeterSalud.objects.all():
+        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_DS]
+        ws_DS.append(datos_usuario)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DS)
+    background_colors(ws_DS)
+
+
     # Guardar el archivo
     nombre_archivo = 'reporte_respuestas.xlsx'
     wb.save(nombre_archivo)
@@ -214,7 +254,7 @@ def crear_excel_listado_ordenable(request):
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
+            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_idpyt IS NULL
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
