@@ -254,7 +254,7 @@ def crear_excel_listado_ordenable(request):
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_idpyt IS NULL
+            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
