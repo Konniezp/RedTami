@@ -92,7 +92,7 @@ def datosListadoOrdenado(request):
         cursor.execute("""
             SELECT us.id, us.Rut, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
+            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
@@ -250,7 +250,7 @@ def crear_excel_listado_ordenable(request):
         cursor.execute("""
             SELECT us.id, us.Rut, Whatsapp, Email, edad,                        
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
+            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
