@@ -209,13 +209,13 @@ def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT us.id, us.Rut, Whatsapp, edad,  
-            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_Familiares
-            COALESCE(tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
-            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut 
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON rnm.Rut = ult.Rut  
+            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+            COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
+            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
             WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY tiempo_transc_ult_mamografia DESC;
+            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
