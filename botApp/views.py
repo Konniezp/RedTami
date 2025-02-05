@@ -90,7 +90,7 @@ def datosTextoPreguntas(request):
 def datosListadoOrdenado(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, edad,  
+            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
@@ -208,7 +208,7 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, edad,  
+            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut

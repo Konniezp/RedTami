@@ -76,6 +76,7 @@ class Usuario(models.Model):
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
     Whatsapp = models.CharField(max_length=200)
+    Email = models.EmailField(max_length=254, blank=True)
     Referencia = models.CharField(max_length=200)
     Comuna_Usuario = models.ForeignKey(Comuna, on_delete=models.CASCADE)
     Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
