@@ -29,6 +29,7 @@ urlpatterns = [
     path('datosFRM2/', views.datosFRM2, name='datosFRM2'),
     path('datosFRNM/', views.datosFRNM, name='datosFRNM'),
     path('datosDS/', views.datosDS, name ='datosDS'),
+    path('datosDS2/', views.datosDS2, name ='datosDS2'),
     path('opcVisualFRM/', views.opcVisualFRM, name='opcVisualFRM'),
     path('opcVisualFRNM/', views.opcVisualFRNM, name='opcVisualFRNM'),
     path('opcVisualDS/', views.opcVisualDS, name='opcVisualDS'),

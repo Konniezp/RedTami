@@ -170,6 +170,7 @@ def datosDS(request):
     }
     return render(request,"respuestas/datosDS.html", data)
 
+@login_required
 def datosDS2(request):
     preguntas = PregDeterSalud.objects.all()
     usuarios_respuestas = RespDeterSalud.objects.select_related(
