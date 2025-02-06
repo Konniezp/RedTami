@@ -64,6 +64,14 @@ def respuestasHome(request):
 def opcVisualFRM(request):
     return render(request, "respuestas/opcVisualFRM.html")
 
+@login_required
+def opcVisualFRNM(request):
+    return render(request, "respuestas/opcVisualFRNM.html")
+
+@login_required
+def opcVisualDS(request):
+    return render(request, "respuestas/opcVisualDS.html")
+
 # Base de datos
 @login_required
 def datosPerfil(request):
