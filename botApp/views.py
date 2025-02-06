@@ -156,6 +156,34 @@ def datosFRNM(request):
     }
     return render(request, "respuestas/datosFRNM.html", data)
 
+def datosFRNM2(request):
+    preguntas = PregFactorRiesgoNoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+        "respuesta_FRNM", "respuesta_FRM__id_pregunta_FRNM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM"]
+        respuesta_usuario = respuesta["respuesta_FRNM__opc_respuesta_FRNM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRNM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRNM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
 @login_required
 def datosDS(request):
     Datos = RespDeterSalud.objects.select_related().values(
