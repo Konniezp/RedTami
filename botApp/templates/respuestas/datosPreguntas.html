@@ -13,6 +13,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Rut</th>
+                    <th>Pregunta</th>
                     <th>Respuesta</th>
                     <th>Fecha Respuesta</th>
                 </tr>
@@ -22,9 +23,9 @@
                 <tr>
                     <td>{{ dato.id }}</td>
                     <td>{{ dato.Rut }}</td>
-                    <td>{{ dato.id_opc_respuesta }}</td>
+                    <td>{{ dato.id_opc_respuesta__id_pregunta__pregunta}}</td>
+                    <td>{{ dato.id_opc_respuesta__OPC_Respuesta}}</td>
                     <td>{{ dato.fecha_respuesta }}</td>
-
                 </tr>
                 {% endfor %}
             </tbody>
