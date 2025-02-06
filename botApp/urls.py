@@ -26,6 +26,7 @@ urlpatterns = [
     path('datosTextoPreguntas/', views.datosTextoPreguntas, name='datosTextoPreguntas'),
     path('datosListadoOrdenado/', views.datosListadoOrdenado, name='datosListadoOrdenado'),
     path('datosFRM/', views.datosFRM, name='datosFRM'),
+    path('datosFRM2/', views.datosFRM2, name='datosFRM2'),
     path('datosFRNM/', views.datosFRNM, name='datosFRNM'),
     path('datosDS/', views.datosDS, name ='datosDS'),
     path('opcVisualFRM/', views.opcVisualFRM, name='opcVisualFRM'),

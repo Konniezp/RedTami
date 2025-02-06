@@ -106,6 +106,34 @@ def datosFRM(request):
     }
     return render(request, "respuestas/datosFRM.html", data)
 
+def datosFRM2(request):
+    preguntas = PregFactorRiesgoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+        "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRM__id_pregunta_FRM__pregunta_FRM"]
+        respuesta_usuario = respuesta["respuesta_FRM__opc_respuesta_FRM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
 @login_required
 def datosFRNM(request):
     Datos = RespUsuarioFactorRiesgoNoMod.objects.select_related().values(
@@ -133,6 +161,34 @@ def datosDS(request):
         "Datos": Datos,
     }
     return render(request,"respuestas/datosDS.html", data)
+
+def datosDS2(request):
+    preguntas = PregDeterSalud.objects.all()
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+        "respuesta_DS", "respuesta_DS__id_pregunta_DS"
+    ).values("Rut", "fecha_respuesta", "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_DS__id_pregunta_DS__pregunta_DS"]
+        respuesta_usuario = respuesta["respuesta_DS__opc_respuesta_DS"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_DS, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosDS2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
 
 @login_required
 def datosListadoOrdenado(request):
