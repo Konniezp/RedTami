@@ -60,6 +60,9 @@ def login(request):
 def respuestasHome(request):
     return render(request, "respuestas/respuestasHome.html")
 
+@login_required
+def opcVisualFRM(request):
+    return render(request, "respuestas/opcVisualFRM.html")
 
 # Base de datos
 @login_required
@@ -88,6 +91,48 @@ def datosTextoPreguntas(request):
         "Datos": Datos,
     }
     return render(request, "respuestas/datosPreguntasEspecialistas.html", data)
+
+@login_required
+def datosFRM(request):
+    Datos = RespUsuarioFactorRiesgoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRM__id_pregunta_FRM_id__pregunta_FRM",
+        "respuesta_FRM__opc_respuesta_FRM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRM.html", data)
+
+@login_required
+def datosFRNM(request):
+    Datos = RespUsuarioFactorRiesgoNoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRNM_id__id_pregunta_FRNM_id__pregunta_FRNM",
+        "respuesta_FRNM_id__opc_respuesta_FRNM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRNM.html", data)
+
+@login_required
+def datosDS(request):
+    Datos = RespDeterSalud.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_DS_id__id_pregunta_DS_id__pregunta_DS",
+        "respuesta_DS_id__opc_respuesta_DS",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request,"respuestas/datosDS.html", data)
 
 @login_required
 def datosListadoOrdenado(request):
