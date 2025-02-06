@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Factores riesgo modificables{% endblock %}
+
+{% block content %}
+
+<h2 class="major">Factores Riesgos Modificables</h2>
+
+<section>
+    <nav>
+
+        <a href="{% url 'datosFRM' %}">
+            <button>Opción visualización 1</button>
+        </a>
+
+        <button>Opción visualización 2</button>
+    </nav>
+    <a class="button" href="{% url 'respuestasHome' %}">Volver</a>
+</section>
+{% endblock %}

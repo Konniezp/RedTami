@@ -1,6 +1,8 @@
 from django.urls import path, include
 from . import views
 from .views import *
+from django.views.generic import TemplateView
+from .views import opcVisualFRM
 
 from rest_framework import routers
 
@@ -23,6 +25,10 @@ urlpatterns = [
     path('datosPreguntas/', views.datosPreguntas, name='datosPreguntas'),
     path('datosTextoPreguntas/', views.datosTextoPreguntas, name='datosTextoPreguntas'),
     path('datosListadoOrdenado/', views.datosListadoOrdenado, name='datosListadoOrdenado'),
+    path('datosFRM/', views.datosFRM, name='datosFRM'),
+    path('datosFRNM/', views.datosFRNM, name='datosFRNM'),
+    path('datosDS/', views.datosDS, name ='datosDS'),
+    path('opcVisualFRM/', views.opcVisualFRM, name='opcVisualFRM'),
 
     # Preguntas
     path('listarPreguntas/', views.listarPreguntas, name='listarPreguntas'),

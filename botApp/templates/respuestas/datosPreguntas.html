@@ -11,6 +11,10 @@
         <table>
             <thead>
                 <tr>
+                    <td colspan="5"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                </tr>
+                <tr>
+                    <th>#</th>
                     <th>ID</th>
                     <th>Rut</th>
                     <th>Respuesta</th>
@@ -20,6 +24,7 @@
             <tbody>
                 {% for dato in Datos %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ dato.id }}</td>
                     <td>{{ dato.Rut }}</td>
                     <td>{{ dato.id_opc_respuesta }}</td>

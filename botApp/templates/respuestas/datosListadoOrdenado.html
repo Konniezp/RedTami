@@ -13,6 +13,10 @@
         <table border="1">
             <thead>
                 <tr>
+                    <td colspan="8"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                </tr>
+                <tr>
+                    <th>#</th>
                     <th>ID</th>
                     <th>RUT</th>
                     <th>WhatsApp</th>
@@ -25,6 +29,7 @@
             <tbody>
                 {% for dato in Datos %}
                 <tr>
+                    <td>{{ forloop.counter }}
                     <td>{{ dato.id }}</td>
                     <td>{{ dato.Rut }}</td>
                     <td>{{ dato.Whatsapp }}</td>
