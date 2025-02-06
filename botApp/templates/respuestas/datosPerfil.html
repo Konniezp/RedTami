@@ -11,6 +11,10 @@
         <table>
             <thead>
                 <tr>
+                    <td colspan="13"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                </tr>
+                <tr>
+                    <th>#</th>
                     <th>ID</th>
                     <th>ID Manichat</th>
                     <th>Rut Usuario</th>
@@ -28,11 +32,12 @@
             <tbody>
                 {% for dato in Datos %}
                 <tr>
+                    <td>{{ forloop.counter }}
                     <td>{{ dato.id }}</td>
                     <td>{{ dato.id_manychat }}</td>
                     <td>{{ dato.Rut }}</td>
                     <td>{{ dato.Whatsapp }}</td>
-                    <td>{{dato.Email}}</td>
+                    <td>{{ dato.Email}}</td>
                     <td>{{ dato.Referencia }}</td>
                     <td>{{ dato.AnioNacimiento }}</td>
                     <td>{{ dato.Comuna_Usuario }}</td>

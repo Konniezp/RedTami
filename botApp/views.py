@@ -60,6 +60,17 @@ def login(request):
 def respuestasHome(request):
     return render(request, "respuestas/respuestasHome.html")
 
+@login_required
+def opcVisualFRM(request):
+    return render(request, "respuestas/opcVisualFRM.html")
+
+@login_required
+def opcVisualFRNM(request):
+    return render(request, "respuestas/opcVisualFRNM.html")
+
+@login_required
+def opcVisualDS(request):
+    return render(request, "respuestas/opcVisualDS.html")
 
 # Base de datos
 @login_required
@@ -72,7 +83,10 @@ def datosPerfil(request):
 
 @login_required
 def datosPreguntas(request):
-    Datos = UsuarioRespuesta.objects.all().order_by("-fecha_respuesta")
+    Datos = UsuarioRespuesta.objects.select_related(
+        "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
+        "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
+        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
     data = {
         "Datos": Datos,
     }
@@ -85,6 +99,133 @@ def datosTextoPreguntas(request):
         "Datos": Datos,
     }
     return render(request, "respuestas/datosPreguntasEspecialistas.html", data)
+
+@login_required
+def datosFRM(request):
+    Datos = RespUsuarioFactorRiesgoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRM__id_pregunta_FRM_id__pregunta_FRM",
+        "respuesta_FRM__opc_respuesta_FRM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRM.html", data)
+
+def datosFRM2(request):
+    preguntas = PregFactorRiesgoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+        "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRM__id_pregunta_FRM__pregunta_FRM"]
+        respuesta_usuario = respuesta["respuesta_FRM__opc_respuesta_FRM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
+@login_required
+def datosFRNM(request):
+    Datos = RespUsuarioFactorRiesgoNoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRNM_id__id_pregunta_FRNM_id__pregunta_FRNM",
+        "respuesta_FRNM_id__opc_respuesta_FRNM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRNM.html", data)
+
+def datosFRNM2(request):
+    preguntas = PregFactorRiesgoNoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+        "respuesta_FRNM", "respuesta_FRM__id_pregunta_FRNM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM"]
+        respuesta_usuario = respuesta["respuesta_FRNM__opc_respuesta_FRNM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRNM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRNM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
+@login_required
+def datosDS(request):
+    Datos = RespDeterSalud.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_DS_id__id_pregunta_DS_id__pregunta_DS",
+        "respuesta_DS_id__opc_respuesta_DS",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request,"respuestas/datosDS.html", data)
+
+@login_required
+def datosDS2(request):
+    preguntas = PregDeterSalud.objects.all()
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+        "respuesta_DS", "respuesta_DS__id_pregunta_DS"
+    ).values("Rut", "fecha_respuesta", "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_DS__id_pregunta_DS__pregunta_DS"]
+        respuesta_usuario = respuesta["respuesta_DS__opc_respuesta_DS"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_DS, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosDS2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
 
 @login_required
 def datosListadoOrdenado(request):
@@ -190,43 +331,182 @@ def crear_excel_desde_db():
     background_colors(ws_preguntas_especialista)
 
     # Hoja 4: Factores riesgo modificables 
+
     ws_FRM = wb.create_sheet(title='Factores riesgo modificables')
-    campos_usuario_FRM = [field.name for field in RespUsuarioFactorRiesgoMod._meta.fields if field.name != 'id']
-    ws_FRM.append(campos_usuario_FRM)
 
-    for respuesta in RespUsuarioFactorRiesgoMod.objects.all():
-        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_FRM]
-        ws_FRM.append(datos_usuario)
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    ws_FRM.append(lista_preguntas)
 
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRM, '')
+            fila.append(respuesta)
+        ws_FRM.append(fila) 
+   
     # Ajustar ancho de columnas y color de fondo 
     ajustar_ancho_columnas(ws_FRM)
     background_colors(ws_FRM)
 
+    #OPCIÓN 2: 
+
+    ws_FRM_2 = wb.create_sheet(title='Factores Riesgo modificables 2')
+
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRM_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_FRM_2.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_2)
+    background_colors(ws_FRM_2)
+
     # Hoja 5: Factores riesgo No modificables 
-    ws_FRNM = wb.create_sheet(title='Factores riesgo No modificables')
-    campos_usuario_FRNM = [field.name for field in RespUsuarioFactorRiesgoNoMod._meta.fields if field.name != 'id']
-    ws_FRNM.append(campos_usuario_FRNM)
 
-    for respuesta in RespUsuarioFactorRiesgoNoMod.objects.all():
-        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_FRNM]
-        ws_FRNM.append(datos_usuario)
+    ws_FRNM = wb.create_sheet(title='Factores Riesgo No Mod')
 
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    ws_FRNM.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRNM, '')
+            fila.append(respuesta)
+        ws_FRNM.append(fila) 
+   
     # Ajustar ancho de columnas y color de fondo 
     ajustar_ancho_columnas(ws_FRNM)
     background_colors(ws_FRNM)
 
+    #OPCIÓN 2: 
+
+    ws_FRNM_2 = wb.create_sheet(title='Factores Riesgo No Mod 2')
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRNM_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_FRNM_2.append(fila)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_2)
+    background_colors(ws_FRNM_2)
+
     # Hoja 6: Determinantes de Salud 
     ws_DS = wb.create_sheet(title='Determinantes de Salud')
-    campos_usuario_DS = [field.name for field in RespDeterSalud._meta.fields if field.name != 'id']
-    ws_DS.append(campos_usuario_DS)
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    ws_DS.append(lista_preguntas)
 
-    for respuesta in RespDeterSalud.objects.all():
-        datos_usuario = [str(getattr(respuesta, campo)) for campo in campos_usuario_DS]
-        ws_DS.append(datos_usuario)
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
 
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_DS, '')
+            fila.append(respuesta)
+        ws_DS.append(fila) 
+   
     # Ajustar ancho de columnas y color de fondo 
     ajustar_ancho_columnas(ws_DS)
     background_colors(ws_DS)
+
+    #OPCIÓN 2: 
+
+    ws_DS_2 = wb.create_sheet(title='Determinantes de Salud 2')
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_DS_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_DS_2.append(fila) 
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DS_2)
+    background_colors(ws_DS_2)
 
 
     # Guardar el archivo

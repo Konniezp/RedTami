@@ -24,6 +24,13 @@
                 <li><a href="{% url 'datosListadoOrdenado'%}">Listado Ordenable</a></li>
             </ul>
         </nav>
+        <nav>
+            <ul>
+              <li><a href="{% url 'opcVisualFRM' %}">Riesgos modificables</a></li>
+              <li><a href="{% url 'opcVisualFRNM' %}">Riesgos no modificables</a></li>
+              <li><a href="{% url 'opcVisualDS' %}">Determinantes salud</a></li>
+            </ul> 
+          </nav>
         <form action="{% url 'descargar_excel' %}" method="post">
             {% csrf_token %}
             <button type="submit">Descargar como Excel</button>
