@@ -564,6 +564,239 @@ def crear_excel_listado_ordenable(request):
     wb.save(response)
     return response
 
+def crear_excel_mod_V1(resquest):
+    wb = Workbook()
+    ws_FRM_V1 = wb.active
+    ws_FRM_V1.title = "Factores de riesgo mod"
+
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRM_V1.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_FRM_V1.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_V1)
+    background_colors(ws_FRM_V1)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="FactoresMod_V1.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_mod_V2(request):
+
+    wb = Workbook()
+    ws_FRM_V2 = wb.active
+    ws_FRM_V2.title = "Factores de riesgo mod 2"
+    
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    ws_FRM_V2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRM, '')
+            fila.append(respuesta)
+        ws_FRM_V2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_V2)
+    background_colors(ws_FRM_V2)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="FactoresMod_V2.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_no_mod_V1(resquest):
+
+    wb = Workbook()
+    ws_FRNM_V1 = wb.active
+    ws_FRNM_V1.title = "Factores de riesgo No mod"
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRNM_V1.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_FRNM_V1.append(fila)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_V1)
+    background_colors(ws_FRNM_V1)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Factores No Mod_V1.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_no_mod_V2(resquest):
+
+    wb = Workbook()
+    ws_FRNM_V2 = wb.active
+    ws_FRNM_V2.title = "Factores de riesgo no mod"
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    ws_FRNM_V2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRNM, '')
+            fila.append(respuesta)
+        ws_FRNM_V2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_V2)
+    background_colors(ws_FRNM_V2)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Factores No Mod_V2.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_DS1(request):
+    wb = Workbook()
+    ws_DSV1 = wb.active
+    ws_DSV1.title = "Determinante Salud"
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_DSV1.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_DSV1.append(fila) 
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DSV1)
+    background_colors(ws_DSV1)
+
+    # Preparar la respuesta HTTP
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="reporte_DS_V1.xlsx"'
+
+    # Guardar el archivo
+    wb.save(response)
+    return response
+
+def crear_excel_DS2(request):
+    wb = Workbook()
+    ws_DSV2 = wb.active
+    ws_DSV2.title = "Determinante Salud"
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    ws_DSV2.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_DS, '')
+            fila.append(respuesta)
+        ws_DSV2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DSV2)
+    background_colors(ws_DSV2)
+
+    # Preparar la respuesta HTTP
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="reporte_DS_V2.xlsx"'
+
+    # Guardar el archivo
+    wb.save(response)
+    return response
+
 # --------------------- Reporteria --------------------- #
 
 # Configuración global para fuentes de gráficos
@@ -1959,3 +2192,5 @@ class ObtenerID(APIView):
             # Si no se encuentra ningún registro para la fecha de hoy, devolver un código de error (por ejemplo, "1")
             return Response({'error_code': '1'})
 # --------------------- Api --------------------- #
+
+
