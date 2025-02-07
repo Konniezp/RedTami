@@ -564,6 +564,74 @@ def crear_excel_listado_ordenable(request):
     wb.save(response)
     return response
 
+def crear_excel_datos_preguntas(resquest):
+    wb = Workbook()
+    ws_datos_preg = wb.active
+    ws_datos_preg.title = "Preguntas generales"
+
+    preguntas =Pregunta.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_datos_preg.append(lista_preguntas)
+
+    usuarios_respuestas = UsuarioRespuesta.objects.select_related(
+        "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
+        "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
+        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
+    
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['id_opc_respuesta__id_pregunta__pregunta']
+        respuesta_usuario = respuesta['id_opc_respuesta__OPC_Respuesta']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_datos_preg.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_datos_preg)
+    background_colors(ws_datos_preg)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Datos preguntas.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_preguntas_esp(resquest):
+    wb = Workbook()
+    ws_preg_esp = wb.active
+    ws_preg_esp.title = "Preguntas especialistas"
+
+    lista_preguntas = ['Rut', 'Preguntas', 'Fecha Pregunta'] 
+    ws_preg_esp.append(lista_preguntas)
+
+    preguntas = UsuarioTextoPregunta.objects.all()
+
+    for pregunta in preguntas:
+        fila = [
+            pregunta.Rut,  
+            pregunta.texto_pregunta,
+            pregunta.fecha_pregunta.replace(tzinfo=None) if pregunta.fecha_pregunta else ''
+        ]
+        ws_preg_esp.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_preg_esp)
+    background_colors(ws_preg_esp)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Preguntas Especialista.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
 def crear_excel_mod_V1(resquest):
     wb = Workbook()
     ws_FRM_V1 = wb.active

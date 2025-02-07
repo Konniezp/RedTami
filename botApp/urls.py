@@ -50,6 +50,8 @@ urlpatterns = [
     path('crear_excel_no_mod_V2/', views.crear_excel_no_mod_V2, name='crear_excel_no_mod_V2'),
     path('crear_excel_DS1/', views.crear_excel_DS1, name="crear_excel_DS1"),
     path('crear_excel_DS2/', views.crear_excel_DS2, name="crear_excel_DS2"),
+    path('crear_excel_datos_preguntas/', views.crear_excel_datos_preguntas, name='crear_excel_datos_preguntas'),
+    path('crear_excel_preguntas_esp/', views.crear_excel_preguntas_esp, name='crear_excel_preguntas_esp'),
    
     # Mensajes
     path('home_mensajes/', views.homeMensajes, name='mensajesHome'),
