@@ -39,6 +39,13 @@
     <p>No hay datos ingresados</p>
     {% endif %}
 
+    <div style="text-align: center;">
+        <form action="{% url 'crear_excel_no_mod_V2' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Descargar como Excel</button>
+        </form>
+    </div>
+
     <a class="button" href="{% url 'respuestasHome' %}">Volver</a>
 </secion>
 
