@@ -44,8 +44,13 @@ urlpatterns = [
     # Descargar Excel
     path('descargar_excel/', views.descargar_excel, name='descargar_excel'),
     path('crear_excel_listado_ordenable/', views.crear_excel_listado_ordenable, name='crear_excel_listado_ordenable'),
-
-    
+    path('crear_excel_mod_V1/', views.crear_excel_mod_V1, name='crear_excel_mod_V1'),
+    path('crear_excel_mod_V2/', views.crear_excel_mod_V2, name='crear_excel_mod_V2'),
+    path('crear_excel_no_mod_V1/', views.crear_excel_no_mod_V1, name='crear_excel_no_mod_V1'),
+    path('crear_excel_no_mod_V2/', views.crear_excel_no_mod_V2, name='crear_excel_no_mod_V2'),
+    path('crear_excel_DS1/', views.crear_excel_DS1, name="crear_excel_DS1"),
+    path('crear_excel_DS2/', views.crear_excel_DS2, name="crear_excel_DS2"),
+   
     # Mensajes
     path('home_mensajes/', views.homeMensajes, name='mensajesHome'),
     path('crearMensaje/', views.crearMensaje, name='crearMensaje'),
