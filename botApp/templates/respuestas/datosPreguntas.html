@@ -11,7 +11,7 @@
         <table>
             <thead>
                 <tr>
-                    <td colspan="5"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                    <td colspan="6"><b>Total de respuestas: {{ Datos|length }}</b></td>
                 </tr>
                 <tr>
                     <th>#</th>
@@ -39,6 +39,13 @@
     {% else %}
     <p>No hay datos ingresados</p>
     {% endif %}
+
+    <div style="text-align: center;">
+        <form action="{% url 'crear_excel_datos_preguntas' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Descargar como Excel</button>
+        </form>
+    </div>
 
     <a class="button" href="{% url 'respuestasHome' %}">Volver</a>
 </section>
