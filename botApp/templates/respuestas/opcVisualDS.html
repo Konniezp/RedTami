@@ -8,13 +8,14 @@
 
 <section>
     <nav>
-
-        <a href="{% url 'datosDS' %}">
-            <button>Opción visualización 1</button>
-        </a>
-        <a href="{% url 'datosDS2'%}">
-            <button>Opción visualización 2</button>
-        </a>
+        <div style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+            <a href="{% url 'datosDS' %}">
+                <button>Opción visualización 1</button>
+            </a>
+            <a href="{% url 'datosDS2' %}">
+                <button>Opción visualización 2</button>
+            </a>
+        </div>
     </nav>
     <a class="button" href="{% url 'respuestasHome' %}">Volver</a>
 </section>

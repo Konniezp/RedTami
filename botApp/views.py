@@ -632,7 +632,7 @@ def generar_grafico_anio_nacimiento():
     plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
-    plt.title("Usuarios por Año de Nacimiento", pad=20)
+    plt.title("Usuarias por Año de Nacimiento", pad=20)
     plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
 
     # Agregar etiquetas en las barras
@@ -1549,7 +1549,7 @@ def grafico_prev_salud_por_rango_edad():
     plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.title("Previsión de salud por rango de Edad", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_fonasa
