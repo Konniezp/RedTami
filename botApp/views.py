@@ -2213,6 +2213,22 @@ class MensajeContenidoViewSet(viewsets.ModelViewSet):
     queryset = MensajeContenido.objects.all()
     serializer_class = MensajeContenidoSerializer
 
+#Factor riesgo no modificable
+class FRNMViewSet(viewsets.ModelViewSet):
+    queryset = RespUsuarioFactorRiesgoNoMod.objects.all()
+    serializer_class = UsuarioRespuestaFRNMSerializer
+
+#Factor riesgo modificable
+class FRMViewSet(viewsets.ModelViewSet):
+    queryset = RespUsuarioFactorRiesgoMod.objects.all()
+    serializer_class = UsuarioRespuestaFRMSerializer
+
+#Determinante salud
+class DSViewSet(viewsets.ModelViewSet):
+    queryset = RespDeterSalud.objects.all()
+    serializer_class = UsuarioRespuestaDSSerializer
+
+
 class UsuarioRespuestaAPIView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAdminUser]
@@ -2259,6 +2275,22 @@ class ObtenerID(APIView):
         else:
             # Si no se encuentra ningún registro para la fecha de hoy, devolver un código de error (por ejemplo, "1")
             return Response({'error_code': '1'})
+        
+class UsuarioRespuestFRNMaAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespUsuarioFactorRiesgoNoMod.objects.all()
+        serializer = UsuarioRespuestaFRNMSerializer(respuestas, many=True)
+        return Response(serializer.data)
+    
+class UsuarioRespuestFRMaAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespUsuarioFactorRiesgoMod.objects.all()
+        serializer = UsuarioRespuestaFRMSerializer(respuestas, many=True)
+        return Response(serializer.data)
 # --------------------- Api --------------------- #
 
 

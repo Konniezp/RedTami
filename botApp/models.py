@@ -72,16 +72,16 @@ class Ocupacion(models.Model):
 
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
-    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
+    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
-    Referencia = models.CharField(max_length=200)
     Comuna_Usuario = models.ForeignKey(Comuna, on_delete=models.CASCADE)
     Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
     SistemaSalud_Usuario = models.ForeignKey(SistemaSalud, on_delete=models.CASCADE)
     Ocupacion_Usuario = models.ForeignKey(Ocupacion, on_delete=models.CASCADE)
+    Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
 
