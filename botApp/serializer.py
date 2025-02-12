@@ -21,3 +21,18 @@ class MensajeContenidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MensajeContenido
         fields = "__all__"
+
+class UsuarioRespuestaFRNMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespUsuarioFactorRiesgoNoMod
+        fields = "__all__"
+
+class UsuarioRespuestaFRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespUsuarioFactorRiesgoMod
+        fields = "__all__"
+
+class UsuarioRespuestaDSSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespDeterSalud
+        fields = "__all__"

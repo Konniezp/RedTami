@@ -11,6 +11,9 @@ router.register(r'Usuario', views.UsuarioViewSet)
 router.register(r'UsuarioRespuesta', views.UsuarioRespuestaViewSet)
 router.register(r'UsuarioTextoPregunta', views.UsuarioTextoPreguntaViewSet)
 router.register(r'MensajeContenido', views.MensajeContenidoViewSet)
+router.register(r'FRNM', views.FRNMViewSet)
+router.register(r'FRM', views.FRMViewSet)
+router.register(r'DS', views.DSViewSet)
 
 urlpatterns = [
     path('', views.home),
