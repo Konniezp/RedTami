@@ -5,8 +5,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from datetime import date
-
-
+from dateutil import parser
 
 class Comuna(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Comuna")
@@ -84,6 +83,7 @@ class Usuario(models.Model):
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
+    fecha_nacimiento = models.CharField(max_length=30, blank=True)
 
     #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
     def calculo_edad (self):
@@ -100,6 +100,19 @@ class Usuario(models.Model):
     def __str__(self):
         return str(self.id)
     
+
+    def save(self, *args, **kwargs):
+        if isinstance(self.fecha_nacimiento, str):  # Si la fecha es un string, la normalizamos
+            try:
+                self.fecha_nacimiento = parser.parse(self.fecha_nacimiento, dayfirst=True).date()
+            except ValueError:
+                raise ValueError("Formato de fecha inválido")
+            
+        AnioNacimiento = self.fecha_nacimiento.year if self.fecha_nacimiento else None
+
+        super().save(*args, **kwargs)  
+
+        return AnioNacimiento
 
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
