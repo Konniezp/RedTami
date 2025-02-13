@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import connection
 from django.db.models import Count, F, Max
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
@@ -32,6 +32,9 @@ from .serializer import *
 
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill
+
+from django.views.decorators.csrf import csrf_exempt
+import json
     
 @login_required
 def home(request):
@@ -2292,5 +2295,37 @@ class UsuarioRespuestFRMaAPIView(APIView):
         serializer = UsuarioRespuestaFRMSerializer(respuestas, many=True)
         return Response(serializer.data)
 # --------------------- Api --------------------- #
+
+# ------------------Parseo fecha ---------------- #
+
+
+@csrf_exempt  # Permite probar con POST sin token CSRF (en producción usa autenticación)
+def guardar_fecha_nacimiento(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)  # Carga JSON enviado por ManyChat
+            fecha_ingresada = data.get("fecha_nacimiento", "").strip()
+            nombre = data.get("nombre", "Usuario Desconocido")  # Nombre opcional
+
+            usuario = Usuario(nombre=nombre, fecha_nacimiento=fecha_ingresada)
+            usuario.save()
+
+            return JsonResponse({"mensaje": "Fecha guardada correctamente."})
+        except ValueError:
+            return JsonResponse({"error": "Formato de fecha inválido."}, status=400)
+
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+def obtener_usuario(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+        fecha_formateada = usuario.fecha_nacimiento.strftime("%d/%m/%Y")  # Convertimos a dd/mm/yyyy
+
+        return JsonResponse({
+            "nombre": usuario.nombre,
+            "fecha_nacimiento": fecha_formateada
+        })
+    except Usuario.DoesNotExist:
+        return JsonResponse({"error": "Usuario no encontrado"}, status=404)
 
 
