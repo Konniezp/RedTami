@@ -7,6 +7,10 @@ from django.utils import timezone
 from datetime import date, datetime
 from dateutil import parser
 
+import locale
+
+locale.setlocale(locale.LC_TIME, 'es_ES') 
+
 class Comuna(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Comuna")
     Nombre_Comuna = models.CharField(max_length=50)
