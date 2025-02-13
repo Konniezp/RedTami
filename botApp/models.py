@@ -114,7 +114,9 @@ class Usuario(models.Model):
                 "%d de %B %Y",
                 "%d/%m/%y", 
                 "%d-%m-%y",
-                "%d %m %y"
+                "%d %m %y",
+                "%d de %B del %Y",
+                "%d de %B del %y",
 
             ]
 

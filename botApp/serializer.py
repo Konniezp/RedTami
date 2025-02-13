@@ -18,7 +18,9 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 "%d de %B %Y",
                 "%d/%m/%y", 
                 "%d-%m-%y",
-                "%d %m %y"
+                "%d %m %y",
+                "%d de %B del %Y",
+                "%d de %B del %y",
             ]
 
             for formato in formatos_fecha:
