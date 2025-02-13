@@ -4,7 +4,7 @@ from django.db import models
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from datetime import date
+from datetime import date, datetime
 from dateutil import parser
 
 class Comuna(models.Model):
@@ -103,17 +103,32 @@ class Usuario(models.Model):
 
     def save(self, *args, **kwargs):
         if isinstance(self.fecha_nacimiento, str):  # Si la fecha es un string, la normalizamos
-            try:
-                self.fecha_nacimiento = parser.parse(self.fecha_nacimiento, dayfirst=True).date()
-            except ValueError:
-                raise ValueError("Formato de fecha inválido")
+            formatos_fecha = [
+                "%d/%m/%Y",  # dd/mm/yyyy
+                "%d-%m-%Y",  # dd-mm-yyyy
+                "%d %B %Y",  # 12 noviembre 1990
+                "%d de %B de %Y"  # 12 de noviembre de 1990
+            ]
             
+            fecha_valida = False
+            
+            for formato in formatos_fecha:
+                try:
+                    self.fecha_nacimiento = datetime.strptime(self.fecha_nacimiento, formato).date()
+                    fecha_valida = True
+                    break  # Si se convierte correctamente, salimos del bucle
+                except ValueError:
+                    continue
+            
+            if not fecha_valida:
+                raise ValidationError("Formato de fecha inválido. Usa dd/mm/yyyy.")
+        
         AnioNacimiento = self.fecha_nacimiento.year if self.fecha_nacimiento else None
 
         super().save(*args, **kwargs)  
 
         return AnioNacimiento
-
+   
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
     pregunta = models.CharField(max_length=200)
