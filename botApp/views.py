@@ -35,6 +35,9 @@ from openpyxl.styles import PatternFill
 
 from django.views.decorators.csrf import csrf_exempt
 import json
+import locale 
+
+locale.setlocale(locale.LC_TIME, 'es_ES')
     
 @login_required
 def home(request):
