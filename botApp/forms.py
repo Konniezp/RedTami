@@ -14,7 +14,7 @@ class UsuarioForm(forms.ModelForm):
 
     class Meta:
         model = Usuario
-        fields = ['Rut', 'Whatsapp', 'fecha_nacimiento' 'Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']
+        fields = ['Rut', 'Whatsapp', 'fecha_nacimiento', 'Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']
 
     def clean_Comuna_Usuario(self):
         comuna = self.cleaned_data['Comuna_Usuario']
