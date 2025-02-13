@@ -102,6 +102,11 @@ class Usuario(models.Model):
     
     def save(self, *args, **kwargs):
         if isinstance(self.fecha_nacimiento, str):  # Si la fecha es un string, la normalizamos
+            print(f"Fecha recibida: '{self.fecha_nacimiento}'")  # Para ver exactamente qué está llegando
+            
+            # Eliminar espacios innecesarios
+            self.fecha_nacimiento = self.fecha_nacimiento.strip()
+            
             formatos_fecha = [
                 "%d/%m/%Y",  # dd/mm/yyyy
                 "%d-%m-%Y",  # dd-mm-yyyy
@@ -118,15 +123,16 @@ class Usuario(models.Model):
                     self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
                     fecha_valida = True
                     break  # Salimos si se convierte correctamente
-                except ValueError:
+                except ValueError as e:
+                    print(f"Error con formato {formato}: {e}")
                     continue
             
             if not fecha_valida:
-                raise ValueError("Formato de fecha inválido. Usa dd/mm/yyyy.")
-        
-        # Calcula la edad si AnioNacimiento es válido
-        #if self.AnioNacimiento:
-        #    self.edad = datetime.now().year - self.AnioNacimiento.year
+                raise ValueError(f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy.")
+    
+    # Calcula la edad si AnioNacimiento es válido
+        if self.AnioNacimiento:
+            self.edad = datetime.now().year - self.AnioNacimiento.year
 
         super().save(*args, **kwargs)
    
