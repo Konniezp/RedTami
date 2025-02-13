@@ -100,7 +100,6 @@ class Usuario(models.Model):
     def __str__(self):
         return str(self.id)
     
-
     def save(self, *args, **kwargs):
         if isinstance(self.fecha_nacimiento, str):  # Si la fecha es un string, la normalizamos
             formatos_fecha = [
@@ -114,20 +113,22 @@ class Usuario(models.Model):
             
             for formato in formatos_fecha:
                 try:
-                    self.fecha_nacimiento = datetime.strptime(self.fecha_nacimiento, formato).date()
+                    # Intentamos convertir la fecha al formato DateField
+                    fecha_convertida = datetime.strptime(self.fecha_nacimiento, formato).date()
+                    self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
                     fecha_valida = True
-                    break  # Si se convierte correctamente, salimos del bucle
+                    break  # Salimos si se convierte correctamente
                 except ValueError:
                     continue
             
             if not fecha_valida:
-                raise ValidationError("Formato de fecha inválido. Usa dd/mm/yyyy.")
+                raise ValueError("Formato de fecha inválido. Usa dd/mm/yyyy.")
         
-        AnioNacimiento = self.fecha_nacimiento.year if self.fecha_nacimiento else None
+        # Calcula la edad si AnioNacimiento es válido
+        #if self.AnioNacimiento:
+        #    self.edad = datetime.now().year - self.AnioNacimiento.year
 
-        super().save(*args, **kwargs)  
-
-        return AnioNacimiento
+        super().save(*args, **kwargs)
    
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
