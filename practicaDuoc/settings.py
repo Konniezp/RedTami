@@ -161,3 +161,5 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=3650),  # 10 años
     "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),  # 10 años
 }
+
+APPEND_SLASH = False
