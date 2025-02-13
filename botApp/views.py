@@ -2302,28 +2302,31 @@ class UsuarioRespuestFRMaAPIView(APIView):
 def guardar_fecha_nacimiento(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  
+            data = json.loads(request.body)
             print(f"Datos recibidos: {data}")
             fecha_ingresada = data.get("fecha_nacimiento", "").strip()
-            
+
+            # Crear el usuario con la fecha en formato de texto
             usuario = Usuario(fecha_nacimiento=fecha_ingresada)
-            usuario.save()
-            
+            usuario.save()  # El método save() se encargará de la conversión
 
             return JsonResponse({"mensaje": "Fecha guardada correctamente."})
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"Error inesperado: {str(e)}"}, status=500)
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
 def obtener_usuario(request, usuario_id):
     try:
         usuario = Usuario.objects.get(id=usuario_id)
-        fecha_formateada = usuario.fecha_nacimiento.strftime("%d/%m/%Y")  # Convertimos a dd/mm/yyyy
+        fecha_formateada = usuario.AnioNacimiento.strftime("%d/%m/%Y") if usuario.AnioNacimiento else None
 
         return JsonResponse({
             "nombre": usuario.nombre,
-            "fecha_nacimiento": fecha_formateada
+            "fecha_nacimiento": usuario.fecha_nacimiento,  # Campo CharField
+            "AnioNacimiento": fecha_formateada  # Campo DateField formateado
         })
     except Usuario.DoesNotExist:
         return JsonResponse({"error": "Usuario no encontrado"}, status=404)

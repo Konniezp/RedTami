@@ -99,23 +99,17 @@ class Usuario(models.Model):
 
     def __str__(self):
         return str(self.id)
-    
     def save(self, *args, **kwargs):
-        if isinstance(self.fecha_nacimiento, str):  # Si la fecha es un string, la normalizamos
-            print(f"Fecha recibida: '{self.fecha_nacimiento}'")  # Para ver exactamente qué está llegando
-            
-            # Eliminar espacios innecesarios
-            self.fecha_nacimiento = self.fecha_nacimiento.strip()
-            
+        if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
             formatos_fecha = [
                 "%d/%m/%Y",  # dd/mm/yyyy
                 "%d-%m-%Y",  # dd-mm-yyyy
                 "%d %B %Y",  # 12 noviembre 1990
                 "%d de %B de %Y"  # 12 de noviembre de 1990
             ]
-            
+
             fecha_valida = False
-            
+
             for formato in formatos_fecha:
                 try:
                     # Intentamos convertir la fecha al formato DateField
@@ -123,19 +117,21 @@ class Usuario(models.Model):
                     self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
                     fecha_valida = True
                     break  # Salimos si se convierte correctamente
-                except ValueError as e:
-                    print(f"Error con formato {formato}: {e}")
+                except ValueError:
                     continue
-            
+
             if not fecha_valida:
-                raise ValueError(f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy.")
-    
-    # Calcula la edad si AnioNacimiento es válido
+                raise ValueError(f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'.")
+
+        # Calcula la edad si AnioNacimiento es válido
         if self.AnioNacimiento:
-            self.edad = datetime.now().year - self.AnioNacimiento.year
+            self.edad = self.calculo_edad()
 
         super().save(*args, **kwargs)
-   
+
+    def __str__(self):
+        return str(self.id)
+    
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
     pregunta = models.CharField(max_length=200)
