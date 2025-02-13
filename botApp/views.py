@@ -2303,10 +2303,12 @@ def guardar_fecha_nacimiento(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)  
+            print(f"Datos recibidos: {data}")
             fecha_ingresada = data.get("fecha_nacimiento", "").strip()
             
             usuario = Usuario(fecha_nacimiento=fecha_ingresada)
             usuario.save()
+            
 
             return JsonResponse({"mensaje": "Fecha guardada correctamente."})
         except ValueError as e:
