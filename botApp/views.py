@@ -2298,21 +2298,19 @@ class UsuarioRespuestFRMaAPIView(APIView):
 
 # ------------------Parseo fecha ---------------- #
 
-
-@csrf_exempt  # Permite probar con POST sin token CSRF (en producción usa autenticación)
+@csrf_exempt
 def guardar_fecha_nacimiento(request):
     if request.method == "POST":
         try:
-            data = json.loads(request.body)  # Carga JSON enviado por ManyChat
+            data = json.loads(request.body)  
             fecha_ingresada = data.get("fecha_nacimiento", "").strip()
-            nombre = data.get("nombre", "Usuario Desconocido")  # Nombre opcional
-
-            usuario = Usuario(nombre=nombre, fecha_nacimiento=fecha_ingresada)
+            
+            usuario = Usuario(fecha_nacimiento=fecha_ingresada)
             usuario.save()
 
             return JsonResponse({"mensaje": "Fecha guardada correctamente."})
-        except ValueError:
-            return JsonResponse({"error": "Formato de fecha inválido."}, status=400)
+        except ValueError as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
