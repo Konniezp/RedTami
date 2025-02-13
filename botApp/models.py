@@ -83,7 +83,7 @@ class Usuario(models.Model):
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
-    fecha_nacimiento = models.CharField(max_length=30, blank=True)
+    fecha_nacimiento = models.CharField(max_length=30)
 
     #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
     def calculo_edad (self):
