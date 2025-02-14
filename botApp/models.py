@@ -100,13 +100,9 @@ class Usuario(models.Model):
         return 0
 
     # Validación y guardado de fecha en save()
-    def limpiar_y_validar_fecha(self):
+    def save(self, *args, **kwargs):
         if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
             # Lista de nombres de meses en español
-
-            fecha_por_defecto = "01/01/1920"
-            fecha_defecto_obj = datetime.strptime(fecha_por_defecto, "%d/%m/%Y").date()
-            
             meses_correctos = [
                 "enero", "febrero", "marzo", "abril", "mayo", "junio",
                 "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
@@ -139,6 +135,8 @@ class Usuario(models.Model):
                 "%d de %B %Y",  # 12 de noviembre 1990
             ]
 
+            fecha_valida = False
+
             for formato in formatos_fecha:
                 try:
                     # Intentamos convertir la fecha al formato DateField
@@ -149,18 +147,13 @@ class Usuario(models.Model):
                 except ValueError:
                     continue
 
-            self.AnioNacimiento = fecha_defecto_obj
-        else:
-            # Si no hay valor proporcionado, se asigna la fecha por defecto
-            self.AnioNacimiento = fecha_defecto_obj
-
-    # Método save para validar y guardar la fecha y la edad
-    def save(self, *args, **kwargs):
-        self.limpiar_y_validar_fecha()  # Valida y limpia la fecha
+            if not fecha_valida:
+                raise ValidationError(
+                    f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
+                )
 
         # Calcula la edad si AnioNacimiento es válido
-        if self.AnioNacimiento:
-            self.edad = self.calculo_edad()
+        self.edad = self.calculo_edad()
 
         super().save(*args, **kwargs)
 

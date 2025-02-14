@@ -11,10 +11,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
         def validate_fecha_nacimiento(self, value):
-
-            fecha_por_defecto = "01/01/1920"
-            fecha_defecto_obj = datetime.strptime(fecha_por_defecto, "%d/%m/%Y").date() 
-
             if value:  
                 meses_correctos = [
                     "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -51,16 +47,19 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
                 for formato in formatos_fecha:
                     try:
+                        # Intentamos convertir la fecha al formato DateField
                         fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
                         fecha_valida = True
-                        return fecha_convertida 
+                        return fecha_convertida  # Retornamos la fecha convertida si es válida
                     except ValueError:
                         continue
 
                 if not fecha_valida:
-                    return fecha_defecto_obj
+                    raise serializers.ValidationError(
+                        f"Formato de fecha inválido. Recibido: '{value}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
+                    )
 
-            return fecha_defecto_obj
+            return value  # Retorna el valor si no hay fecha para validar
         
 class UsuarioRespuestaSerializer(serializers.ModelSerializer):
     class Meta:
