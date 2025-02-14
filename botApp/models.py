@@ -71,53 +71,71 @@ class Ocupacion(models.Model):
 
     def __str__(self):
         return self.OPC_Ocupacion
-
+    
+    from django.db import models
+from datetime import datetime, date
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from unidecode import unidecode  # Para eliminar acentos
+from fuzzywuzzy import process
 
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
-    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True)
+    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
-    Comuna_Usuario = models.ForeignKey(Comuna, on_delete=models.CASCADE)
-    Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
-    SistemaSalud_Usuario = models.ForeignKey(SistemaSalud, on_delete=models.CASCADE)
-    Ocupacion_Usuario = models.ForeignKey(Ocupacion, on_delete=models.CASCADE)
+
+    Comuna_Usuario = models.ForeignKey('Comuna', on_delete=models.CASCADE)
+    Genero_Usuario = models.ForeignKey('Genero', on_delete=models.CASCADE)
+    SistemaSalud_Usuario = models.ForeignKey('SistemaSalud', on_delete=models.CASCADE)
+    Ocupacion_Usuario = models.ForeignKey('Ocupacion', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
-    fecha_nacimiento = models.CharField(max_length=30)
+    fecha_nacimiento = models.CharField(max_length=30, blank=True, null=True)
 
-    #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
-    def calculo_edad (self):
-        fecha_actual = date.today()
-        edad =  fecha_actual.year - self.AnioNacimiento.year
-        edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
-        return edad
-    
-    #Guardar edad con método save
-    def save(self, *args, **kwargs):
-        self.edad = self.calculo_edad()  
-        super().save(*args, **kwargs) #Llama al método save
+    # Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
+    def calculo_edad(self):
+        if self.AnioNacimiento:
+            fecha_actual = date.today()
+            edad = fecha_actual.year - self.AnioNacimiento.year
+            edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
+            return edad
+        return 0
 
-    def __str__(self):
-        return str(self.id)
+    # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
         if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
+            # Lista de nombres de meses en español
+            meses_correctos = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ]
+
+            # Normalizar el texto: convertir a minúsculas y eliminar acentos
+            fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
+
+            # Reemplazar nombres de meses mal escritos
+            for mes in meses_correctos:
+                # Buscar coincidencias aproximadas
+                coincidencia, puntaje = process.extractOne(mes, [fecha_normalizada])
+                if puntaje > 80:  # Umbral de similitud
+                    fecha_normalizada = fecha_normalizada.replace(coincidencia, mes)
+
+            # Formatos de fecha permitidos
             formatos_fecha = [
                 "%d/%m/%Y",  # dd/mm/yyyy
                 "%d-%m-%Y",  # dd-mm-yyyy
                 "%d %B %Y",  # 12 noviembre 1990
                 "%d de %B de %Y",  # 12 de noviembre de 1990
                 "%d %m %Y",  # dd mm yyyy
-                "%d de %B %Y", # 12 de noviembre 1990
                 "%d/%m/%y",  # dd/mm/yy
                 "%d-%m-%y",  # dd-mm-yy
                 "%d %m %y",  # dd mm yy
-                "%d de %B del %Y", # 12 de noviembre del 1990
-                "%d de %B del %y", # 12 de noviembre del 90
-
+                "%d de %B del %Y",  # 12 de noviembre del 1990
+                "%d de %B del %y",  # 12 de noviembre del 90
             ]
 
             fecha_valida = False
@@ -125,7 +143,7 @@ class Usuario(models.Model):
             for formato in formatos_fecha:
                 try:
                     # Intentamos convertir la fecha al formato DateField
-                    fecha_convertida = datetime.strptime(self.fecha_nacimiento, formato).date()
+                    fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
                     self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
                     fecha_valida = True
                     break  # Salimos si se convierte correctamente
@@ -133,11 +151,12 @@ class Usuario(models.Model):
                     continue
 
             if not fecha_valida:
-                raise ValueError(f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'.")
+                raise ValidationError(
+                    f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
+                )
 
         # Calcula la edad si AnioNacimiento es válido
-        if self.AnioNacimiento:
-            self.edad = self.calculo_edad()
+        self.edad = self.calculo_edad()
 
         super().save(*args, **kwargs)
 
