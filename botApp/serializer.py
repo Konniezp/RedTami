@@ -11,8 +11,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
         def validate_fecha_nacimiento(self, value):
-            if value:  # Solo si se proporciona fecha_nacimiento
-                # Lista de nombres de meses en español
+
+            fecha_por_defecto = "01/01/1920"
+            fecha_defecto_obj = datetime.strptime(fecha_por_defecto, "%d/%m/%Y").date() 
+
+            if value:  
                 meses_correctos = [
                     "enero", "febrero", "marzo", "abril", "mayo", "junio",
                     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
@@ -42,26 +45,22 @@ class UsuarioSerializer(serializers.ModelSerializer):
                     "%d de %B del %Y",  # 12 de noviembre del 1990
                     "%d de %B del %y",  # 12 de noviembre del 90
                     "%d de %B %y",  # 12 de noviembre 90
-                    "%d de %B %Y",  # 12 de noviembre 90
+                    "%d de %B %Y",  # 12 de noviembre 1990
                 ]
-
                 fecha_valida = False
 
                 for formato in formatos_fecha:
                     try:
-                        # Intentamos convertir la fecha al formato DateField
                         fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
                         fecha_valida = True
-                        return fecha_convertida  # Retornamos la fecha convertida si es válida
+                        return fecha_convertida 
                     except ValueError:
                         continue
 
                 if not fecha_valida:
-                    raise serializers.ValidationError(
-                        f"Formato de fecha inválido. Recibido: '{value}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
-                    )
+                    return fecha_defecto_obj
 
-            return value  # Retorna el valor si no hay fecha para validar
+            return fecha_defecto_obj
         
 class UsuarioRespuestaSerializer(serializers.ModelSerializer):
     class Meta:
