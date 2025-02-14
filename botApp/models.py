@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import date, datetime
 from dateutil import parser
 from unidecode import unidecode 
-from fuzzywuzzy import process
+from fuzzywuzzy import fuzz
 
 import locale
 
@@ -78,30 +78,28 @@ class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
-    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True)
+    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
-    Comuna_Usuario = models.ForeignKey(Comuna, on_delete=models.CASCADE)
-    Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
-    SistemaSalud_Usuario = models.ForeignKey(SistemaSalud, on_delete=models.CASCADE)
-    Ocupacion_Usuario = models.ForeignKey(Ocupacion, on_delete=models.CASCADE)
+    Comuna_Usuario = models.ForeignKey('Comuna', on_delete=models.CASCADE)
+    Genero_Usuario = models.ForeignKey('Genero', on_delete=models.CASCADE)
+    SistemaSalud_Usuario = models.ForeignKey('SistemaSalud', on_delete=models.CASCADE)
+    Ocupacion_Usuario = models.ForeignKey('Ocupacion', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
-    fecha_nacimiento = models.CharField(max_length=30, null=True)
+    fecha_nacimiento = models.CharField(max_length=30, null=True, blank=True)
 
-    #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
-    def calculo_edad (self):
-        fecha_actual = date.today()
-        edad =  fecha_actual.year - self.AnioNacimiento.year
-        edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
-        return edad
-    
-    #Guardar edad con método save
-    def save(self, *args, **kwargs):
-        self.edad = self.calculo_edad()  
-        super().save(*args, **kwargs) #Llama al método save
+    # Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
+    def calculo_edad(self):
+        if self.AnioNacimiento:
+            fecha_actual = date.today()
+            edad = fecha_actual.year - self.AnioNacimiento.year
+            edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
+            return edad
+        return 0
 
+    # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
         if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
             # Lista de nombres de meses en español
@@ -115,10 +113,11 @@ class Usuario(models.Model):
 
             # Reemplazar nombres de meses mal escritos
             for mes in meses_correctos:
-                # Buscar coincidencias aproximadas
-                coincidencia, puntaje = process.extractOne(mes, [fecha_normalizada])
-                if puntaje > 80:  # Umbral de similitud
-                    fecha_normalizada = fecha_normalizada.replace(coincidencia, mes)
+                palabras_fecha = fecha_normalizada.split()
+                for palabra in palabras_fecha:
+                    puntaje = fuzz.ratio(palabra, mes)
+                    if puntaje > 70:  # Umbral de similitud
+                        fecha_normalizada = fecha_normalizada.replace(palabra, mes)
 
             # Formatos de fecha permitidos
             formatos_fecha = [
