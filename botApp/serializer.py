@@ -14,13 +14,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 "%d-%m-%Y",  # dd-mm-yyyy
                 "%d %B %Y",  # 12 noviembre 1990
                 "%d de %B de %Y",  # 12 de noviembre de 1990
-                "%d %m %Y",
-                "%d de %B %Y",
-                "%d/%m/%y", 
-                "%d-%m-%y",
-                "%d %m %y",
-                "%d de %B del %Y",
-                "%d de %B del %y",
+                "%d %m %Y",  # dd mm yyyy
+                "%d de %B %Y", # 12 de noviembre 1990
+                "%d/%m/%y",  # dd/mm/yy
+                "%d-%m-%y",  # dd-mm-yy
+                "%d %m %y",  # dd mm yy
+                "%d de %B del %Y", # 12 de noviembre del 1990
+                "%d de %B del %y", # 12 de noviembre del 90
             ]
 
             for formato in formatos_fecha:
