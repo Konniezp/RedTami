@@ -131,6 +131,8 @@ class Usuario(models.Model):
                 "%d %m %y",  # dd mm yy
                 "%d de %B del %Y",  # 12 de noviembre del 1990
                 "%d de %B del %y",  # 12 de noviembre del 90
+                "%d de %B %y",  # 12 de noviembre 90
+                "%d de %B %Y",  # 12 de noviembre 1990
             ]
 
             fecha_valida = False
