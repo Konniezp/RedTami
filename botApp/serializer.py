@@ -77,7 +77,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
                     f"Formato de fecha inválido. Recibido: '{value}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
                 )
 
-        return value  # Retorna el valor si no hay fecha para validar
+        return value  # Retorna el valor si no hay fecha para validar    
         
 class UsuarioRespuestaSerializer(serializers.ModelSerializer):
     class Meta:
