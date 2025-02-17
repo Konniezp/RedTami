@@ -29,7 +29,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
             }
 
             # Normalizar el texto: convertir a minúsculas y eliminar acentos
-            fecha_normalizada = unidecode(value.lower())
+            fecha_normalizada = unidecode(str(value).lower())
 
             # Reemplazar abreviaturas y nombres mal escritos
             palabras_fecha = re.findall(r'\b\w+\b', fecha_normalizada)
