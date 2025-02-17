@@ -118,7 +118,7 @@ class Usuario(models.Model):
             "diciembre": ["dic"]
         }
             # Normalizar el texto: convertir a minúsculas y eliminar acentos
-            fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
+            fecha_normalizada = unidecode(str(self.fecha_nacimiento).lower())
 
             palabras_fecha = re.findall(r'\b\w+\b', fecha_normalizada)
             for palabra in palabras_fecha:

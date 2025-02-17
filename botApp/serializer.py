@@ -3,6 +3,7 @@ from .models import *
 from datetime import datetime
 from fuzzywuzzy import fuzz
 from unidecode import unidecode 
+import re
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
