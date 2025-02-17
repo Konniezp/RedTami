@@ -10,6 +10,7 @@ from unidecode import unidecode
 from fuzzywuzzy import fuzz
 
 import locale
+import re
 
 locale.setlocale(locale.LC_TIME, 'es_ES') 
 
@@ -102,22 +103,36 @@ class Usuario(models.Model):
     # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
         if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
-            # Lista de nombres de meses en español
-            meses_correctos = [
-                "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-            ]
-
+            meses_correctos = {
+            "enero": ["ene"],
+            "febrero": ["feb"],
+            "marzo": ["mar"],
+            "abril": ["abr"],
+            "mayo": ["may"],
+            "junio": ["jun"],
+            "julio": ["jul"],
+            "agosto": ["ago"],
+            "septiembre": ["sep", "set"],
+            "octubre": ["oct"],
+            "noviembre": ["nov"],
+            "diciembre": ["dic"]
+        }
             # Normalizar el texto: convertir a minúsculas y eliminar acentos
             fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
 
-            # Reemplazar nombres de meses mal escritos
-            for mes in meses_correctos:
-                palabras_fecha = fecha_normalizada.split()
-                for palabra in palabras_fecha:
+            palabras_fecha = re.findall(r'\b\w+\b', fecha_normalizada)
+            for palabra in palabras_fecha:
+                for mes, abreviaturas in meses_correctos.items():
+                # Verifica similitudes con el nombre completo del mes
                     puntaje = fuzz.ratio(palabra, mes)
-                    if puntaje > 70:  # Umbral de similitud
-                        fecha_normalizada = fecha_normalizada.replace(palabra, mes)
+                if puntaje > 70:
+                    fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
+
+                # Verifica similitudes con las abreviaturas del mes
+                for abreviatura in abreviaturas:
+                    puntaje_abrev = fuzz.ratio(palabra, abreviatura)
+                    if puntaje_abrev > 80:  # Umbral más alto para abreviaturas
+                        fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
 
             # Formatos de fecha permitidos
             formatos_fecha = [
