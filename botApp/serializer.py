@@ -44,7 +44,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
                     # Verifica similitudes con las abreviaturas del mes
                     for abreviatura in abreviaturas:
                         puntaje_abrev = fuzz.ratio(palabra, abreviatura)
-                        if puntaje_abrev > 80:  # Umbral más alto para abreviaturas
+                        if puntaje_abrev > 80:  
                             fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
 
             # Formatos de fecha permitidos
@@ -52,7 +52,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 "%d/%m/%Y",  # dd/mm/yyyy
                 "%d-%m-%Y",  # dd-mm-yyyy
                 "%d %B %Y",  # 12 noviembre 1990
-                "%d de %B de %Y",  # 12 de noviembre de 1990
+                "%d de %B de %Y",  # 12 de noviembre de 1990         
                 "%d %m %Y",  # dd mm yyyy
                 "%d/%m/%y",  # dd/mm/yy
                 "%d-%m-%y",  # dd-mm-yy
@@ -61,15 +61,20 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 "%d de %B del %y",  # 12 de noviembre del 90
                 "%d de %B %y",  # 12 de noviembre 90
                 "%d de %B %Y",  # 12 de noviembre 1990
-            ]
+                "%d de %b %Y",  # 12 de nov 1990
+                "%d de %b %y",  # 12 de nov 90
+                "%d de %b del %Y",  # 12 de nov del 1990
+                "%d de %b del %y"   # 12 de nov del 90
+                    
+                ]
+
             fecha_valida = False
 
             for formato in formatos_fecha:
                 try:
-                    # Intentamos convertir la fecha al formato DateField
                     fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
                     fecha_valida = True
-                    return fecha_convertida  # Retornamos la fecha convertida si es válida
+                    return fecha_convertida  
                 except ValueError:
                     continue
 
@@ -78,8 +83,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
                     f"Formato de fecha inválido. Recibido: '{value}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
                 )
 
-        return value  # Retorna el valor si no hay fecha para validar    
-        
+        return value  
+          
 class UsuarioRespuestaSerializer(serializers.ModelSerializer):
     class Meta:
         model = UsuarioRespuesta
