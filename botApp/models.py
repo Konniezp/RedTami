@@ -102,7 +102,7 @@ class Usuario(models.Model):
 
     # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
-        if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
+        if self.fecha_nacimiento: 
             meses_correctos = {
             "enero": ["ene"],
             "febrero": ["feb"],
@@ -123,7 +123,6 @@ class Usuario(models.Model):
             palabras_fecha = re.findall(r'\b\w+\b', fecha_normalizada)
             for palabra in palabras_fecha:
                 for mes, abreviaturas in meses_correctos.items():
-                # Verifica similitudes con el nombre completo del mes
                     puntaje = fuzz.ratio(palabra, mes)
                 if puntaje > 70:
                     fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
@@ -131,7 +130,7 @@ class Usuario(models.Model):
                 # Verifica similitudes con las abreviaturas del mes
                 for abreviatura in abreviaturas:
                     puntaje_abrev = fuzz.ratio(palabra, abreviatura)
-                    if puntaje_abrev > 80:  # Umbral más alto para abreviaturas
+                    if puntaje_abrev > 80:  
                         fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
 
             # Formatos de fecha permitidos
@@ -148,6 +147,11 @@ class Usuario(models.Model):
                 "%d de %B del %y",  # 12 de noviembre del 90
                 "%d de %B %y",  # 12 de noviembre 90
                 "%d de %B %Y",  # 12 de noviembre 1990
+                "%d de %b %Y",  # 12 de nov 1990
+                "%d de %b %y",  # 12 de nov 90
+                "%d de %b del %Y",  # 12 de nov del 1990
+                "%d de %b del %y"   # 12 de nov del 90
+                 
             ]
 
             fecha_valida = False
@@ -156,9 +160,9 @@ class Usuario(models.Model):
                 try:
                     # Intentamos convertir la fecha al formato DateField
                     fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
-                    self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
+                    self.AnioNacimiento = fecha_convertida 
                     fecha_valida = True
-                    break  # Salimos si se convierte correctamente
+                    break 
                 except ValueError:
                     continue
 
