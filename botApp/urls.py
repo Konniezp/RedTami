@@ -14,6 +14,8 @@ router.register(r'MensajeContenido', views.MensajeContenidoViewSet)
 router.register(r'FRNM', views.FRNMViewSet)
 router.register(r'FRM', views.FRMViewSet)
 router.register(r'DS', views.DSViewSet)
+router.register(r'RespTextoFRM', views.RespTextoFRMViewSet)
+
 
 urlpatterns = [
     path('', views.home),

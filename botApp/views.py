@@ -2234,6 +2234,10 @@ class DSViewSet(viewsets.ModelViewSet):
     queryset = RespDeterSalud.objects.all()
     serializer_class = UsuarioRespuestaDSSerializer
 
+# Respuesta Texto Peso y Altura (FRM)
+class RespTextoFRMViewSet(viewsets.ModelViewSet):
+    queryset = RespTextoFRM.objects.all()
+    serializer_class = RespTextoFRMSerializer
 
 class UsuarioRespuestaAPIView(APIView):
     authentication_classes = [SessionAuthentication]
@@ -2297,6 +2301,15 @@ class UsuarioRespuestFRMaAPIView(APIView):
         respuestas = RespUsuarioFactorRiesgoMod.objects.all()
         serializer = UsuarioRespuestaFRMSerializer(respuestas, many=True)
         return Response(serializer.data)
+    
+class RespTextoFRMAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespTextoFRM.objects.all()
+        serializer = RespTextoFRMSerializer(respuestas, many=True)
+        return Response(serializer.data)
+
 # --------------------- Api --------------------- #
 
 # ------------------Parseo fecha ---------------- #
