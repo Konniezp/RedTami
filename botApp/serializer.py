@@ -94,3 +94,8 @@ class UsuarioRespuestaDSSerializer(serializers.ModelSerializer):
     class Meta:
         model = RespDeterSalud
         fields = "__all__"
+
+class RespTextoFRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespTextoFRM
+        fields = "__all__"
