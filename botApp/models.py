@@ -10,7 +10,6 @@ from unidecode import unidecode
 from fuzzywuzzy import fuzz
 
 import locale
-import re
 
 locale.setlocale(locale.LC_TIME, 'es_ES') 
 
@@ -103,36 +102,22 @@ class Usuario(models.Model):
     # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
         if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
-            meses_correctos = {
-            "enero": ["ene"],
-            "febrero": ["feb"],
-            "marzo": ["mar"],
-            "abril": ["abr"],
-            "mayo": ["may"],
-            "junio": ["jun"],
-            "julio": ["jul"],
-            "agosto": ["ago"],
-            "septiembre": ["sep", "set"],
-            "octubre": ["oct"],
-            "noviembre": ["nov"],
-            "diciembre": ["dic"]
-        }
+            # Lista de nombres de meses en español
+            meses_correctos = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ]
+
             # Normalizar el texto: convertir a minúsculas y eliminar acentos
             fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
 
-            palabras_fecha = re.findall(r'\b\w+\b', fecha_normalizada)
-            for palabra in palabras_fecha:
-                for mes, abreviaturas in meses_correctos.items():
-                # Verifica similitudes con el nombre completo del mes
+            # Reemplazar nombres de meses mal escritos
+            for mes in meses_correctos:
+                palabras_fecha = fecha_normalizada.split()
+                for palabra in palabras_fecha:
                     puntaje = fuzz.ratio(palabra, mes)
-                if puntaje > 70:
-                    fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
-
-                # Verifica similitudes con las abreviaturas del mes
-                for abreviatura in abreviaturas:
-                    puntaje_abrev = fuzz.ratio(palabra, abreviatura)
-                    if puntaje_abrev > 80:  # Umbral más alto para abreviaturas
-                        fecha_normalizada = re.sub(rf'\b{palabra}\b', mes, fecha_normalizada)
+                    if puntaje > 70:  # Umbral de similitud
+                        fecha_normalizada = fecha_normalizada.replace(palabra, mes)
 
             # Formatos de fecha permitidos
             formatos_fecha = [
@@ -148,6 +133,10 @@ class Usuario(models.Model):
                 "%d de %B del %y",  # 12 de noviembre del 90
                 "%d de %B %y",  # 12 de noviembre 90
                 "%d de %B %Y",  # 12 de noviembre 1990
+                "%d de %b %Y",  # 12 de nov 1990
+                "%d de %b %y",  # 12 de nov 90
+                "%d de %b del %Y",  # 12 de nov del 1990
+                "%d de %b del %y"   # 12 de nov del 90
             ]
 
             fecha_valida = False
@@ -262,9 +251,17 @@ class comuna_chile(models.Model):
     def __str__(self):
         return self.nombre_comuna
     
+class Codigos_preg (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
+    codigo_preguntas = models.CharField(max_length=10, blank=True)
+
+    def __str__(self):
+        return self.codigo_preguntas
+    
 class PregFactorRiesgoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
     pregunta_FRM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRM
@@ -291,6 +288,7 @@ class RespUsuarioFactorRiesgoMod (models.Model):
 class PregFactorRiesgoNoMod(models.Model):
     id = models.AutoField(primary_key= True, verbose_name= "ID Factor de Riesgo No Mod")
     pregunta_FRNM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRNM
@@ -315,6 +313,7 @@ class RespUsuarioFactorRiesgoNoMod (models.Model):
 class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
     pregunta_DS = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE,null=True)
 
     def __str__(self):
         return self.pregunta_DS
@@ -335,5 +334,26 @@ class RespDeterSalud (models.Model):
 
     def __str__(self):
         return f"{self.Rut} - {self.respuesta_DS}"
+    
+class RespTextoFRM(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
+    Rut = models.CharField(max_length=10)
+    peso_FRM6 = models.IntegerField(default=0)  # Peso en kg
+    altura_FRM5 = models.IntegerField(default=0)  # Altura en cm
+    imc = models.FloatField(default=0.0)  
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def calculo_imc(self):
+        if self.altura_FRM5 > 0:  
+            altura_metros = self.altura_FRM5 / 100  # Convierte de cm a metros
+            return round(self.peso_FRM6 / (altura_metros ** 2), 2)  # Redondear a 2 decimales
+        return 0.0  # Retorna 0 si la altura no es válida
+
+    def save(self, *args, **kwargs):
+        self.imc = self.calculo_imc() 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm - IMC: {self.imc}"
    
 

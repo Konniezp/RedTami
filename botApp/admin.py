@@ -181,6 +181,15 @@ class RespDeterSaludAdmin(admin.ModelAdmin):
     search_fields=("id", "Rut", "respuesta_DS", "fecha_respuesta")
     list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
 
+class RespTextoFRMAdmin (admin.ModelAdmin):
+    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
+    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
+    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
+
+class Codigos_pregAdmin (admin.ModelAdmin):
+    list_display=("id", "codigo_preguntas")
+    search_fields=("id", "codigo_preguntas")
+    list_filter=("id", "codigo_preguntas")
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
@@ -205,6 +214,6 @@ admin.site.register(RespUsuarioFactorRiesgoNoMod, RespUsuarioFactorRiesgoNoModAd
 admin.site.register(PregDeterSalud, PregDeterSaludAdmin)
 admin.site.register(OpcDeterSalud, OpcDeterSaludAdmin)
 admin.site.register(RespDeterSalud, RespDeterSaludAdmin)
-
-
+admin.site.register(RespTextoFRM, RespTextoFRMAdmin)
+admin.site.register(Codigos_preg, Codigos_pregAdmin)
 
