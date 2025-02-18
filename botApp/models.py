@@ -251,9 +251,17 @@ class comuna_chile(models.Model):
     def __str__(self):
         return self.nombre_comuna
     
+class Codigos_preg (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
+    codigo_preguntas = models.CharField(max_length=10, blank=True)
+
+    def __str__(self):
+        return self.codigo_preguntas
+    
 class PregFactorRiesgoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
     pregunta_FRM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRM
@@ -280,6 +288,7 @@ class RespUsuarioFactorRiesgoMod (models.Model):
 class PregFactorRiesgoNoMod(models.Model):
     id = models.AutoField(primary_key= True, verbose_name= "ID Factor de Riesgo No Mod")
     pregunta_FRNM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRNM
@@ -304,6 +313,7 @@ class RespUsuarioFactorRiesgoNoMod (models.Model):
 class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
     pregunta_DS = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE,null=True)
 
     def __str__(self):
         return self.pregunta_DS
@@ -324,5 +334,26 @@ class RespDeterSalud (models.Model):
 
     def __str__(self):
         return f"{self.Rut} - {self.respuesta_DS}"
+    
+class RespTextoFRM(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
+    Rut = models.CharField(max_length=10)
+    peso_FRM6 = models.IntegerField(default=0)  # Peso en kg
+    altura_FRM5 = models.IntegerField(default=0)  # Altura en cm
+    imc = models.FloatField(default=0.0)  
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+
+    def calculo_imc(self):
+        if self.altura_FRM5 > 0:  
+            altura_metros = self.altura_FRM5 / 100  # Convierte de cm a metros
+            return round(self.peso_FRM6 / (altura_metros ** 2), 2)  # Redondear a 2 decimales
+        return 0.0  # Retorna 0 si la altura no es válida
+
+    def save(self, *args, **kwargs):
+        self.imc = self.calculo_imc() 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm - IMC: {self.imc}"
    
 
