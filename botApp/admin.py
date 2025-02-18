@@ -137,9 +137,9 @@ class comuna_chileAdmin(admin.ModelAdmin):
 
 
 class PregFactorRiesgoModAdmin(admin.ModelAdmin):
-    list_display=("id", "pregunta_FRM")
-    search_fields=("id", "pregunta_FRM")
-    list_filter=("id", "pregunta_FRM")
+    list_display=("id", "pregunta_FRM", "codigo_preguntas")
+    search_fields=("id", "pregunta_FRM", "codigo_preguntas")
+    list_filter=("id", "pregunta_FRM", "codigo_preguntas")
 
 class OpcFactorRiesgoModAdmin(admin.ModelAdmin):
     list_display=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
@@ -152,9 +152,9 @@ class RespUsuarioFactorRiesgoModAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
 
 class PregFactorRiesgoNoModAdmin(admin.ModelAdmin):
-    list_display=("id", "pregunta_FRNM")
-    search_fields=("id", "pregunta_FRNM")
-    list_filter=("id", "pregunta_FRNM")
+    list_display=("id", "pregunta_FRNM", "codigo_preguntas")
+    search_fields=("id", "pregunta_FRNM", "codigo_preguntas")
+    list_filter=("id", "pregunta_FRNM", "codigo_preguntas")
 
 class OpcFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_display=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
@@ -167,9 +167,9 @@ class RespUsuarioFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_FRNM",  "fecha_respuesta")
 
 class PregDeterSaludAdmin(admin.ModelAdmin):
-    list_display =("id", "pregunta_DS")
-    search_fields=("id", "pregunta_DS")
-    list_filter=("id", "pregunta_DS")
+    list_display =("id", "pregunta_DS", "codigo_preguntas")
+    search_fields=("id", "pregunta_DS","codigo_preguntas")
+    list_filter=("id", "pregunta_DS","codigo_preguntas")
 
 class OpcDeterSaludAdmin(admin.ModelAdmin):
     list_display =("id", "opc_respuesta_DS", "id_pregunta_DS")
