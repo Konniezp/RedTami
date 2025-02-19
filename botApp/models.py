@@ -77,7 +77,7 @@ class Ocupacion(models.Model):
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
-    Rut = models.CharField(max_length=10, unique=True)
+    Rut = models.CharField(max_length=10)
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
