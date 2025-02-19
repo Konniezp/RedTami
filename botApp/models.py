@@ -77,11 +77,11 @@ class Ocupacion(models.Model):
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=10, unique=True)
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
-    Comuna_Usuario = models.ForeignKey('Comuna', on_delete=models.CASCADE)
+    Comuna_Usuario = models.ForeignKey('comuna_chile', on_delete=models.CASCADE)
     Genero_Usuario = models.ForeignKey('Genero', on_delete=models.CASCADE)
     SistemaSalud_Usuario = models.ForeignKey('SistemaSalud', on_delete=models.CASCADE)
     Ocupacion_Usuario = models.ForeignKey('Ocupacion', on_delete=models.CASCADE)
@@ -162,7 +162,7 @@ class Usuario(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.id)
+        return f"{self.Rut} - {self.id}"
     
 class Codigos_preg (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
@@ -201,6 +201,7 @@ class UsuarioTextoPregunta(models.Model):
     Rut = models.CharField(max_length=10)
     texto_pregunta = models.CharField(max_length=200)
     fecha_pregunta = models.DateTimeField(auto_now_add=True)
+    id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.Rut} - {self.texto_pregunta}"
@@ -212,11 +213,14 @@ class MensajeContenido(models.Model):
     Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
     fecha = models.DateField(verbose_name="Fecha")
 
+
 class ultima_mamografia_anio(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
     Rut = models.CharField(max_length=10)
     anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
     tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
+    fecha_pregunta = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
     # Función para calcular tiempo transcurrido desde la última mamografía
     def calculo_tiempo_transc_ult_mamografia(self):
@@ -254,6 +258,7 @@ class comuna_chile(models.Model):
     cod_comuna = models.CharField(max_length=6)
     nombre_comuna = models.CharField (max_length=200)
     cod_provincia = models.ForeignKey (provincia, on_delete = models.CASCADE)
+
 
     def __str__(self):
         return self.nombre_comuna
@@ -342,6 +347,7 @@ class RespTextoFRM(models.Model):
     altura_FRM5 = models.IntegerField(default=0)  # Altura en cm
     imc = models.FloatField(default=0.0)  
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
+    id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
 
     def calculo_imc(self):
         if self.altura_FRM5 > 0:  

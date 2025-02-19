@@ -106,9 +106,9 @@ class OcupacionAdmin(admin.ModelAdmin):
 
 
 class UsuarioTextoPreguntaAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
-    search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
-    list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
+    list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     
 class MensajeContenidoAdmin(admin.ModelAdmin):
     list_display = ("id", "texto", "Genero_Usuario","fecha")
@@ -116,9 +116,9 @@ class MensajeContenidoAdmin(admin.ModelAdmin):
     list_filter = ("id", "texto", "fecha", "Genero_Usuario")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
+    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
 
 class regionAdmin(admin.ModelAdmin):
     list_display =("id", "cod_region", "nombre_region")
@@ -182,9 +182,9 @@ class RespDeterSaludAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
 
 class RespTextoFRMAdmin (admin.ModelAdmin):
-    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
-    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
-    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta")
+    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
 
 class Codigos_pregAdmin (admin.ModelAdmin):
     list_display=("id", "codigo_preguntas")
