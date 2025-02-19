@@ -116,9 +116,9 @@ class MensajeContenidoAdmin(admin.ModelAdmin):
     list_filter = ("id", "texto", "fecha", "Genero_Usuario")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
+    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_respuesta")
+    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_respuesta")
+    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_respuesta")
 
 class regionAdmin(admin.ModelAdmin):
     list_display =("id", "cod_region", "nombre_region")
