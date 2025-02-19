@@ -49,9 +49,9 @@ class UsuarioAdmin(admin.ModelAdmin):
 
 
 class PreguntaAdmin(admin.ModelAdmin):
-    list_display = ("id", "pregunta")
-    search_fields = ("id", "pregunta")
-    list_filter = ("id", "pregunta")
+    list_display = ("id", "pregunta", "codigo_preguntas")
+    search_fields = ("id", "pregunta", "codigo_preguntas")
+    list_filter = ("id", "pregunta", "codigo_preguntas")
 
 
 class UsuarioRespuestaAdmin(admin.ModelAdmin):
