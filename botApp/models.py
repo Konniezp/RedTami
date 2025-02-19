@@ -164,13 +164,20 @@ class Usuario(models.Model):
     def __str__(self):
         return str(self.id)
     
+class Codigos_preg (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
+    codigo_preguntas = models.CharField(max_length=10, blank=True)
+
+    def __str__(self):
+        return self.codigo_preguntas
+    
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
     pregunta = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta
-
 
 class PreguntaOpcionRespuesta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Opcion Respuesta")
@@ -250,13 +257,6 @@ class comuna_chile(models.Model):
 
     def __str__(self):
         return self.nombre_comuna
-    
-class Codigos_preg (models.Model):
-    id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
-    codigo_preguntas = models.CharField(max_length=10, blank=True)
-
-    def __str__(self):
-        return self.codigo_preguntas
     
 class PregFactorRiesgoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
