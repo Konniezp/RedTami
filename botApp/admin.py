@@ -12,11 +12,9 @@ class UsuarioAdmin(admin.ModelAdmin):
         "Referencia",
         "AnioNacimiento",
         "Comuna_Usuario",
-        "Genero_Usuario",
-        "SistemaSalud_Usuario",
-        "Ocupacion_Usuario",
         "Fecha_Ingreso",
-        "edad"
+        "edad",
+        "fecha_nacimiento"
     )
     search_fields = (
         "id",
@@ -27,10 +25,9 @@ class UsuarioAdmin(admin.ModelAdmin):
         "Referencia",
         "AnioNacimiento",
         "Comuna_Usuario",
-        "Genero_Usuario",
-        "SistemaSalud_Usuario",
-        "Ocupacion_Usuario",
         "Fecha_Ingreso",
+        "edad",
+        "fecha_nacimiento"
     )
     list_filter = (
         "id",
@@ -41,12 +38,10 @@ class UsuarioAdmin(admin.ModelAdmin):
         "Referencia",
         "AnioNacimiento",
         "Comuna_Usuario",
-        "Genero_Usuario",
-        "SistemaSalud_Usuario",
-        "Ocupacion_Usuario",
         "Fecha_Ingreso",
+        "edad",
+        "fecha_nacimiento"
     )
-
 
 class PreguntaAdmin(admin.ModelAdmin):
     list_display = ("id", "pregunta", "codigo_preguntas")
@@ -80,40 +75,15 @@ class PreguntaOpcionRespuestaAdmin(admin.ModelAdmin):
     search_fields = ("id", "id_pregunta", "OPC_Respuesta")
     list_filter = ("id", "id_pregunta", "OPC_Respuesta")
 
-
-class ComunaAdmin(admin.ModelAdmin):
-    list_display = ("id", "Nombre_Comuna")
-    search_fields = ("id", "Nombre_Comuna")
-    list_filter = ("id", "Nombre_Comuna")
-
-
-class GeneroAdmin(admin.ModelAdmin):
-    list_display = ("id", "OPC_Genero")
-    search_fields = ("id", "OPC_Genero")
-    list_filter = ("id", "OPC_Genero")
-
-
-class SistemaSaludAdmin(admin.ModelAdmin):
-    list_display = ("id", "OPC_SistemaSalud")
-    search_fields = ("id", "OPC_SistemaSalud")
-    list_filter = ("id", "OPC_SistemaSalud")
-
-
-class OcupacionAdmin(admin.ModelAdmin):
-    list_display = ("id", "OPC_Ocupacion")
-    search_fields = ("id", "OPC_Ocupacion")
-    list_filter = ("id", "OPC_Ocupacion")
-
-
 class UsuarioTextoPreguntaAdmin(admin.ModelAdmin):
     list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     
 class MensajeContenidoAdmin(admin.ModelAdmin):
-    list_display = ("id", "texto", "Genero_Usuario","fecha")
-    search_fields = ("id", "texto", "fecha", "Genero_Usuario")
-    list_filter = ("id", "texto", "fecha", "Genero_Usuario")
+    list_display = ("id", "texto", "fecha", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
+    search_fields = ("id", "texto", "fecha", "opcrespFRNM","opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
+    list_filter = ("id", "texto", "fecha", "opcrespFRNM","opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
     list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
@@ -121,20 +91,19 @@ class ultima_mamografia_anioAdmin(admin.ModelAdmin):
     list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
 
 class regionAdmin(admin.ModelAdmin):
-    list_display =("id", "cod_region", "nombre_region")
-    search_fields=("id", "cod_region", "nombre_region")
-    list_filter=("id", "cod_region", "nombre_region")
+    list_display =("cod_region", "nombre_region")
+    search_fields=("cod_region", "nombre_region")
+    list_filter=("cod_region", "nombre_region")
 
 class provinciaAdmin(admin.ModelAdmin):
-    list_display=("id", "cod_provincia", "nombre_provincia", "cod_region")
-    search_fields=("id", "cod_provincia", "nombre_provincia", "cod_region")
-    list_filter=("id", "cod_provincia", "nombre_provincia", "cod_region")
+    list_display=("cod_provincia", "nombre_provincia", "cod_region")
+    search_fields=("cod_provincia", "nombre_provincia", "cod_region")
+    list_filter=("cod_provincia", "nombre_provincia", "cod_region")
 
-class comuna_chileAdmin(admin.ModelAdmin):
-    list_display=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
-    search_fields=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
-    list_filter=("id", "cod_comuna", "nombre_comuna", "cod_provincia")
-
+class comunaAdmin(admin.ModelAdmin):
+    list_display=("cod_comuna", "nombre_comuna", "cod_provincia")
+    search_fields=("cod_comuna", "nombre_comuna", "cod_provincia")
+    list_filter=("cod_comuna", "nombre_comuna", "cod_provincia")
 
 class PregFactorRiesgoModAdmin(admin.ModelAdmin):
     list_display=("id", "pregunta_FRM", "codigo_preguntas")
@@ -182,29 +151,30 @@ class RespDeterSaludAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
 
 class RespTextoFRMAdmin (admin.ModelAdmin):
-    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
-    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
-    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
 
 class Codigos_pregAdmin (admin.ModelAdmin):
     list_display=("id", "codigo_preguntas")
     search_fields=("id", "codigo_preguntas")
     list_filter=("id", "codigo_preguntas")
 
+class CalculoFRMAdmin(admin.ModelAdmin):
+    list_display=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
+    search_fields=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
+    list_filter=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
+
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
 admin.site.register(UsuarioRespuesta, UsuarioRespuestaAdmin)
 admin.site.register(PreguntaOpcionRespuesta, PreguntaOpcionRespuestaAdmin)
-admin.site.register(Comuna, ComunaAdmin)
-admin.site.register(Genero, GeneroAdmin)
-admin.site.register(SistemaSalud, SistemaSaludAdmin)
-admin.site.register(Ocupacion, OcupacionAdmin)
 admin.site.register(UsuarioTextoPregunta, UsuarioTextoPreguntaAdmin)
 admin.site.register(MensajeContenido, MensajeContenidoAdmin)
 admin.site.register(ultima_mamografia_anio, ultima_mamografia_anioAdmin)
 admin.site.register(region, regionAdmin)
 admin.site.register(provincia, provinciaAdmin)
-admin.site.register(comuna_chile, comuna_chileAdmin)
+admin.site.register(comuna, comunaAdmin)
 admin.site.register(PregFactorRiesgoMod, PregFactorRiesgoModAdmin)
 admin.site.register(OpcFactorRiesgoMod, OpcFactorRiesgoModAdmin)
 admin.site.register(RespUsuarioFactorRiesgoMod, RespUsuarioFactorRiesgoModAdmin)
@@ -216,4 +186,4 @@ admin.site.register(OpcDeterSalud, OpcDeterSaludAdmin)
 admin.site.register(RespDeterSalud, RespDeterSaludAdmin)
 admin.site.register(RespTextoFRM, RespTextoFRMAdmin)
 admin.site.register(Codigos_preg, Codigos_pregAdmin)
-
+admin.site.register(CalculoFRM, CalculoFRMAdmin)
