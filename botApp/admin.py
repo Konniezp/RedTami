@@ -49,9 +49,9 @@ class UsuarioAdmin(admin.ModelAdmin):
 
 
 class PreguntaAdmin(admin.ModelAdmin):
-    list_display = ("id", "pregunta")
-    search_fields = ("id", "pregunta")
-    list_filter = ("id", "pregunta")
+    list_display = ("id", "pregunta", "codigo_preguntas")
+    search_fields = ("id", "pregunta", "codigo_preguntas")
+    list_filter = ("id", "pregunta", "codigo_preguntas")
 
 
 class UsuarioRespuestaAdmin(admin.ModelAdmin):
@@ -106,9 +106,9 @@ class OcupacionAdmin(admin.ModelAdmin):
 
 
 class UsuarioTextoPreguntaAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
-    search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
-    list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta")
+    list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     
 class MensajeContenidoAdmin(admin.ModelAdmin):
     list_display = ("id", "texto", "Genero_Usuario","fecha")
@@ -116,9 +116,9 @@ class MensajeContenidoAdmin(admin.ModelAdmin):
     list_filter = ("id", "texto", "fecha", "Genero_Usuario")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
-    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia")
+    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
 
 class regionAdmin(admin.ModelAdmin):
     list_display =("id", "cod_region", "nombre_region")
@@ -137,9 +137,9 @@ class comuna_chileAdmin(admin.ModelAdmin):
 
 
 class PregFactorRiesgoModAdmin(admin.ModelAdmin):
-    list_display=("id", "pregunta_FRM")
-    search_fields=("id", "pregunta_FRM")
-    list_filter=("id", "pregunta_FRM")
+    list_display=("id", "pregunta_FRM", "codigo_preguntas")
+    search_fields=("id", "pregunta_FRM", "codigo_preguntas")
+    list_filter=("id", "pregunta_FRM", "codigo_preguntas")
 
 class OpcFactorRiesgoModAdmin(admin.ModelAdmin):
     list_display=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
@@ -152,9 +152,9 @@ class RespUsuarioFactorRiesgoModAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
 
 class PregFactorRiesgoNoModAdmin(admin.ModelAdmin):
-    list_display=("id", "pregunta_FRNM")
-    search_fields=("id", "pregunta_FRNM")
-    list_filter=("id", "pregunta_FRNM")
+    list_display=("id", "pregunta_FRNM", "codigo_preguntas")
+    search_fields=("id", "pregunta_FRNM", "codigo_preguntas")
+    list_filter=("id", "pregunta_FRNM", "codigo_preguntas")
 
 class OpcFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_display=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
@@ -167,9 +167,9 @@ class RespUsuarioFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "respuesta_FRNM",  "fecha_respuesta")
 
 class PregDeterSaludAdmin(admin.ModelAdmin):
-    list_display =("id", "pregunta_DS")
-    search_fields=("id", "pregunta_DS")
-    list_filter=("id", "pregunta_DS")
+    list_display =("id", "pregunta_DS", "codigo_preguntas")
+    search_fields=("id", "pregunta_DS","codigo_preguntas")
+    list_filter=("id", "pregunta_DS","codigo_preguntas")
 
 class OpcDeterSaludAdmin(admin.ModelAdmin):
     list_display =("id", "opc_respuesta_DS", "id_pregunta_DS")
@@ -181,6 +181,15 @@ class RespDeterSaludAdmin(admin.ModelAdmin):
     search_fields=("id", "Rut", "respuesta_DS", "fecha_respuesta")
     list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
 
+class RespTextoFRMAdmin (admin.ModelAdmin):
+    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "imc", "fecha_respuesta", "id_usuario")
+
+class Codigos_pregAdmin (admin.ModelAdmin):
+    list_display=("id", "codigo_preguntas")
+    search_fields=("id", "codigo_preguntas")
+    list_filter=("id", "codigo_preguntas")
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
@@ -205,6 +214,6 @@ admin.site.register(RespUsuarioFactorRiesgoNoMod, RespUsuarioFactorRiesgoNoModAd
 admin.site.register(PregDeterSalud, PregDeterSaludAdmin)
 admin.site.register(OpcDeterSalud, OpcDeterSaludAdmin)
 admin.site.register(RespDeterSalud, RespDeterSaludAdmin)
-
-
+admin.site.register(RespTextoFRM, RespTextoFRMAdmin)
+admin.site.register(Codigos_preg, Codigos_pregAdmin)
 

@@ -11,8 +11,13 @@
         <table>
             <thead>
                 <tr>
+                    <td colspan="6"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                </tr>
+                <tr>
+                    <th>#</th>
                     <th>ID</th>
                     <th>Rut</th>
+                    <th>Pregunta</th>
                     <th>Respuesta</th>
                     <th>Fecha Respuesta</th>
                 </tr>
@@ -20,11 +25,12 @@
             <tbody>
                 {% for dato in Datos %}
                 <tr>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ dato.id }}</td>
                     <td>{{ dato.Rut }}</td>
-                    <td>{{ dato.id_opc_respuesta }}</td>
+                    <td>{{ dato.id_opc_respuesta__id_pregunta__pregunta}}</td>
+                    <td>{{ dato.id_opc_respuesta__OPC_Respuesta}}</td>
                     <td>{{ dato.fecha_respuesta }}</td>
-
                 </tr>
                 {% endfor %}
             </tbody>
@@ -33,6 +39,13 @@
     {% else %}
     <p>No hay datos ingresados</p>
     {% endif %}
+
+    <div style="text-align: center;">
+        <form action="{% url 'crear_excel_datos_preguntas' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Descargar como Excel</button>
+        </form>
+    </div>
 
     <a class="button" href="{% url 'respuestasHome' %}">Volver</a>
 </section>

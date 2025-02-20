@@ -10,10 +10,11 @@ class UsuarioForm(forms.ModelForm):
     AnioNacimiento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'dark-input'}))
     Rut = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
     Whatsapp = forms.CharField(max_length=200, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    fecha_nacimiento = forms.CharField(max_length=200, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Usuario
-        fields = ['AnioNacimiento', 'Rut', 'Whatsapp', 'Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']
+        fields = ['Rut', 'Whatsapp', 'fecha_nacimiento', 'Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']
 
     def clean_Comuna_Usuario(self):
         comuna = self.cleaned_data['Comuna_Usuario']

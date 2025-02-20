@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import connection
 from django.db.models import Count, F, Max
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
@@ -32,6 +32,12 @@ from .serializer import *
 
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill
+
+from django.views.decorators.csrf import csrf_exempt
+import json
+import locale 
+
+locale.setlocale(locale.LC_TIME, 'es_ES')
     
 @login_required
 def home(request):
@@ -60,6 +66,17 @@ def login(request):
 def respuestasHome(request):
     return render(request, "respuestas/respuestasHome.html")
 
+@login_required
+def opcVisualFRM(request):
+    return render(request, "respuestas/opcVisualFRM.html")
+
+@login_required
+def opcVisualFRNM(request):
+    return render(request, "respuestas/opcVisualFRNM.html")
+
+@login_required
+def opcVisualDS(request):
+    return render(request, "respuestas/opcVisualDS.html")
 
 # Base de datos
 @login_required
@@ -72,7 +89,10 @@ def datosPerfil(request):
 
 @login_required
 def datosPreguntas(request):
-    Datos = UsuarioRespuesta.objects.all().order_by("-fecha_respuesta")
+    Datos = UsuarioRespuesta.objects.select_related(
+        "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
+        "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
+        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
     data = {
         "Datos": Datos,
     }
@@ -87,13 +107,140 @@ def datosTextoPreguntas(request):
     return render(request, "respuestas/datosPreguntasEspecialistas.html", data)
 
 @login_required
+def datosFRM(request):
+    Datos = RespUsuarioFactorRiesgoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRM__id_pregunta_FRM_id__pregunta_FRM",
+        "respuesta_FRM__opc_respuesta_FRM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRM.html", data)
+
+def datosFRM2(request):
+    preguntas = PregFactorRiesgoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+        "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRM__id_pregunta_FRM__pregunta_FRM"]
+        respuesta_usuario = respuesta["respuesta_FRM__opc_respuesta_FRM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
+@login_required
+def datosFRNM(request):
+    Datos = RespUsuarioFactorRiesgoNoMod.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_FRNM_id__id_pregunta_FRNM_id__pregunta_FRNM",
+        "respuesta_FRNM_id__opc_respuesta_FRNM",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request, "respuestas/datosFRNM.html", data)
+
+def datosFRNM2(request):
+    preguntas = PregFactorRiesgoNoMod.objects.all()
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+        "respuesta_FRNM", "respuesta_FRM__id_pregunta_FRNM"
+    ).values("Rut", "fecha_respuesta", "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM"]
+        respuesta_usuario = respuesta["respuesta_FRNM__opc_respuesta_FRNM"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_FRNM, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosFRNM2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
+@login_required
+def datosDS(request):
+    Datos = RespDeterSalud.objects.select_related().values(
+        "id",
+        "Rut",
+        "respuesta_DS_id__id_pregunta_DS_id__pregunta_DS",
+        "respuesta_DS_id__opc_respuesta_DS",
+        "fecha_respuesta"
+    ).order_by("-Rut")
+    data = {
+        "Datos": Datos,
+    }
+    return render(request,"respuestas/datosDS.html", data)
+
+@login_required
+def datosDS2(request):
+    preguntas = PregDeterSalud.objects.all()
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+        "respuesta_DS", "respuesta_DS__id_pregunta_DS"
+    ).values("Rut", "fecha_respuesta", "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta["Rut"]
+        pregunta = respuesta["respuesta_DS__id_pregunta_DS__pregunta_DS"]
+        respuesta_usuario = respuesta["respuesta_DS__opc_respuesta_DS"]
+        
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {"fecha": respuesta["fecha_respuesta"], "respuestas": {}}
+        dict_respuestas[rut]["respuestas"][pregunta] = respuesta_usuario
+
+    # Convertir el diccionario a una lista de listas para facilitar la renderización en HTML
+    tabla_respuestas = []
+    for rut, data in dict_respuestas.items():
+        fila = [rut] + [data["respuestas"].get(p.pregunta_DS, "-") for p in preguntas] + [data["fecha"]]
+        tabla_respuestas.append(fila)
+
+    return render(request, "respuestas/datosDS2.html", {
+        "preguntas": preguntas,
+        "tabla_respuestas": tabla_respuestas,
+    })
+
+@login_required
 def datosListadoOrdenado(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT us.id, us.Rut, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
-            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
+            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
+            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
             WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
@@ -189,6 +336,185 @@ def crear_excel_desde_db():
     ajustar_ancho_columnas(ws_preguntas_especialista)
     background_colors(ws_preguntas_especialista)
 
+    # Hoja 4: Factores riesgo modificables 
+
+    ws_FRM = wb.create_sheet(title='Factores riesgo modificables')
+
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    ws_FRM.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRM, '')
+            fila.append(respuesta)
+        ws_FRM.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM)
+    background_colors(ws_FRM)
+
+    #OPCIÓN 2: 
+
+    ws_FRM_2 = wb.create_sheet(title='Factores Riesgo modificables 2')
+
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRM_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_FRM_2.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_2)
+    background_colors(ws_FRM_2)
+
+    # Hoja 5: Factores riesgo No modificables 
+
+    ws_FRNM = wb.create_sheet(title='Factores Riesgo No Mod')
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    ws_FRNM.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRNM, '')
+            fila.append(respuesta)
+        ws_FRNM.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM)
+    background_colors(ws_FRNM)
+
+    #OPCIÓN 2: 
+
+    ws_FRNM_2 = wb.create_sheet(title='Factores Riesgo No Mod 2')
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRNM_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_FRNM_2.append(fila)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_2)
+    background_colors(ws_FRNM_2)
+
+    # Hoja 6: Determinantes de Salud 
+    ws_DS = wb.create_sheet(title='Determinantes de Salud')
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    ws_DS.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_DS, '')
+            fila.append(respuesta)
+        ws_DS.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DS)
+    background_colors(ws_DS)
+
+    #OPCIÓN 2: 
+
+    ws_DS_2 = wb.create_sheet(title='Determinantes de Salud 2')
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_DS_2.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_DS_2.append(fila) 
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DS_2)
+    background_colors(ws_DS_2)
+
+
     # Guardar el archivo
     nombre_archivo = 'reporte_respuestas.xlsx'
     wb.save(nombre_archivo)
@@ -208,9 +534,9 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
+            SELECT us.id, us.Rut, Whatsapp, Email, edad,                        
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 'No aplica') AS Ult_mamografia
+            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
             FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
@@ -241,6 +567,307 @@ def crear_excel_listado_ordenable(request):
     response["Content-Disposition"] = 'attachment; filename="ListadoOrdenable.xlsx"'
 
     # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_datos_preguntas(resquest):
+    wb = Workbook()
+    ws_datos_preg = wb.active
+    ws_datos_preg.title = "Preguntas generales"
+
+    preguntas =Pregunta.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_datos_preg.append(lista_preguntas)
+
+    usuarios_respuestas = UsuarioRespuesta.objects.select_related(
+        "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
+        "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
+        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
+    
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['id_opc_respuesta__id_pregunta__pregunta']
+        respuesta_usuario = respuesta['id_opc_respuesta__OPC_Respuesta']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_datos_preg.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_datos_preg)
+    background_colors(ws_datos_preg)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Datos preguntas.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_preguntas_esp(resquest):
+    wb = Workbook()
+    ws_preg_esp = wb.active
+    ws_preg_esp.title = "Preguntas especialistas"
+
+    lista_preguntas = ['Rut', 'Preguntas', 'Fecha Pregunta'] 
+    ws_preg_esp.append(lista_preguntas)
+
+    preguntas = UsuarioTextoPregunta.objects.all()
+
+    for pregunta in preguntas:
+        fila = [
+            pregunta.Rut,  
+            pregunta.texto_pregunta,
+            pregunta.fecha_pregunta.replace(tzinfo=None) if pregunta.fecha_pregunta else ''
+        ]
+        ws_preg_esp.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_preg_esp)
+    background_colors(ws_preg_esp)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Preguntas Especialista.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_mod_V1(resquest):
+    wb = Workbook()
+    ws_FRM_V1 = wb.active
+    ws_FRM_V1.title = "Factores de riesgo mod"
+
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRM_V1.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,  
+            respuesta_usuario, 
+            fecha_respuesta,  
+        ]
+        ws_FRM_V1.append(fila)
+    
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_V1)
+    background_colors(ws_FRM_V1)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="FactoresMod_V1.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_mod_V2(request):
+
+    wb = Workbook()
+    ws_FRM_V2 = wb.active
+    ws_FRM_V2.title = "Factores de riesgo mod 2"
+    
+    preguntas =PregFactorRiesgoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    ws_FRM_V2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
+        respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRM, '')
+            fila.append(respuesta)
+        ws_FRM_V2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRM_V2)
+    background_colors(ws_FRM_V2)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="FactoresMod_V2.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_no_mod_V1(resquest):
+
+    wb = Workbook()
+    ws_FRNM_V1 = wb.active
+    ws_FRNM_V1.title = "Factores de riesgo No mod"
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_FRNM_V1.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_FRNM_V1.append(fila)
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_V1)
+    background_colors(ws_FRNM_V1)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Factores No Mod_V1.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_no_mod_V2(resquest):
+
+    wb = Workbook()
+    ws_FRNM_V2 = wb.active
+    ws_FRNM_V2.title = "Factores de riesgo no mod"
+
+    preguntas =PregFactorRiesgoNoMod.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    ws_FRNM_V2.append(lista_preguntas)
+
+    usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
+        respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_FRNM, '')
+            fila.append(respuesta)
+        ws_FRNM_V2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_FRNM_V2)
+    background_colors(ws_FRNM_V2)
+
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="Factores No Mod_V2.xlsx"'
+
+    # Guardar el archivo en la respuesta HTTP
+    wb.save(response)
+    return response
+
+def crear_excel_DS1(request):
+    wb = Workbook()
+    ws_DSV1 = wb.active
+    ws_DSV1.title = "Determinante Salud"
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    ws_DSV1.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+
+    for respuesta in usuarios_respuestas:
+
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
+        fila = [
+            respuesta['Rut'],
+            pregunta,
+            respuesta_usuario,
+            fecha_respuesta, 
+        ]
+        ws_DSV1.append(fila) 
+
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DSV1)
+    background_colors(ws_DSV1)
+
+    # Preparar la respuesta HTTP
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="reporte_DS_V1.xlsx"'
+
+    # Guardar el archivo
+    wb.save(response)
+    return response
+
+def crear_excel_DS2(request):
+    wb = Workbook()
+    ws_DSV2 = wb.active
+    ws_DSV2.title = "Determinante Salud"
+
+    preguntas =PregDeterSalud.objects.all()
+    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    ws_DSV2.append(lista_preguntas)
+
+    usuarios_respuestas = RespDeterSalud.objects.select_related(
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+
+    dict_respuestas = {}
+
+    for respuesta in usuarios_respuestas:
+        rut = respuesta['Rut']
+        pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
+        respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
+        if rut not in dict_respuestas:
+            dict_respuestas[rut] = {}
+        dict_respuestas[rut][pregunta] = respuesta_usuario
+
+    for rut, respuestas_usuario in dict_respuestas.items():
+        fila = [rut]
+        for pregunta in preguntas:
+            respuesta = respuestas_usuario.get(pregunta.pregunta_DS, '')
+            fila.append(respuesta)
+        ws_DSV2.append(fila) 
+   
+    # Ajustar ancho de columnas y color de fondo 
+    ajustar_ancho_columnas(ws_DSV2)
+    background_colors(ws_DSV2)
+
+    # Preparar la respuesta HTTP
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    response["Content-Disposition"] = 'attachment; filename="reporte_DS_V2.xlsx"'
+
+    # Guardar el archivo
     wb.save(response)
     return response
 
@@ -312,7 +939,7 @@ def generar_grafico_anio_nacimiento():
     plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
     plt.ylabel("Número de Usuarios")
-    plt.title("Usuarios por Año de Nacimiento", pad=20)
+    plt.title("Usuarias por Año de Nacimiento", pad=20)
     plt.xticks(range(min(anios), max(anios)+1,1), rotation = 90)
 
     # Agregar etiquetas en las barras
@@ -1229,7 +1856,7 @@ def grafico_prev_salud_por_rango_edad():
     plt.bar(opciones_anios, cantidades_otro, color="#ecc8c9", bottom=np.array(cantidades_fonasa) + np.array(cantidades_isapre), label="Cantidad Otro")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
-    plt.title("Mamografías por rango de Edad", pad=20)
+    plt.title("Previsión de salud por rango de Edad", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_fonasa
@@ -1592,6 +2219,26 @@ class MensajeContenidoViewSet(viewsets.ModelViewSet):
     queryset = MensajeContenido.objects.all()
     serializer_class = MensajeContenidoSerializer
 
+#Factor riesgo no modificable
+class FRNMViewSet(viewsets.ModelViewSet):
+    queryset = RespUsuarioFactorRiesgoNoMod.objects.all()
+    serializer_class = UsuarioRespuestaFRNMSerializer
+
+#Factor riesgo modificable
+class FRMViewSet(viewsets.ModelViewSet):
+    queryset = RespUsuarioFactorRiesgoMod.objects.all()
+    serializer_class = UsuarioRespuestaFRMSerializer
+
+#Determinante salud
+class DSViewSet(viewsets.ModelViewSet):
+    queryset = RespDeterSalud.objects.all()
+    serializer_class = UsuarioRespuestaDSSerializer
+
+# Respuesta Texto Peso y Altura (FRM)
+class RespTextoFRMViewSet(viewsets.ModelViewSet):
+    queryset = RespTextoFRM.objects.all()
+    serializer_class = RespTextoFRMSerializer
+
 class UsuarioRespuestaAPIView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAdminUser]
@@ -1638,4 +2285,66 @@ class ObtenerID(APIView):
         else:
             # Si no se encuentra ningún registro para la fecha de hoy, devolver un código de error (por ejemplo, "1")
             return Response({'error_code': '1'})
+        
+class UsuarioRespuestFRNMaAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespUsuarioFactorRiesgoNoMod.objects.all()
+        serializer = UsuarioRespuestaFRNMSerializer(respuestas, many=True)
+        return Response(serializer.data)
+    
+class UsuarioRespuestFRMaAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespUsuarioFactorRiesgoMod.objects.all()
+        serializer = UsuarioRespuestaFRMSerializer(respuestas, many=True)
+        return Response(serializer.data)
+    
+class RespTextoFRMAPIView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAdminUser]
+    def get(self, request):
+        respuestas = RespTextoFRM.objects.all()
+        serializer = RespTextoFRMSerializer(respuestas, many=True)
+        return Response(serializer.data)
+
 # --------------------- Api --------------------- #
+
+# ------------------Parseo fecha ---------------- #
+
+@csrf_exempt
+def guardar_fecha_nacimiento(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            print(f"Datos recibidos: {data}")
+            fecha_ingresada = data.get("fecha_nacimiento", "").strip()
+
+            # Crear el usuario con la fecha en formato de texto
+            usuario = Usuario(fecha_nacimiento=fecha_ingresada)
+            usuario.save()  # El método save() se encargará de la conversión
+
+            return JsonResponse({"mensaje": "Fecha guardada correctamente."})
+        except ValueError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"Error inesperado: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+def obtener_usuario(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+        fecha_formateada = usuario.AnioNacimiento.strftime("%d/%m/%Y") if usuario.AnioNacimiento else None
+
+        return JsonResponse({
+            "nombre": usuario.nombre,
+            "fecha_nacimiento": usuario.fecha_nacimiento,  # Campo CharField
+            "AnioNacimiento": fecha_formateada  # Campo DateField formateado
+        })
+    except Usuario.DoesNotExist:
+        return JsonResponse({"error": "Usuario no encontrado"}, status=404)
+
+

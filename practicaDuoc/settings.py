@@ -126,6 +126,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+DATE_FORMAT = '%d/%m/%Y'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -150,6 +151,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DATE_INPUT_FORMATS': ['%d/%m/%Y'],
+    'DATE_FORMAT': '%d/%m/%Y',
 }
 
 from datetime import timedelta
@@ -158,3 +161,5 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=3650),  # 10 años
     "REFRESH_TOKEN_LIFETIME": timedelta(days=3650),  # 10 años
 }
+
+APPEND_SLASH = False

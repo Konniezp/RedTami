@@ -4,9 +4,14 @@ from django.db import models
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from datetime import date
+from datetime import date, datetime
+from dateutil import parser
+from unidecode import unidecode 
+from fuzzywuzzy import fuzz
 
+import locale
 
+locale.setlocale(locale.LC_TIME, 'es_ES') 
 
 class Comuna(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Comuna")
@@ -68,46 +73,111 @@ class Ocupacion(models.Model):
 
     def __str__(self):
         return self.OPC_Ocupacion
-
-
+    
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
-    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=10)
+    AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
+    Comuna_Usuario = models.ForeignKey('comuna_chile', on_delete=models.CASCADE)
+    Genero_Usuario = models.ForeignKey('Genero', on_delete=models.CASCADE)
+    SistemaSalud_Usuario = models.ForeignKey('SistemaSalud', on_delete=models.CASCADE)
+    Ocupacion_Usuario = models.ForeignKey('Ocupacion', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
-    Comuna_Usuario = models.ForeignKey(Comuna, on_delete=models.CASCADE)
-    Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
-    SistemaSalud_Usuario = models.ForeignKey(SistemaSalud, on_delete=models.CASCADE)
-    Ocupacion_Usuario = models.ForeignKey(Ocupacion, on_delete=models.CASCADE)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
+    fecha_nacimiento = models.CharField(max_length=30, null=True, blank=True)
 
-    #Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
-    def calculo_edad (self):
-        fecha_actual = date.today()
-        edad =  fecha_actual.year - self.AnioNacimiento.year
-        edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
-        return edad
-    
-    #Guardar edad con método save
+    # Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
+    def calculo_edad(self):
+        if self.AnioNacimiento:
+            fecha_actual = date.today()
+            edad = fecha_actual.year - self.AnioNacimiento.year
+            edad -= ((fecha_actual.month, fecha_actual.day) < (self.AnioNacimiento.month, self.AnioNacimiento.day))
+            return edad
+        return 0
+
+    # Validación y guardado de fecha en save()
     def save(self, *args, **kwargs):
-        self.edad = self.calculo_edad()  
-        super().save(*args, **kwargs) #Llama al método save
+        if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
+            # Lista de nombres de meses en español
+            meses_correctos = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ]
+
+            # Normalizar el texto: convertir a minúsculas y eliminar acentos
+            fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
+
+            # Reemplazar nombres de meses mal escritos
+            for mes in meses_correctos:
+                palabras_fecha = fecha_normalizada.split()
+                for palabra in palabras_fecha:
+                    puntaje = fuzz.ratio(palabra, mes)
+                    if puntaje > 70:  # Umbral de similitud
+                        fecha_normalizada = fecha_normalizada.replace(palabra, mes)
+
+            # Formatos de fecha permitidos
+            formatos_fecha = [
+                "%d/%m/%Y",  # dd/mm/yyyy
+                "%d-%m-%Y",  # dd-mm-yyyy
+                "%d %B %Y",  # 12 noviembre 1990
+                "%d de %B de %Y",  # 12 de noviembre de 1990
+                "%d %m %Y",  # dd mm yyyy
+                "%d/%m/%y",  # dd/mm/yy
+                "%d-%m-%y",  # dd-mm-yy
+                "%d %m %y",  # dd mm yy
+                "%d de %B del %Y",  # 12 de noviembre del 1990
+                "%d de %B del %y",  # 12 de noviembre del 90
+                "%d de %B %y",  # 12 de noviembre 90
+                "%d de %B %Y",  # 12 de noviembre 1990
+                "%d de %b %Y",  # 12 de nov 1990
+                "%d de %b %y",  # 12 de nov 90
+                "%d de %b del %Y",  # 12 de nov del 1990
+                "%d de %b del %y"   # 12 de nov del 90
+            ]
+
+            fecha_valida = False
+
+            for formato in formatos_fecha:
+                try:
+                    # Intentamos convertir la fecha al formato DateField
+                    fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
+                    self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
+                    fecha_valida = True
+                    break  # Salimos si se convierte correctamente
+                except ValueError:
+                    continue
+
+            if not fecha_valida:
+                raise ValidationError(
+                    f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
+                )
+
+        # Calcula la edad si AnioNacimiento es válido
+        self.edad = self.calculo_edad()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.id)
+        return f"{self.Rut} - {self.id}"
     
+class Codigos_preg (models.Model):
+    id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
+    codigo_preguntas = models.CharField(max_length=10, blank=True)
 
+    def __str__(self):
+        return self.codigo_preguntas
+    
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Pregunta")
     pregunta = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta
-
 
 class PreguntaOpcionRespuesta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Opcion Respuesta")
@@ -131,6 +201,7 @@ class UsuarioTextoPregunta(models.Model):
     Rut = models.CharField(max_length=10)
     texto_pregunta = models.CharField(max_length=200)
     fecha_pregunta = models.DateTimeField(auto_now_add=True)
+    id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.Rut} - {self.texto_pregunta}"
@@ -142,11 +213,14 @@ class MensajeContenido(models.Model):
     Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
     fecha = models.DateField(verbose_name="Fecha")
 
+
 class ultima_mamografia_anio(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
     Rut = models.CharField(max_length=10)
     anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
     tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
+    fecha_pregunta = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
     # Función para calcular tiempo transcurrido desde la última mamografía
     def calculo_tiempo_transc_ult_mamografia(self):
@@ -185,12 +259,14 @@ class comuna_chile(models.Model):
     nombre_comuna = models.CharField (max_length=200)
     cod_provincia = models.ForeignKey (provincia, on_delete = models.CASCADE)
 
+
     def __str__(self):
         return self.nombre_comuna
     
 class PregFactorRiesgoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Factor de Riesgo Mod")
     pregunta_FRM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRM
@@ -217,6 +293,7 @@ class RespUsuarioFactorRiesgoMod (models.Model):
 class PregFactorRiesgoNoMod(models.Model):
     id = models.AutoField(primary_key= True, verbose_name= "ID Factor de Riesgo No Mod")
     pregunta_FRNM = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
         return self.pregunta_FRNM
@@ -241,6 +318,7 @@ class RespUsuarioFactorRiesgoNoMod (models.Model):
 class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
     pregunta_DS = models.CharField(max_length=200)
+    codigo_preguntas = models.ForeignKey(Codigos_preg, on_delete = models.CASCADE,null=True)
 
     def __str__(self):
         return self.pregunta_DS
@@ -261,5 +339,27 @@ class RespDeterSalud (models.Model):
 
     def __str__(self):
         return f"{self.Rut} - {self.respuesta_DS}"
+    
+class RespTextoFRM(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
+    Rut = models.CharField(max_length=10)
+    peso_FRM6 = models.IntegerField(default=0)  # Peso en kg
+    altura_FRM5 = models.IntegerField(default=0)  # Altura en cm
+    imc = models.FloatField(default=0.0)  
+    fecha_respuesta = models.DateTimeField(auto_now_add=True)
+    id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
+
+    def calculo_imc(self):
+        if self.altura_FRM5 > 0:  
+            altura_metros = self.altura_FRM5 / 100  # Convierte de cm a metros
+            return round(self.peso_FRM6 / (altura_metros ** 2), 2)  # Redondear a 2 decimales
+        return 0.0  # Retorna 0 si la altura no es válida
+
+    def save(self, *args, **kwargs):
+        self.imc = self.calculo_imc() 
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm - IMC: {self.imc}"
    
 
