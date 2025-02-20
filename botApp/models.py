@@ -10,69 +10,9 @@ from unidecode import unidecode
 from fuzzywuzzy import fuzz
 
 import locale
+import re
 
 locale.setlocale(locale.LC_TIME, 'es_ES') 
-
-class Comuna(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name="ID Comuna")
-    Nombre_Comuna = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.Nombre_Comuna
-
-
-class Genero(models.Model):
-    FEMENINO = "Femenino"
-    MASCULINO = "Masculino"
-    OTRO = "Otro"
-
-    GENERO_CHOICES = [
-        (FEMENINO, "Femenino"),
-        (MASCULINO, "Masculino"),
-        (OTRO, "Otro"),
-    ]
-
-    id = models.AutoField(primary_key=True, verbose_name="ID Genero")
-    OPC_Genero = models.CharField(max_length=50, choices=GENERO_CHOICES)
-
-    def __str__(self):
-        return self.OPC_Genero
-
-
-class SistemaSalud(models.Model):
-    FONASA = "Fonasa"
-    ISAPRE = "Isapre"
-    OTRO = "Otro"
-
-    SISTEMA_SALUD_CHOICES = [
-        (FONASA, "Fonasa"),
-        (ISAPRE, "Isapre"),
-        (OTRO, "Otro"),
-    ]
-
-    id = models.AutoField(primary_key=True, verbose_name="ID Sistema Salud")
-    OPC_SistemaSalud = models.CharField(max_length=50, choices=SISTEMA_SALUD_CHOICES)
-
-    def __str__(self):
-        return self.OPC_SistemaSalud
-
-
-class Ocupacion(models.Model):
-    DUENIACASA = "Dueña de Casa"
-    TRABAJADOR = "Trabajadora"
-    OTRO = "Otro"
-
-    OCUPACION_CHOICES = [
-        (DUENIACASA, "Dueña de Casa"),
-        (TRABAJADOR, "Trabajadora"),
-        (OTRO, "Otro"),
-    ]
-
-    id = models.AutoField(primary_key=True, verbose_name="ID Ocupacion")
-    OPC_Ocupacion = models.CharField(max_length=50, choices=OCUPACION_CHOICES)
-
-    def __str__(self):
-        return self.OPC_Ocupacion
     
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
@@ -81,10 +21,7 @@ class Usuario(models.Model):
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=200)
     Email = models.EmailField(max_length=254, blank=True)
-    Comuna_Usuario = models.ForeignKey('comuna_chile', on_delete=models.CASCADE)
-    Genero_Usuario = models.ForeignKey('Genero', on_delete=models.CASCADE)
-    SistemaSalud_Usuario = models.ForeignKey('SistemaSalud', on_delete=models.CASCADE)
-    Ocupacion_Usuario = models.ForeignKey('Ocupacion', on_delete=models.CASCADE)
+    Comuna_Usuario = models.ForeignKey('comuna', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
     edad = models.IntegerField(default=0)
@@ -210,8 +147,15 @@ class UsuarioTextoPregunta(models.Model):
 class MensajeContenido(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Texto")
     texto = models.CharField(max_length=200)
-    Genero_Usuario = models.ForeignKey(Genero, on_delete=models.CASCADE)
+    opcrespFRNM = models.ForeignKey('RespUsuarioFactorRiesgoNoMod', on_delete=models.CASCADE)
+    opcrespFRM = models.ForeignKey('RespUsuarioFactorRiesgoMod', on_delete= models.CASCADE)
+    opcrespDS = models.ForeignKey('RespDeterSalud', on_delete= models.CASCADE)
+    opcresTM =models.ForeignKey(UsuarioRespuesta, on_delete= models.CASCADE)
+    opcresUS = models.ForeignKey(Usuario, on_delete= models.CASCADE)
     fecha = models.DateField(verbose_name="Fecha")
+
+    def __str__(self):
+        return f"{self.opcrespFRNM} - {self.opcrespFRM} - {self.opcrespDS} - {self.opcresTM} - {self.opcresUS}"
 
 
 class ultima_mamografia_anio(models.Model):
@@ -237,28 +181,24 @@ class ultima_mamografia_anio(models.Model):
         return f"{self.Rut} - {self.anio_ult_mamografia}"
 
 class region(models.Model):
-    id = models.AutoField (primary_key=True, verbose_name="ID región")
-    cod_region = models.CharField(max_length=2)
+    cod_region = models.CharField(primary_key=True, verbose_name= "Cod region", max_length=2)
     nombre_region = models.CharField(max_length=200)
 
     def __str__(self):
         return self.cod_region
 
 class provincia(models.Model):
-    id = models.AutoField (primary_key=True, verbose_name="ID provincia")
-    cod_provincia = models.CharField(max_length=4)
+    cod_provincia = models.CharField(primary_key=True, verbose_name= "Cod provincia", max_length=4)
     nombre_provincia = models.CharField(max_length=200)
     cod_region = models.ForeignKey(region,on_delete = models.CASCADE)
 
     def __str__(self):
         return self.cod_provincia
 
-class comuna_chile(models.Model):
-    id = models.AutoField (primary_key=True, verbose_name="ID comuna")
-    cod_comuna = models.CharField(max_length=6)
+class comuna(models.Model):
+    cod_comuna = models.CharField(primary_key=True, verbose_name="Cod comuna", max_length=6)
     nombre_comuna = models.CharField (max_length=200)
     cod_provincia = models.ForeignKey (provincia, on_delete = models.CASCADE)
-
 
     def __str__(self):
         return self.nombre_comuna
@@ -271,7 +211,6 @@ class PregFactorRiesgoMod(models.Model):
     def __str__(self):
         return self.pregunta_FRM
 
-
 class OpcFactorRiesgoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Opc Riesgo Mod")
     opc_respuesta_FRM = models.CharField(max_length=200)
@@ -279,7 +218,6 @@ class OpcFactorRiesgoMod(models.Model):
 
     def __str__(self):
         return f"{self.id_pregunta_FRM} - {self.opc_respuesta_FRM}"
-
 
 class RespUsuarioFactorRiesgoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
@@ -298,7 +236,6 @@ class PregFactorRiesgoNoMod(models.Model):
     def __str__(self):
         return self.pregunta_FRNM
 
-
 class OpcFactorRiesgoNoMod(models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Opc Riesgo No Mod")
     opc_respuesta_FRNM = models.CharField(max_length=200)
@@ -307,14 +244,15 @@ class OpcFactorRiesgoNoMod(models.Model):
     def __str__(self):
         return f"{self.id_pregunta_FRNM} - {self.opc_respuesta_FRNM}"
 
-
 class RespUsuarioFactorRiesgoNoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
     Rut = models.CharField(max_length=10)
     respuesta_FRNM = models.ForeignKey(OpcFactorRiesgoNoMod, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
-    
 
+    def __str__(self):
+        return f"{self.Rut} - {self.respuesta_FRNM}"
+    
 class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
     pregunta_DS = models.CharField(max_length=200)
@@ -343,23 +281,91 @@ class RespDeterSalud (models.Model):
 class RespTextoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
     Rut = models.CharField(max_length=10)
-    peso_FRM6 = models.IntegerField(default=0)  # Peso en kg
-    altura_FRM5 = models.IntegerField(default=0)  # Altura en cm
-    imc = models.FloatField(default=0.0)  
+    peso_FRM6 = models.CharField(max_length= 3)  # Peso en kg
+    altura_FRM5 = models.CharField(max_length= 4)  # Altura en cm
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
     id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Guardamos el dato bruto primero
+        CalculoFRM.procesar_datos_brutos(self)  # Llamamos la limpieza
+
+class CalculoFRM(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID Cálculo FRM")
+    Rut = models.CharField(max_length=10)
+    altura_mod = models.FloatField(default=0)
+    peso_mod = models.FloatField(default=0)
+    imc = models.FloatField(default=0.0) 
+    datos_originales = models.OneToOneField(RespTextoFRM, on_delete=models.CASCADE)
+
     def calculo_imc(self):
-        if self.altura_FRM5 > 0:  
-            altura_metros = self.altura_FRM5 / 100  # Convierte de cm a metros
-            return round(self.peso_FRM6 / (altura_metros ** 2), 2)  # Redondear a 2 decimales
+        if self.altura_mod > 0 and self.peso_mod > 0:  
+            altura_metros = self.altura_mod / 100  # Convierte de cm a metros
+            return round(self.peso_mod / (altura_metros ** 2), 2)  # Redondear a 2 decimales
         return 0.0  # Retorna 0 si la altura no es válida
 
     def save(self, *args, **kwargs):
         self.imc = self.calculo_imc() 
         super().save(*args, **kwargs)
+    
+    @staticmethod
+    def limpiar_numero(valor, es_altura=False):
+        if not valor:
+            return 0.0
 
-    def __str__(self):
-        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm - IMC: {self.imc}"
-   
+        # Diccionario para convertir palabras a números
+        palabras_a_numeros = {
+            'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
+            'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9,
+            'diez': 10, 'once': 11, 'doce': 12, 'trece': 13, 'catorce': 14,
+            'quince': 15, 'dieciséis': 16, 'diecisiete': 17, 'dieciocho': 18,
+            'diecinueve': 19, 'veinte': 20, 'treinta': 30, 'cuarenta': 40,
+            'cincuenta': 50, 'sesenta': 60, 'setenta': 70, 'ochenta': 80,
+            'noventa': 90, 'cien': 100
+        }
+
+        valor_lower = str(valor).strip().lower()
+        if valor_lower in palabras_a_numeros:
+            return palabras_a_numeros[valor_lower]
+
+        # Limpieza de caracteres no numéricos
+        valor = valor.strip().replace(',', '.')  # Espacios y comas → puntos
+        valor = re.sub(r'[^0-9.]', '', valor)  # Quitar letras y símbolos
+
+        partes = valor.split('.')
+        if len(partes) > 2:
+            valor = partes[0] + '.' + partes[1]  # Mantener solo el primer punto
+
+
+        try:
+            valor_numerico = float(valor)
+            if es_altura and valor_numerico > 250:  
+                valor_numerico /= 10  # Corrige alturas mal escritas (ej. "1700" → "170")
+            return valor_numerico if valor_numerico > 0 else 0.0
+        except ValueError:
+            return 0.0
+
+    @classmethod
+    def procesar_datos_brutos(cls, instance):
+        peso_formateado = cls.limpiar_numero(instance.peso_FRM6)
+        altura_formateada = cls.limpiar_numero(instance.altura_FRM5, es_altura=True)
+        
+        formateado, created = cls.objects.get_or_create(
+            datos_originales=instance,
+            defaults={
+                "Rut": instance.Rut,
+                "peso": peso_formateado,
+                "altura": altura_formateada,
+            }
+        )
+
+        if not created:
+            formateado.peso_mod= peso_formateado
+            formateado.altura_mod= altura_formateada
+            formateado.save()
+    
+      
 
