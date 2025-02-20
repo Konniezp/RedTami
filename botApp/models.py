@@ -147,17 +147,23 @@ class UsuarioTextoPregunta(models.Model):
 class MensajeContenido(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Texto")
     texto = models.CharField(max_length=200)
+    fecha = models.DateField(verbose_name="Fecha")
+
+    def __str__(self):
+        return self.texto
+
+class filtro_mensaje(models.Model):
+    id = models.AutoField(primary_key=True, verbose_name="ID filtro mensaje")
     opcrespFRNM = models.ForeignKey('RespUsuarioFactorRiesgoNoMod', on_delete=models.CASCADE)
     opcrespFRM = models.ForeignKey('RespUsuarioFactorRiesgoMod', on_delete= models.CASCADE)
     opcrespDS = models.ForeignKey('RespDeterSalud', on_delete= models.CASCADE)
     opcresTM =models.ForeignKey(UsuarioRespuesta, on_delete= models.CASCADE)
     opcresUS = models.ForeignKey(Usuario, on_delete= models.CASCADE)
-    fecha = models.DateField(verbose_name="Fecha")
-
+    mensaje_contenido_id = models.ForeignKey(MensajeContenido, on_delete=models.CASCADE)
+    
     def __str__(self):
         return f"{self.opcrespFRNM} - {self.opcrespFRM} - {self.opcrespDS} - {self.opcresTM} - {self.opcresUS}"
-
-
+    
 class ultima_mamografia_anio(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
     Rut = models.CharField(max_length=10)
