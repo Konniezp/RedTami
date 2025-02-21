@@ -312,7 +312,7 @@ def crear_excel_desde_db():
 
     # Hoja 2: Datos Perfil
     ws_datos_perfil = wb.create_sheet(title='Datos Perfil')
-    campos_usuario = [field.name for field in Usuario._meta.fields if field.name not in ['Comuna_Usuario', 'Genero_Usuario', 'SistemaSalud_Usuario', 'Ocupacion_Usuario']]
+    campos_usuario = [field.name for field in Usuario._meta.fields if field.name not in ['Comuna_Usuario']]
     ws_datos_perfil.append(campos_usuario)
 
     for usuario in Usuario.objects.all():
@@ -992,10 +992,15 @@ def generar_grafico_respuestas_por_dia():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-def generar_grafico_personas_por_genero():
+def generar_grafico_personas_por_genero_NUEVO():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT Genero_Usuario_id, COUNT(*) FROM botApp_usuario GROUP BY Genero_Usuario_id"
+            """
+            SELECT respuesta_FRNM_id, Count(*)
+            FROM botApp_respusuariofactorriesgonomod
+            WHERE respuesta_FRNM_id IN(1,2)
+            group by respuesta_FRNM_id; """
+            
         )
         resultados = cursor.fetchall()
 
@@ -1004,8 +1009,8 @@ def generar_grafico_personas_por_genero():
 
     for resultado in resultados:
         genero_id, cantidad = resultado
-        genero = Genero.objects.get(id=genero_id)
-        generos.append(genero.OPC_Genero)
+        genero = OpcFactorRiesgoNoMod.objects.get(id=genero_id)
+        generos.append(genero.opc_respuesta_FRNM)
         cantidades.append(cantidad)
 
     # Crear gráfico de barras con diferentes colores para cada barra
@@ -1032,10 +1037,10 @@ def generar_grafico_ingresos_por_comuna():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT c.Nombre_Comuna, COUNT(*) AS TotalIngresos 
+            SELECT c.nombre_comuna, COUNT(*) AS TotalIngresos 
             FROM botApp_usuario u
             JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.id 
-            GROUP BY c.Nombre_Comuna
+            GROUP BY c.nombre_comuna
             """
         )
         resultados = cursor.fetchall()
@@ -1098,7 +1103,7 @@ def generar_grafico_referencias():
 def generar_grafico_pregunta1():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (8, 9) GROUP BY id_opc_respuesta_id"
+            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (1, 2) GROUP BY id_opc_respuesta_id"
         )
         resultados = cursor.fetchall()
 
@@ -1136,7 +1141,7 @@ def generar_grafico_pregunta1():
 def generar_grafico_pregunta2():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (10, 11, 12) GROUP BY id_opc_respuesta_id"
+            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (2, 3, 4) GROUP BY id_opc_respuesta_id"
         )
         resultados = cursor.fetchall()
 
@@ -1174,7 +1179,7 @@ def generar_grafico_pregunta2():
 def generar_grafico_pregunta3():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (13, 14, 15, 16) GROUP BY id_opc_respuesta_id"
+            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (6,7, 8, 9) GROUP BY id_opc_respuesta_id"
         )
         resultados = cursor.fetchall()
 
@@ -1212,7 +1217,7 @@ def generar_grafico_pregunta3():
 def generar_grafico_pregunta4():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (17, 18, 19, 20) GROUP BY id_opc_respuesta_id"
+            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (10, 11, 12, 13) GROUP BY id_opc_respuesta_id"
         )
         resultados = cursor.fetchall()
 
@@ -1250,7 +1255,7 @@ def generar_grafico_pregunta4():
 def generar_grafico_pregunta5():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (21, 22, 23) GROUP BY id_opc_respuesta_id"
+            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (14, 15, 16) GROUP BY id_opc_respuesta_id"
         )
         resultados = cursor.fetchall()
 
@@ -1288,7 +1293,7 @@ def generar_grafico_pregunta5():
 def generar_grafico_pregunta6():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (25, 26, 27) GROUP BY id_opc_respuesta_id"
+            "SELECT respuesta_FRNM_id, COUNT(*) FROM botApp_respusuariofactorriesgonomod WHERE respuesta_FRNM_id IN (4, 5, 6) GROUP BY respuesta_FRNM_id"
         )
         resultados = cursor.fetchall()
 
@@ -1330,7 +1335,7 @@ def generar_grafico_mamografia_si_por_edad():
             """
             SELECT us.edad, COUNT(*) as Cantidad 
             FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (8)
+            WHERE id_opc_respuesta_id IN (1)
             GROUP BY edad ORDER BY edad ASC
             """
         )
@@ -1371,16 +1376,17 @@ def generar_grafico_mamo_si_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT ur.id_opc_respuesta_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_usuariorespuesta ur
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE ur.id_opc_respuesta_id IN (25, 26, 27)
+            SELECT FRNM.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod FRNM
+            JOIN botApp_usuario us ON FRNM.Rut = us.Rut
+            WHERE FRNM.respuesta_FRNM_id IN (4, 5, 6)
             AND us.Rut IN (
-            SELECT ur2.Rut 
-            FROM botApp_usuariorespuesta ur2 
-            WHERE ur2.id_opc_respuesta_id = 8
+            SELECT FRNM.Rut 
+            FROM botApp_respusuariofactorriesgonomod FRNM
+            WHERE FRNM.respuesta_FRNM_id = 1
             )
-            GROUP BY ur.id_opc_respuesta_id; """
+            GROUP BY FRNM.respuesta_FRNM_id;
+           """
 
         )
         resultados = cursor.fetchall()
@@ -1424,7 +1430,7 @@ def generar_grafico_mamografia_no_por_edad():
             """
             SELECT us.edad, COUNT(distinct ur.fecha_respuesta) as Cantidad 
             FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (9)
+            WHERE id_opc_respuesta_id IN (2)
             GROUP BY edad ORDER BY edad ASC
             """
         )
@@ -1464,16 +1470,16 @@ def generar_grafico_mamo_no_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT ur.id_opc_respuesta_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_usuariorespuesta ur
+            SELECT ur.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod ur
             JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE ur.id_opc_respuesta_id IN (25, 26, 27)
+            WHERE ur.respuesta_FRNM_id IN (3, 4, 5)
             AND us.Rut IN (
             SELECT ur2.Rut 
-            FROM botApp_usuariorespuesta ur2 
-            WHERE ur2.id_opc_respuesta_id = 9
+            FROM botApp_respusuariofactorriesgonomod ur2 
+            WHERE ur2.respuesta_FRNM_id = 2
             )
-            GROUP BY ur.id_opc_respuesta_id; """
+            GROUP BY ur.respuesta_FRNM_id; """
 
         )
         resultados = cursor.fetchall()
@@ -1516,7 +1522,7 @@ def mamografia_por_edad_si_no():
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (8,9)
+            WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
             """
@@ -1686,7 +1692,7 @@ def mamografia_por_edad_si_no_rango_edad():
             SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (8,9)
+            WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
             """
@@ -1758,7 +1764,7 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
             SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE id_opc_respuesta_id IN (8,9)
+            WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
             """
@@ -1819,9 +1825,10 @@ def grafico_prev_salud_por_rango_edad():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT edad, COUNT(*) as Cantidad, SistemaSalud_Usuario_id
-            FROM botApp_usuario
-            GROUP BY edad, SistemaSalud_Usuario_id 
+            SELECT us.edad, COUNT(*) as Cantidad, ds.respuesta_DS_id
+            FROM botApp_usuario us JOIN  botApp_respdetersalud ds ON us.rut = ds.rut
+            WHERE ds.respuesta_DS_id IN(1,2,3)
+            GROUP BY edad, respuesta_DS_id 
             ORDER BY edad ASC;
             """
         )
@@ -1970,55 +1977,12 @@ def grafico_frecuencia_alcohol():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-def generar_grafico_personas_por_genero_NUEVO():
-    with connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT respuesta_FRNM_id, Count(*)
-            FROM botApp_respusuariofactorriesgonomod
-            WHERE respuesta_FRNM_id IN(1,2)
-            group by respuesta_FRNM_id; """
-            
-        )
-        resultados = cursor.fetchall()
-
-    generos = []
-    cantidades = []
-
-    for resultado in resultados:
-        genero_id, cantidad = resultado
-        genero = OpcFactorRiesgoNoMod.objects.get(id=genero_id)
-        generos.append(genero.opc_respuesta_FRNM)
-        cantidades.append(cantidad)
-
-    # Crear gráfico de barras con diferentes colores para cada barra
-    colores = {'Masculino': '#79addc', 'Femenino': 'pink', 'Otro': 'green'}
-    plt.bar(generos, cantidades, color=[colores[genero] for genero in generos])
-
-    # Agregar los valores de cada barra
-    for i in range(len(generos)):
-        plt.text(i, cantidades[i], str(cantidades[i]), ha='center', va='bottom')
-
-    plt.xlabel("Género")
-    plt.ylabel("Número de Personas")
-    plt.title("Ingresos por Género", pad=20)
-
-    buffer = BytesIO()
-    plt.savefig(buffer, format="png")
-    buffer.seek(0)
-    plt.close()
-
-    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-    return imagen_base64
-
-
 
 @login_required
 def reportes(request):
     data = {
         "imagen_base64_edad": generar_grafico_usuario_por_edad(),
         "imagen_base64_ingresos": generar_grafico_respuestas_por_dia(),
-        "imagen_base64_genero":  generar_grafico_personas_por_genero(),
         "imagen_base64_ingresos_comuna": generar_grafico_ingresos_por_comuna(),
         "imagen_base64_pregunta1": generar_grafico_pregunta1(),
         "imagen_base64_pregunta2": generar_grafico_pregunta2(),
