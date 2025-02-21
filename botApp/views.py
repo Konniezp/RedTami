@@ -881,6 +881,20 @@ plt.rcParams['axes.titlesize'] =20
 plt.rcParams['axes.labelsize']= 13
 plt.rcParams['axes.labelpad']=10
 
+def reportes(request):
+    # Extraemos datos, filtrando los valores None
+    datos = list(Usuario.objects.values_list('campo', flat=True).exclude(campo=None))
+
+    if datos:  # Si la lista tiene valores válidos
+        try:
+            minimo = min(datos)  # Calculamos el mínimo
+        except ValueError:  # Si la lista estuviera vacía por alguna razón
+            minimo = None
+    else:  # Si no hay datos
+        minimo = None
+
+    return render(request, 'reportes.html', {'minimo': minimo, 'datos_disponibles': bool(datos)})
+
 def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
