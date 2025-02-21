@@ -1305,10 +1305,10 @@ def generar_grafico_pregunta6():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -1396,10 +1396,10 @@ def generar_grafico_mamo_si_por_familiar_directo():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
@@ -1488,10 +1488,10 @@ def generar_grafico_mamo_no_por_familiar_directo():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
