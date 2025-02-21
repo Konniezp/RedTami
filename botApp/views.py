@@ -120,6 +120,7 @@ def datosFRM(request):
     }
     return render(request, "respuestas/datosFRM.html", data)
 
+@login_required
 def datosFRM2(request):
     preguntas = PregFactorRiesgoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
@@ -162,6 +163,7 @@ def datosFRNM(request):
     }
     return render(request, "respuestas/datosFRNM.html", data)
 
+@login_required
 def datosFRNM2(request):
     preguntas = PregFactorRiesgoNoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
@@ -1428,7 +1430,7 @@ def generar_grafico_mamografia_no_por_edad():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(distinct ur.fecha_respuesta) as Cantidad 
+            SELECT us.edad, COUNT(*) as Cantidad 
             FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (2)
             GROUP BY edad ORDER BY edad ASC
@@ -1470,16 +1472,16 @@ def generar_grafico_mamo_no_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT ur.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod ur
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE ur.respuesta_FRNM_id IN (3, 4, 5)
+            SELECT FRNM.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod FRNM
+            JOIN botApp_usuario us ON FRNM.Rut = us.Rut
+            WHERE FRNM.respuesta_FRNM_id IN (3, 4, 5)
             AND us.Rut IN (
-            SELECT ur2.Rut 
-            FROM botApp_respusuariofactorriesgonomod ur2 
-            WHERE ur2.respuesta_FRNM_id = 2
+            SELECT FRNM.Rut 
+            FROM botApp_respusuariofactorriesgonomod FRNM
+            WHERE FRNM.respuesta_FRNM_id = 2
             )
-            GROUP BY ur.respuesta_FRNM_id; """
+            GROUP BY FRNM.respuesta_FRNM_id """
 
         )
         resultados = cursor.fetchall()
@@ -1546,9 +1548,9 @@ def mamografia_por_edad_si_no():
         # Obtenemos el índice correspondiente a la edad
         index = edades.index(edad)
 
-        if respuesta == 8:
+        if respuesta == 1:
             cantidades_si[index] += cantidad
-        elif respuesta == 9: 
+        elif respuesta == 2: 
             cantidades_no[index] += cantidad
 
     # Crear el gráfico
@@ -1689,7 +1691,7 @@ def mamografia_por_edad_si_no_rango_edad():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (1,2)
@@ -1713,17 +1715,17 @@ def mamografia_por_edad_si_no_rango_edad():
     for resultado in resultados:
         edad, cantidad, respuesta = resultado
 
-        if edad < edad_min and respuesta == 8:
+        if edad < edad_min and respuesta == 1:
             cantidades_si[0] += cantidad
         elif edad >= edad_min and edad <= edad_max and respuesta == 8:
             cantidades_si[1] += cantidad
-        elif edad > edad_max and respuesta == 8:
+        elif edad > edad_max and respuesta == 1:
             cantidades_si[2] += cantidad 
-        elif edad < edad_min and respuesta == 9:
+        elif edad < edad_min and respuesta == 2:
             cantidades_no[0] += cantidad
         elif edad >= edad_min and edad <= edad_max and respuesta == 9:
             cantidades_no[1] += cantidad
-        elif edad > edad_max and respuesta == 9:
+        elif edad > edad_max and respuesta == 2:
             cantidades_no[2] += cantidad 
 
     # Crear el gráfico
@@ -1761,7 +1763,7 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (1,2)
@@ -1779,17 +1781,17 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     for resultado in resultados:
         edad, cantidad, respuesta = resultado
 
-        if edad < 50 and respuesta == 8:
+        if edad < 50 and respuesta == 1:
             cantidades_si[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 8:
+        elif edad >= 50 and edad <= 69 and respuesta == 1:
             cantidades_si[1] += cantidad
-        elif edad > 69 and respuesta == 8:
+        elif edad > 69 and respuesta == 1:
             cantidades_si[2] += cantidad 
-        elif edad < 50 and respuesta == 9:
+        elif edad < 50 and respuesta == 2:
             cantidades_no[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 9:
+        elif edad >= 50 and edad <= 69 and respuesta == 2:
             cantidades_no[1] += cantidad
-        elif edad > 69 and respuesta == 9:
+        elif edad > 69 and respuesta == 2:
             cantidades_no[2] += cantidad 
 
     x = np.arange(len(opciones_anios))  
