@@ -1378,18 +1378,17 @@ def generar_grafico_mamo_si_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT FRNM.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            JOIN botApp_usuario us ON FRNM.Rut = us.Rut
-            WHERE FRNM.respuesta_FRNM_id IN (4, 5, 6)
-            AND us.Rut IN (
-            SELECT FRNM.Rut 
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            WHERE FRNM.respuesta_FRNM_id = 1
+            SELECT r.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod r
+            JOIN botApp_usuario u ON r.Rut = u.Rut
+            WHERE r.respuesta_FRNM_id IN (4, 5, 6)
+            AND r.Rut IN (
+                SELECT Rut 
+                FROM botApp_respusuariofactorriesgonomod
+                WHERE respuesta_FRNM_id = 1
             )
-            GROUP BY FRNM.respuesta_FRNM_id;
-           """
-
+            GROUP BY r.respuesta_FRNM_id;
+            """
         )
         resultados = cursor.fetchall()
 
@@ -1717,13 +1716,13 @@ def mamografia_por_edad_si_no_rango_edad():
 
         if edad < edad_min and respuesta == 1:
             cantidades_si[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 8:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 1:
             cantidades_si[1] += cantidad
         elif edad > edad_max and respuesta == 1:
             cantidades_si[2] += cantidad 
         elif edad < edad_min and respuesta == 2:
             cantidades_no[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 9:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 2:
             cantidades_no[1] += cantidad
         elif edad > edad_max and respuesta == 2:
             cantidades_no[2] += cantidad 
