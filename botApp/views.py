@@ -1378,16 +1378,14 @@ def generar_grafico_mamo_si_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT r.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
             FROM botApp_respusuariofactorriesgonomod r
-            JOIN botApp_usuario u ON r.Rut = u.Rut
+            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
+            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
             WHERE r.respuesta_FRNM_id IN (4, 5, 6)
-            AND r.Rut IN (
-                SELECT Rut 
-                FROM botApp_respusuariofactorriesgonomod
-                WHERE respuesta_FRNM_id = 1
-            )
+            AND ur_mamo.id_opc_respuesta_id = 1 
             GROUP BY r.respuesta_FRNM_id;
+
             """
         )
         resultados = cursor.fetchall()
@@ -1471,16 +1469,15 @@ def generar_grafico_mamo_no_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT FRNM.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            JOIN botApp_usuario us ON FRNM.Rut = us.Rut
-            WHERE FRNM.respuesta_FRNM_id IN (3, 4, 5)
-            AND us.Rut IN (
-            SELECT FRNM.Rut 
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            WHERE FRNM.respuesta_FRNM_id = 2
-            )
-            GROUP BY FRNM.respuesta_FRNM_id """
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod r
+            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
+            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
+            WHERE r.respuesta_FRNM_id IN (4, 5, 6)
+            AND ur_mamo.id_opc_respuesta_id = 2
+            GROUP BY r.respuesta_FRNM_id;
+            
+           """
 
         )
         resultados = cursor.fetchall()
