@@ -10,173 +10,178 @@
 <section id="reportes">
     {% if Datos %}
     <div class="chart-container">
-        <h2>Usuarias por edad</h2>
         {% if datos_disponibles %}
-        <img src="data:image/png;base64,{{imagen_base64_edad}}" alt="Personas por edad">
+            <h2>Usuarias por edad</h2>
+            {%if imagen_base64_edad%}
+            <img src="data:imagen/png;base64,{{imagen_base64_edad}}" alt="Personas por edad", style="width: 90%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Usuarias por edad".</p>
+            {% endif %}
+            <br><br>
+            <h2>Usuarias por rango de edad </h2>
+                {% if imagen_base64_rango_edad %}
+                <img src="data:image/png;base64,{{imagen_base64_rango_edad}}" alt="Usuarias por rango de edad", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Usuarias por rango de edad".</p>
+                {% endif %}
+                <br><br>  
+            <h2>Se ha realizado mamografía: si/no por rango de edad</h2>
+                {% if imagen_base64_mamografia_si_no_rango_edad %}
+                <img src="data:image/png;base64,{{imagen_base64_mamografia_si_no_rango_edad}}" alt="Mamografia si/no por rango de edad", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Se ha realizado mamografía: si/no por rango de edad".</p>
+                {% endif %}
+                <br><br>
+            <h2>Se ha realizado mamografía: si/no por rango de edad barras agrupadas</h2>
+                {% if imagen_base64_mamografia_si_no_rango_edad_agrupadas %}
+                <img src="data:image/png;base64,{{imagen_base64_mamografia_si_no_rango_edad_agrupadas}}" alt="Mamografia si/no por rango de edad agrupado", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Se ha realizado mamografía: si/no por rango de edad barras agrupadas".</p>
+                {% endif %}
+                <br><br>
+            <h2>Usuarias por año de nacimiento</h2>
+            {% if imagen_base64_anios_nacimiento %}
+            <img src="data:image/png;base64,{{ imagen_base64_anios_nacimiento }}" alt="Personas por año de nacimiento", style="width: 90%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Usuarias por año de nacimiento".</p>
+            {% endif %}
+            <br><br>
+            <h2>Respuestas preguntas</h2>
+            {% if imagen_base64_pregunta1 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta1 }}" alt="¿Te has realizado una mamografía?", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 1".</p>
+            {% endif %}
+            {% if imagen_base64_pregunta2 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta2 }}" alt="¿Recuerdas cuando fue tu última mamografía?", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 2".</p>
+            {% endif %}
+            <br><br>
+            {% if imagen_base64_pregunta3 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta3 }}" alt="Fecha de última mamografía", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 3".</p>
+            {% endif %}
+            {% if imagen_base64_pregunta4 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta4 }}" alt="¿Tienes los archivos de tu última mamografía?", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 4".</p>
+            {% endif %}
+            <br><br>
+            {% if imagen_base64_pregunta5 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta5 }}" alt="¿Te gustaría recibir más información?", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 5".</p>
+            {% endif %}
+            {% if imagen_base64_pregunta6 %}
+            <img src="data:image/png;base64,{{ imagen_base64_pregunta6 }}" alt="¿Tienes un familiar directo con cáncer de mama?", style="width: 45%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Preguna 6".</p>
+            {% endif %}
+            <br><br>
+            <h2>Ingresos por día</h2>
+            {% if imagen_base64_ingresos %}
+            <img src="data:image/png;base64,{{ imagen_base64_ingresos }}" alt="Ingresos por día", style="width: 60%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Ingresos por día".</p>
+            {% endif %}
+            <br><br>
+            <h2>Personas por género</h2>
+            {% if imagen_base64_genero %}
+            <img src="data:image/png;base64,{{ imagen_base64_genero }}" alt="Personas por género", style="width: 60%; height: auto;">
+            {% else %}
+            <p>No hay datos suficientes para generar el gráfico "Personas por género".</p>
+            {% endif %}
+            <br><br>
+            <h2>Ingresos por comuna</h2>
+                {% if imagen_base64_ingresos_comuna %}
+                <img src="data:image/png;base64,{{ imagen_base64_ingresos_comuna }}" alt="Ingresos por comuna", style="width: 60%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Personas por género".</p>
+                {% endif %}
+                <br><br>
+            <h2>Referencias</h2>
+                {% if imagen_base64_referencias %}
+                <img src="data:image/png;base64,{{ imagen_base64_referencias }}" alt="Referencias", style="width: 60%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Referencias".</p>
+                {% endif %}
+                <br><br>
+            <h2>Mamografía por edad Respuesta Si</h2>
+                {% if imagen_base64_mamografia_si_por_edad %}
+                <img src="data:image/png;base64,{{imagen_base64_mamografia_si_por_edad}}" alt="Mamografia respuesta si por edad", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Mamografía por edad Respuesta Si".</p>
+                {% endif %}
+                <br><br>
+            <h2>Gráfico que si se ha realizado mamografía y cuenta con antecedentes familiares</h2>
+                {% if imagen_base64_mamo_si_por_familiar_directo %}
+                <img src="data:image/png;base64,{{imagen_base64_mamo_si_por_familiar_directo}}" alt ="Mamografia Si por familiar directo", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Gráfico que si se ha realizado mamografía y cuenta con antecedentes familiares".</p>
+                {% endif %}
+                <br><br>
+            <h2>Mamografía por edad Respuesta No</h2>
+                {% if imagen_base64_mamografia_no_por_edad %}
+                <img src="data:image/png;base64,{{imagen_base64_mamografia_no_por_edad}}" alt="Mamografia respuesta no por edad", style="width: 90%; height: auto;">    
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Mamografía por edad Respuesta No".</p>
+                {% endif %}
+                <br><br>
+                <br><br>
+            <h2>Gráfico que no se ha realizado mamografía y cuenta con antecedentes familiares</h2>
+                {% if imagen_base64_mamo_no_por_familiar_directo %}
+                <img src="data:image/png;base64,{{imagen_base64_mamo_no_por_familiar_directo}}" alt ="Mamografia no por familiar directo", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Gráfico que no se ha realizado mamografía y cuenta con antecedentes familiares".</p>
+                {% endif %}
+                <br><br>
+            <h2>Se ha realizado mamografía: si/no por edad</h2>
+                {% if imagen_base64_mamografia_por_edad_si_no %}
+                <img src="data:image/png;base64,{{imagen_base64_mamografia_por_edad_si_no}}" alt="Mamografia por edad si/no", style="width: 90%; height: auto;"> 
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Se ha realizado mamografía: si/no por edad".</p>
+                {% endif %}
+                <br><br>
+            <h2>Tiempo transcurrido desde última mamografía</h2>
+                {% if imagen_base64_tiempo_transc %}
+                <img src="data:image/png;base64,{{imagen_base64_tiempo_transc}}" alt="Tiempo transcurrido", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Tiempo transcurrido desde última mamografía".</p>
+                {% endif %}
+                <br><br>
+            <h2>Sistema de salud</h2>
+                {% if imagen_base64_grafico_prev_salud_por_rango_edad  %}
+                <img src="data:imagen/png;base64,{{imagen_base64_grafico_prev_salud_por_rango_edad}}" alt="Sistema de salud", style="width: 90%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Sistema de salud".</p>
+                {% endif %}
+                <br><br>
+            <h2>Consumo de alcohol</h2>
+                {% if imagen_base64_grafico_consumo_alcohol %}
+                <img src="data:imagen/png;base64,{{imagen_base64_grafico_consumo_alcohol}}" alt="Consumo de Alcohol", style="width: 45%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Consumo de alcohol".</p>
+                {% endif %}
+                <br><br>
+            <h2>Escolaridad de las Usuarias</h2>
+                {% if imagen_base64_grafico_escolaridad %}
+                <img src="data:imagen/png;base64,{{imagen_base64_grafico_escolaridad}}" alt="Escolaridad", style="width: 45%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Escolaridad de las Usuarias".</p>
+                {% endif %}
+                <br><br>
+            <h2>Género</h2>
+                {% if imagen_base64_grafico_genero_nuevo %}
+                <img src="data:imagen/png;base64,{{imagen_base64_grafico_genero_nuevo}}" alt="genero_nuevo", style="width: 45%; height: auto;">
+                {% else %}
+                <p>No hay datos suficientes para generar el gráfico "Género".</p>
+                {% endif %}
+                <br><br>
         {% else %}
-        <p>No hay datos suficientes para generar este gráfico.</p>
+            <p>No hay datos ingresados en ninguna categoría.</p>
         {% endif %}
-        <br><br>
-        <h2>Usuarias por rango de edad </h2>
-        {% if imagen_base64_rango_edad %}
-            <img src="data:image/png;base64,{{imagen_base64_rango_edad}}" alt="Usuarias por rango de edad", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Usuarias por rango de edad"</p>
-            {% endif %}
-            <br><br>  
-        <h2>Se ha realizado mamografía: si/no por rango de edad</h2>
-            {% if imagen_base64_mamografia_si_no_rango_edad %}
-            <img src="data:image/png;base64,{{imagen_base64_mamografia_si_no_rango_edad}}" alt="Mamografia si/no por rango de edad", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Se ha realizado mamografía: si/no por rango de edad"</p>
-            <br><br>
-        <h2>Se ha realizado mamografía: si/no por rango de edad barras agrupadas</h2>
-            {% if imagen_base64_mamografia_si_no_rango_edad_agrupadas %}
-            <img src="data:image/png;base64,{{imagen_base64_mamografia_si_no_rango_edad_agrupadas}}" alt="Mamografia si/no por rango de edad agrupado", style="width: 90%; height: auto;">
-            {% else %}
-            <p> No se ha podido acceder al gráfico "Se ha realizado mamografía: si/no por rango de edad barras agrupadas"</p>
-            {% endif %}
-            <br><br>
-        <h2>Usuarias por año de nacimiento</h2>
-        {% if imagen_base64_anios_nacimiento %}
-        <img src="data:image/png;base64,{{imagen_base64_anios_nacimiento}}" alt="Personas por año de nacimiento", style="width: 90%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Usuarias por año de nacimiento"</p>
-        {% endif %}
-        <br><br>
-        <h2>Respuestas preguntas</h2>
-        {% if imagen_base64_pregunta1 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta1}}" alt="¿Te has realizado una mamografía?", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 1"</p>
-        {% endif %}
-        {% if imagen_base64_pregunta2 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta2}}" alt="¿Recuerdas cuando fue tu última mamografía?", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 2"</p>
-        {% endif %}
-        <br><br>
-        {% if imagen_base64_pregunta3 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta3}}" alt="Fecha de última mamografía", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 3"</p>
-        {% endif %}
-        {% if imagen_base64_pregunta4 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta4}}" alt="¿Tienes los archivos de tu última mamografía?", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 4"</p>
-        {% endif %}
-        <br><br>
-        {% if imagen_base64_pregunta5 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta5}}" alt="¿Te gustaría recibir más información?", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 5"</p>
-        {% endif %}
-        {% if imagen_base64_pregunta6 %}
-        <img src="data:image/png;base64,{{imagen_base64_pregunta6}}" alt="¿Tienes un familiar directo con cáncer de mama?", style="width: 45%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Pregunta 6"</p>
-        {% endif %}
-        <br><br>
-        <h2>Ingresos por día</h2>
-        {% if imagen_base64_ingresos %}
-        <img src="data:image/png;base64,{{imagen_base64_ingresos}}" alt="Ingresos por día", style="width: 60%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Ingresos por día"</p>
-        {% endif %}
-        <br><br>
-        <h2>Personas por género</h2>
-        {% if imagen_base64_genero %}
-        <img src="data:image/png;base64,{{imagen_base64_genero}}" alt="Personas por género", style="width: 60%; height: auto;">
-        {% else %}
-        <p>No se ha podido acceder al gráfico "Personas por género"</p>
-        {% endif %}
-        <br><br>
-        <h2>Ingresos por comuna</h2>
-            {% if imagen_base64_ingresos_comuna %}
-            <img src="data:image/png;base64,{{imagen_base64_ingresos_comuna}}" alt="Ingresos por comuna", style="width: 60%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Ingresos por comuna"</p>
-            {% endif %}
-            <br><br>
-        <h2>Referencias</h2>
-            {% if imagen_base64_referencias %}
-            <img src="data:image/png;base64,{{imagen_base64_referencias}}" alt="Referencias", style="width: 60%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Referencias"</p>
-            {% endif %}
-            <br><br>
-        <h2>Mamografía por edad Respuesta Si</h2>
-            {% if imagen_base64_mamografia_si_por_edad %}
-            <img src="data:image/png;base64, {{imagen_base64_mamografia_si_por_edad}}" alt="Mamografia respuesta si por edad", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Mamografía por edad Respuesta Si"</p>
-            {% endif %}
-            <br><br>
-        <h2>Gráfico que si se ha realizado mamografía y cuenta con antecedentes familiares </h2>
-            {% if imagen_base64_mamo_si_por_familiar_directo %}    
-            <img src="data:image/png;base64,{{imagen_base64_mamo_si_por_familiar_directo}}" alt ="Mamografia Si por familiar directo", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Gráfico que si se ha realizado mamografía y cuenta con antecedentes familiares "</p>
-            {% endif %}
-            <br><br>
-        <h2>Mamografía por edad Respuesta No</h2>
-            {% if imagen_base64_mamografia_no_por_edad %}
-            <img src="data:image/png;base64,{{imagen_base64_mamografia_no_por_edad}}" alt="Mamografia respuesta no por edad", style="width: 90%; height: auto;">    
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Mamografía por edad Respuesta No"</p>
-            {% endif %}
-            <br><br>
-        <h2>Gráfico que no se ha realizado mamografía y cuenta con antecedentes familiares </h2>
-            {% if imagen_base64_mamo_no_por_familiar_directo %}
-            <img src="data:image/png;base64,{{imagen_base64_mamo_no_por_familiar_directo}}" alt ="Mamografia no por familiar directo", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Gráfico que no se ha realizado mamografía y cuenta con antecedentes familiares"</p>
-            {% endif %}
-            <br><br>
-        <h2>Se ha realizado mamografía: si/no por edad</h2>
-            {% if imagen_base64_mamografia_por_edad_si_no %}
-            <img src="data:image/png;base64,{{imagen_base64_mamografia_por_edad_si_no}}" alt="Mamografia por edad si/no", style="width: 90%; height: auto;"> 
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Se ha realizado mamografía: si/no por edad"</p>
-            {% endif %}
-            <br><br>
-        <h2>Tiempo transcurrido desde última mamografía</h2>
-            {% if imagen_base64_tiempo_transc %}
-            <img src="data:image/png;base64,{{imagen_base64_tiempo_transc}}" alt="Tiempo transcurrido", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Tiempo transcurrido desde última mamografía"</p>
-            {% endif %}
-            <br><br>
-        <h2>Sistema de salud</h2>
-            {% if imagen_base64_grafico_prev_salud_por_rango_edad %}
-            <img src="data:imagen/png;base64,{{imagen_base64_grafico_prev_salud_por_rango_edad}}" alt="Sistema de salud", style="width: 90%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Sistema de salud"</p>
-            {% endif %}
-            <br><br>
-        <h2>Consumo de alcohol</h2>
-            {% if imagen_base64_grafico_consumo_alcohol %}
-            <img src="data:imagen/png;base64,{{imagen_base64_grafico_consumo_alcohol}}" alt="Consumo de Alcohol", style="width: 45%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Consumo de alcohol"</p>
-            {% endif %}
-            <br><br>
-        <h2>Escolaridad de las Usuarias</h2>
-            {% if imagen_base64_grafico_escolaridad %}
-            <img src="data:imagen/png;base64,{{imagen_base64_grafico_escolaridad}}" alt="Escolaridad", style="width: 45%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Escolaridad de las Usuarias"</p>
-            {% endif %}
-            <br><br>
-        <h2>Género</h2>
-            {% if imagen_base64_grafico_genero_nuevo %}
-            <img src="data:imagen/png;base64,{{imagen_base64_grafico_genero_nuevo}}" alt="genero_nuevo", style="width: 45%; height: auto;">
-            {% else %}
-            <p>No se ha podido acceder al gráfico "Género"</p>
-            {% endif %}
-            <br><br>
-    
     </div>
     {% else %}
     <p>No hay datos ingresados</p>

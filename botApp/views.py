@@ -37,6 +37,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import locale 
 
+import logging
+
 locale.setlocale(locale.LC_TIME, 'es_ES')
     
 @login_required
@@ -120,6 +122,7 @@ def datosFRM(request):
     }
     return render(request, "respuestas/datosFRM.html", data)
 
+@login_required
 def datosFRM2(request):
     preguntas = PregFactorRiesgoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
@@ -162,6 +165,7 @@ def datosFRNM(request):
     }
     return render(request, "respuestas/datosFRNM.html", data)
 
+@login_required
 def datosFRNM2(request):
     preguntas = PregFactorRiesgoNoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
@@ -881,19 +885,46 @@ plt.rcParams['axes.titlesize'] =20
 plt.rcParams['axes.labelsize']= 13
 plt.rcParams['axes.labelpad']=10
 
+logger = logging.getLogger(__name__) 
+
 def reportes(request):
-    # Extraemos datos, filtrando los valores None
-    datos = list(Usuario.objects.values_list('campo', flat=True).exclude(campo=None))
+    datos_disponibles = False  
+    imagenes = {
+        "imagen_base64_edad": None,
+        "imagen_base64_anios_nacimiento": None,
+        "imagen_base64_mamografia_si_por_edad": None,
+        "imagen_base64_mamografia_no_por_edad": None,
+        "imagen_base64_mamografia_por_edad_si_no": None,
+        "imagen_base64_rango_edad": None,
+        "imagen_base64_mamografia_si_no_rango_edad": None,
+        "imagen_base64_mamografia_si_no_rango_edad_agrupadas": None,
+        "imagen_base64_grafico_prev_salud_por_rango_edad": None,
+    }
 
-    if datos:  # Si la lista tiene valores válidos
-        try:
-            minimo = min(datos)  # Calculamos el mínimo
-        except ValueError:  # Si la lista estuviera vacía por alguna razón
-            minimo = None
-    else:  # Si no hay datos
-        minimo = None
+    try:
+        datos_usuario = list(Usuario.objects.values_list('edad', flat=True).exclude(edad=None))
 
-    return render(request, 'reportes.html', {'minimo': minimo, 'datos_disponibles': bool(datos)})
+        if datos_usuario:
+            if any(edad is not None for edad in datos_usuario):
+                imagenes['imagen_base64_edad'] = generar_grafico_usuario_por_edad()
+                imagenes['imagen_base64_anios_nacimiento'] = generar_grafico_anio_nacimiento()
+                imagenes['imagen_base64_mamografia_si_por_edad'] = generar_grafico_mamografia_si_por_edad()
+                imagenes['imagen_base64_mamografia_no_por_edad'] = generar_grafico_mamografia_no_por_edad()
+                imagenes['imagen_base64_mamografia_por_edad_si_no'] = mamografia_por_edad_si_no()
+                imagenes['imagen_base64_rango_edad'] = generar_grafico_por_rango_edad()
+                imagenes['imagen_base64_mamografia_si_no_rango_edad'] = mamografia_por_edad_si_no_rango_edad()
+                imagenes['imagen_base64_mamografia_si_no_rango_edad_agrupadas'] = mamografia_por_edad_si_no_rango_edad_agrupado()
+                imagenes['imagen_base64_grafico_prev_salud_por_rango_edad'] = grafico_prev_salud_por_rango_edad()
+
+            datos_disponibles = bool(datos_usuario)
+
+    except Exception as error:
+        logger.error(f"Error al obtener datos de Usuario: {error}")
+
+    return render(request, 'reportes.html', {
+        'datos_disponibles': datos_disponibles,
+        **imagenes
+    })
 
 def generar_grafico_usuario_por_edad():
 
@@ -911,6 +942,9 @@ def generar_grafico_usuario_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
+    if not edades:
+        return None
+    
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
@@ -949,6 +983,9 @@ def generar_grafico_anio_nacimiento():
         anios.append(anio)
         cantidades.append(cantidad)
 
+    if not anios: 
+        return None 
+    
     plt.figure(figsize=[18, 8])
     plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
@@ -985,6 +1022,9 @@ def generar_grafico_respuestas_por_dia():
         fechas.append(datetime.strftime(fecha, "%d-%m-%Y"))
         cantidades.append(cantidad)
 
+    if not fechas: 
+        return None
+    
     plt.plot(fechas, cantidades, marker="o", linestyle="-", color="#79addc")
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
@@ -1035,6 +1075,9 @@ def generar_grafico_personas_por_genero_NUEVO():
     for i in range(len(generos)):
         plt.text(i, cantidades[i], str(cantidades[i]), ha='center', va='bottom')
 
+    if not generos: 
+        return None
+    
     plt.xlabel("Género")
     plt.ylabel("Número de Personas")
     plt.title("Ingresos por Género", pad=20)
@@ -1062,6 +1105,8 @@ def generar_grafico_ingresos_por_comuna():
     comunas = [result[0] for result in resultados]
     total_ingresos = [result[1] for result in resultados]
 
+    if not comunas: 
+        return None
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+ 0.5)} ingresos", startangle=90)
@@ -1094,6 +1139,9 @@ def generar_grafico_referencias():
     referencias = [result[0] for result in resultados]
     total_ingresos = [result[1] for result in resultados]
 
+    if not referencias: 
+        return None
+    
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=referencias, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
@@ -1317,10 +1365,10 @@ def generar_grafico_pregunta6():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
@@ -1363,6 +1411,9 @@ def generar_grafico_mamografia_si_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
+    if not edades: 
+        return None
+    
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
@@ -1390,18 +1441,15 @@ def generar_grafico_mamo_si_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT FRNM.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            JOIN botApp_usuario us ON FRNM.Rut = us.Rut
-            WHERE FRNM.respuesta_FRNM_id IN (4, 5, 6)
-            AND us.Rut IN (
-            SELECT FRNM.Rut 
-            FROM botApp_respusuariofactorriesgonomod FRNM
-            WHERE FRNM.respuesta_FRNM_id = 1
-            )
-            GROUP BY FRNM.respuesta_FRNM_id;
-           """
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod r
+            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
+            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
+            WHERE r.respuesta_FRNM_id IN (4, 5, 6)
+            AND ur_mamo.id_opc_respuesta_id = 1 
+            GROUP BY r.respuesta_FRNM_id;
 
+            """
         )
         resultados = cursor.fetchall()
 
@@ -1411,10 +1459,10 @@ def generar_grafico_mamo_si_por_familiar_directo():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
@@ -1442,7 +1490,7 @@ def generar_grafico_mamografia_no_por_edad():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(distinct ur.fecha_respuesta) as Cantidad 
+            SELECT us.edad, COUNT(*) as Cantidad 
             FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (2)
             GROUP BY edad ORDER BY edad ASC
@@ -1457,6 +1505,9 @@ def generar_grafico_mamografia_no_por_edad():
         edad, cantidad = resultado
         edades.append(edad)
         cantidades.append(cantidad)
+
+    if not edades: 
+        return None
 
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#EFB0C9")
@@ -1484,16 +1535,15 @@ def generar_grafico_mamo_no_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT ur.respuesta_FRNM_id, COUNT(*) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod ur
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
-            WHERE ur.respuesta_FRNM_id IN (3, 4, 5)
-            AND us.Rut IN (
-            SELECT ur2.Rut 
-            FROM botApp_respusuariofactorriesgonomod ur2 
-            WHERE ur2.respuesta_FRNM_id = 2
-            )
-            GROUP BY ur.respuesta_FRNM_id; """
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
+            FROM botApp_respusuariofactorriesgonomod r
+            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
+            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
+            WHERE r.respuesta_FRNM_id IN (4, 5, 6)
+            AND ur_mamo.id_opc_respuesta_id = 2
+            GROUP BY r.respuesta_FRNM_id;
+            
+           """
 
         )
         resultados = cursor.fetchall()
@@ -1504,10 +1554,10 @@ def generar_grafico_mamo_no_por_familiar_directo():
 
     for resultado in resultados:
         id_opc_respuesta, cantidad = resultado
-        opcion_respuesta = PreguntaOpcionRespuesta.objects.get(id=id_opc_respuesta)
-        labels.append(opcion_respuesta.OPC_Respuesta)
+        opcion_respuesta = OpcFactorRiesgoNoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRNM)
         sizes.append(cantidad)
-        counts.append(f"{opcion_respuesta.OPC_Respuesta} - {cantidad}")
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRNM} - {cantidad}")
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
@@ -1560,11 +1610,14 @@ def mamografia_por_edad_si_no():
         # Obtenemos el índice correspondiente a la edad
         index = edades.index(edad)
 
-        if respuesta == 8:
+        if respuesta == 1:
             cantidades_si[index] += cantidad
-        elif respuesta == 9: 
+        elif respuesta == 2: 
             cantidades_no[index] += cantidad
 
+    if not edades: 
+        return None
+    
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades_si, color="#79addc", label="Cantidad Sí")
@@ -1703,7 +1756,7 @@ def mamografia_por_edad_si_no_rango_edad():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (1,2)
@@ -1727,17 +1780,17 @@ def mamografia_por_edad_si_no_rango_edad():
     for resultado in resultados:
         edad, cantidad, respuesta = resultado
 
-        if edad < edad_min and respuesta == 8:
+        if edad < edad_min and respuesta == 1:
             cantidades_si[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 8:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 1:
             cantidades_si[1] += cantidad
-        elif edad > edad_max and respuesta == 8:
+        elif edad > edad_max and respuesta == 1:
             cantidades_si[2] += cantidad 
-        elif edad < edad_min and respuesta == 9:
+        elif edad < edad_min and respuesta == 2:
             cantidades_no[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 9:
+        elif edad >= edad_min and edad <= edad_max and respuesta == 2:
             cantidades_no[1] += cantidad
-        elif edad > edad_max and respuesta == 9:
+        elif edad > edad_max and respuesta == 2:
             cantidades_no[2] += cantidad 
 
     # Crear el gráfico
@@ -1775,7 +1828,7 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT us.edad, COUNT(DISTINCT ur.fecha_respuesta) as Cantidad, ur.id_opc_respuesta_id
+            SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.Rut = us.Rut
             WHERE id_opc_respuesta_id IN (1,2)
@@ -1793,17 +1846,17 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     for resultado in resultados:
         edad, cantidad, respuesta = resultado
 
-        if edad < 50 and respuesta == 8:
+        if edad < 50 and respuesta == 1:
             cantidades_si[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 8:
+        elif edad >= 50 and edad <= 69 and respuesta == 1:
             cantidades_si[1] += cantidad
-        elif edad > 69 and respuesta == 8:
+        elif edad > 69 and respuesta == 1:
             cantidades_si[2] += cantidad 
-        elif edad < 50 and respuesta == 9:
+        elif edad < 50 and respuesta == 2:
             cantidades_no[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 9:
+        elif edad >= 50 and edad <= 69 and respuesta == 2:
             cantidades_no[1] += cantidad
-        elif edad > 69 and respuesta == 9:
+        elif edad > 69 and respuesta == 2:
             cantidades_no[2] += cantidad 
 
     x = np.arange(len(opciones_anios))  
