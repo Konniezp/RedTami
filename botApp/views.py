@@ -37,6 +37,8 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import locale 
 
+import logging
+
 locale.setlocale(locale.LC_TIME, 'es_ES')
     
 @login_required
@@ -881,6 +883,47 @@ plt.rcParams['axes.titlesize'] =20
 plt.rcParams['axes.labelsize']= 13
 plt.rcParams['axes.labelpad']=10
 
+logger = logging.getLogger(__name__) 
+
+def reportes(request):
+    datos_disponibles = False  
+    imagenes = {
+        "imagen_base64_edad": None,
+        "imagen_base64_anios_nacimiento": None,
+        "imagen_base64_mamografia_si_por_edad": None,
+        "imagen_base64_mamografia_no_por_edad": None,
+        "imagen_base64_mamografia_por_edad_si_no": None,
+        "imagen_base64_rango_edad": None,
+        "imagen_base64_mamografia_si_no_rango_edad": None,
+        "imagen_base64_mamografia_si_no_rango_edad_agrupadas": None,
+        "imagen_base64_grafico_prev_salud_por_rango_edad": None,
+    }
+
+    try:
+        datos_usuario = list(Usuario.objects.values_list('edad', flat=True).exclude(edad=None))
+
+        if datos_usuario:
+            if any(edad is not None for edad in datos_usuario):
+                imagenes['imagen_base64_edad'] = generar_grafico_usuario_por_edad()
+                imagenes['imagen_base64_anios_nacimiento'] = generar_grafico_anio_nacimiento()
+                imagenes['imagen_base64_mamografia_si_por_edad'] = generar_grafico_mamografia_si_por_edad()
+                imagenes['imagen_base64_mamografia_no_por_edad'] = generar_grafico_mamografia_no_por_edad()
+                imagenes['imagen_base64_mamografia_por_edad_si_no'] = mamografia_por_edad_si_no()
+                imagenes['imagen_base64_rango_edad'] = generar_grafico_por_rango_edad()
+                imagenes['imagen_base64_mamografia_si_no_rango_edad'] = mamografia_por_edad_si_no_rango_edad()
+                imagenes['imagen_base64_mamografia_si_no_rango_edad_agrupadas'] = mamografia_por_edad_si_no_rango_edad_agrupado()
+                imagenes['imagen_base64_grafico_prev_salud_por_rango_edad'] = grafico_prev_salud_por_rango_edad()
+
+            datos_disponibles = bool(datos_usuario)
+
+    except Exception as error:
+        logger.error(f"Error al obtener datos de Usuario: {error}")
+
+    return render(request, 'reportes.html', {
+        'datos_disponibles': datos_disponibles,
+        **imagenes
+    })
+
 def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
@@ -897,6 +940,9 @@ def generar_grafico_usuario_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
+    if not edades:
+        return None
+    
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
@@ -935,6 +981,9 @@ def generar_grafico_anio_nacimiento():
         anios.append(anio)
         cantidades.append(cantidad)
 
+    if not anios: 
+        return None 
+    
     plt.figure(figsize=[18, 8])
     plt.bar(anios, cantidades, color="#79addc")
     plt.xlabel("Año de Nacimiento")
@@ -971,6 +1020,9 @@ def generar_grafico_respuestas_por_dia():
         fechas.append(datetime.strftime(fecha, "%d-%m-%Y"))
         cantidades.append(cantidad)
 
+    if not fechas: 
+        return None
+    
     plt.plot(fechas, cantidades, marker="o", linestyle="-", color="#79addc")
     plt.xlabel("Fecha de Respuesta")
     plt.ylabel("Número de Respuestas")
@@ -1021,6 +1073,9 @@ def generar_grafico_personas_por_genero_NUEVO():
     for i in range(len(generos)):
         plt.text(i, cantidades[i], str(cantidades[i]), ha='center', va='bottom')
 
+    if not generos: 
+        return None
+    
     plt.xlabel("Género")
     plt.ylabel("Número de Personas")
     plt.title("Ingresos por Género", pad=20)
@@ -1048,6 +1103,8 @@ def generar_grafico_ingresos_por_comuna():
     comunas = [result[0] for result in resultados]
     total_ingresos = [result[1] for result in resultados]
 
+    if not comunas: 
+        return None
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=comunas, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos)+ 0.5)} ingresos", startangle=90)
@@ -1080,6 +1137,9 @@ def generar_grafico_referencias():
     referencias = [result[0] for result in resultados]
     total_ingresos = [result[1] for result in resultados]
 
+    if not referencias: 
+        return None
+    
     # Configurar el gráfico circular
     fig, ax = plt.subplots()
     wedges, texts, autotexts = ax.pie(total_ingresos, labels=referencias, autopct=lambda pct: f"{pct:.1f}%\n{int(pct/100 * sum(total_ingresos))} ingresos", startangle=90)
@@ -1349,6 +1409,9 @@ def generar_grafico_mamografia_si_por_edad():
         edades.append(edad)
         cantidades.append(cantidad)
 
+    if not edades: 
+        return None
+    
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#79addc")
     plt.xlabel("Edad")
@@ -1443,6 +1506,9 @@ def generar_grafico_mamografia_no_por_edad():
         edad, cantidad = resultado
         edades.append(edad)
         cantidades.append(cantidad)
+
+    if not edades: 
+        return None
 
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades, color="#EFB0C9")
@@ -1551,6 +1617,9 @@ def mamografia_por_edad_si_no():
         elif respuesta == 9: 
             cantidades_no[index] += cantidad
 
+    if not edades: 
+        return None
+    
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades_si, color="#79addc", label="Cantidad Sí")
