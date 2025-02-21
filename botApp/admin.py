@@ -81,9 +81,14 @@ class UsuarioTextoPreguntaAdmin(admin.ModelAdmin):
     list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
     
 class MensajeContenidoAdmin(admin.ModelAdmin):
-    list_display = ("id", "texto", "fecha", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
-    search_fields = ("id", "texto", "fecha", "opcrespFRNM","opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
-    list_filter = ("id", "texto", "fecha", "opcrespFRNM","opcrespFRM", "opcrespDS", "opcresTM", "opcresUS")
+    list_display = ("id", "texto", "fecha")
+    search_fields = ("id", "texto", "fecha")
+    list_filter = ("id", "texto", "fecha")
+
+class filtro_mensajeAdmin(admin.ModelAdmin):
+    list_display = ("id", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS", "mensaje_contenido_id")
+    search_fields = ("id", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS", "mensaje_contenido_id")
+    list_filter = ("id", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS", "mensaje_contenido_id")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
     list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
@@ -187,3 +192,4 @@ admin.site.register(RespDeterSalud, RespDeterSaludAdmin)
 admin.site.register(RespTextoFRM, RespTextoFRMAdmin)
 admin.site.register(Codigos_preg, Codigos_pregAdmin)
 admin.site.register(CalculoFRM, CalculoFRMAdmin)
+admin.site.register(filtro_mensaje, filtro_mensajeAdmin)

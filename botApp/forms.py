@@ -25,7 +25,7 @@ class PreguntaForm(forms.ModelForm):
 class MensajeContenidoForm(forms.ModelForm):
     class Meta:
         model = MensajeContenido
-        fields = ['texto','fecha', 'opcrespFRNM', 'opcrespFRM','opcrespDS', 'opcresTM', 'opcresUS']
+        fields = ['texto','fecha']
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'dark-input'})
         }
