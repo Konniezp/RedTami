@@ -2334,7 +2334,7 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
         #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()
         #id_usuario = usuario_model.id
 
-
+        return JsonResponse(data)
 
         respuesta = False
 
