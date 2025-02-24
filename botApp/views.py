@@ -2327,7 +2327,7 @@ def consultar_estado_pregunta(request):
     if request.method == "POST":
         
         #data = json.loads(request.body.decode('utf-8'))
-        data = JSONParser().parse(request)
+        data = JSONParser().parse(request.body)
         
 
         #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()
