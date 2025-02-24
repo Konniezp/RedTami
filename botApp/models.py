@@ -291,7 +291,7 @@ class RespTextoFRM(models.Model):
     altura_FRM5 = models.CharField(max_length= 4)  # Altura en cm
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
     id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
-
+    
     def __str__(self):
         return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm"
     
@@ -363,8 +363,8 @@ class CalculoFRM(models.Model):
             datos_originales=instance,
             defaults={
                 "Rut": instance.Rut,
-                "peso": peso_formateado,
-                "altura": altura_formateada,
+                "peso_mod": peso_formateado,
+                "altura_mod": altura_formateada,
             }
         )
 
@@ -373,5 +373,3 @@ class CalculoFRM(models.Model):
             formateado.altura_mod= altura_formateada
             formateado.save()
     
-      
-

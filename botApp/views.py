@@ -2278,6 +2278,10 @@ class RespTextoFRMAPIView(APIView):
         serializer = RespTextoFRMSerializer(respuestas, many=True)
         return Response(serializer.data)
 
+
+
+
+
 # --------------------- Api --------------------- #
 
 # ------------------Parseo fecha ---------------- #
@@ -2316,3 +2320,66 @@ def obtener_usuario(request, usuario_id):
         return JsonResponse({"error": "Usuario no encontrado"}, status=404)
 
 
+
+@csrf_exempt
+def consultar_estado_pregunta(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            print(f"Datos recibidos: {data}")
+
+            usuario_model = Usuario.objects.get(Rut=data.Rut)
+            id_usuario = usuario_model.id
+
+
+
+
+
+            if data["tipo_pregunta"] == "XXX":
+                pregunta_model = Pregunta.objects.get(pregunta=data.nombre_pregunta)
+                id_pregunta = pregunta_model.id
+
+                opcion_respuesta_model = PreguntaOpcionRespuesta.objects.get(id_pregunta=id_pregunta)
+                respuesta = UsuarioRespuesta.objects.filter(Rut=data.Rut, id_opc_respuesta=opcion_respuesta_model.id)
+            if data["tipo_pregunta"] == "YYY":
+                pregunta_model = PregDeterSalud.objects.get(pregunta_DS=data.nombre_pregunta)
+                id_pregunta = pregunta_model.id
+
+                opcion_respuesta_model = OpcDeterSalud.objects.get(id_pregunta_DS=id_pregunta)
+                respuesta = RespDeterSalud.objects.filter(Rut=data.Rut, respuesta_DS=opcion_respuesta_model.id)
+            if data["tipo_pregunta"] == "ZZZ":
+                pregunta_model = PregFactorRiesgoMod.objects.get(pregunta_FRM=data.nombre_pregunta)
+                id_pregunta = pregunta_model.id
+
+                opcion_respuesta_model = OpcFactorRiesgoMod.objects.get(id_pregunta_FRM=id_pregunta)
+                respuesta = RespUsuarioFactorRiesgoMod.objects.filter(Rut=data.Rut, respuesta_FRM=opcion_respuesta_model.id)
+            if data["tipo_pregunta"] == "AAA":
+                pregunta_model = PregFactorRiesgoNoMod.objects.get(pregunta_FRNM=data.nombre_pregunta)
+                id_pregunta = pregunta_model.id
+
+                opcion_respuesta_model = OpcFactorRiesgoNoMod.objects.get(id_pregunta_FRNM=id_pregunta)
+                respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data.Rut, respuesta_FRNM=opcion_respuesta_model.id)
+            
+
+            return JsonResponse({
+                "respondido": respuesta == True
+            })
+        except ValueError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": f"Error inesperado: {str(e)}"}, status=500)
+
+    return JsonResponse({"error": "Método no permitido."}, status=405)
+
+def obtener_usuario(request, usuario_id):
+    try:
+        usuario = Usuario.objects.get(id=usuario_id)
+        fecha_formateada = usuario.AnioNacimiento.strftime("%d/%m/%Y") if usuario.AnioNacimiento else None
+
+        return JsonResponse({
+            "nombre": usuario.nombre,
+            "fecha_nacimiento": usuario.fecha_nacimiento,  # Campo CharField
+            "AnioNacimiento": fecha_formateada  # Campo DateField formateado
+        })
+    except Usuario.DoesNotExist:
+        return JsonResponse({"error": "Usuario no encontrado"}, status=404)

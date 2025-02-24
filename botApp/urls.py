@@ -72,4 +72,8 @@ urlpatterns = [
     path('api_pregunta/', UsuarioTextoPreguntaAPIView.as_view(), name='api_pregunta'),
     path('api_respuesta/', UsuarioRespuestaAPIView.as_view(), name='api_respuesta'),
     path('api_mensaje/', MensajeContenidoAPIView.as_view(), name='api_mensaje'),
+
+
+    #ver si respuesta existe
+    path('existe-respuesta/', views.consultar_estado_pregunta, name='existe_respuesta'),
 ]
