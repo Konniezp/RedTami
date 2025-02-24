@@ -2367,7 +2367,7 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
         
 
         return JsonResponse({
-            "respondido": respuesta
+            "respondido": len(respuesta) > 0
         })
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
