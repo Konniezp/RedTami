@@ -25,6 +25,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAdminUser
+from rest_framework.parsers import JSONParser
 
 from .forms import *
 from .models import *
@@ -2324,20 +2325,15 @@ def obtener_usuario(request, usuario_id):
 @csrf_exempt
 def consultar_estado_pregunta(request):
     if request.method == "POST":
-        return JsonResponse(request.body, safe=False)
-        data = json.loads(request.body.decode('utf-8'))
         
+        #data = json.loads(request.body.decode('utf-8'))
+        data = JSONParser().parse(request)
         
-        data = {
-            "Rut": data.get("Rut", ""),
-            "tipo_pregunta": data.get("tipo_pregunta", ""),
-            "nombre_pregunta": data.get("nombre_pregunta", "")
-        }
 
         #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()
         #id_usuario = usuario_model.id
 
-        #return JsonResponse(data)
+        return JsonResponse(data)
 
         respuesta = False
 
