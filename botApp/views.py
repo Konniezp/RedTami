@@ -2344,8 +2344,8 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
 
             opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
             #return JsonResponse({"lista": opcion_respuesta_model})
-            respuesta = UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta__in=opcion_respuesta_model)
-            return JsonResponse(respuesta)
+            respuesta = UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta__in=opcion_respuesta_model).first()
+            #return JsonResponse({respuesta})
         elif data["tipo_pregunta"] == "YYY":
             pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
