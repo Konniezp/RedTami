@@ -2331,7 +2331,7 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
             "nombre_pregunta": nombre_pregunta
         }
 
-        usuario_model = Usuario.objects.get(Rut=data.Rut)
+        usuario_model = Usuario.objects.get(Rut=data["Rut"])
         id_usuario = usuario_model.id
 
 
@@ -2339,29 +2339,29 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
 
 
         if data["tipo_pregunta"] == "XXX":
-            pregunta_model = Pregunta.objects.get(pregunta=data.nombre_pregunta)
+            pregunta_model = Pregunta.objects.get(pregunta=data["nombre_pregunta"])
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = PreguntaOpcionRespuesta.objects.get(id_pregunta=id_pregunta)
-            respuesta = UsuarioRespuesta.objects.filter(Rut=data.Rut, id_opc_respuesta=opcion_respuesta_model.id)
+            respuesta = UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta=opcion_respuesta_model.id)
         if data["tipo_pregunta"] == "YYY":
-            pregunta_model = PregDeterSalud.objects.get(pregunta_DS=data.nombre_pregunta)
+            pregunta_model = PregDeterSalud.objects.get(pregunta_DS=data["nombre_pregunta"])
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = OpcDeterSalud.objects.get(id_pregunta_DS=id_pregunta)
-            respuesta = RespDeterSalud.objects.filter(Rut=data.Rut, respuesta_DS=opcion_respuesta_model.id)
+            respuesta = RespDeterSalud.objects.filter(Rut=data["Rut"], respuesta_DS=opcion_respuesta_model.id)
         if data["tipo_pregunta"] == "ZZZ":
-            pregunta_model = PregFactorRiesgoMod.objects.get(pregunta_FRM=data.nombre_pregunta)
+            pregunta_model = PregFactorRiesgoMod.objects.get(pregunta_FRM=data["nombre_pregunta"])
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = OpcFactorRiesgoMod.objects.get(id_pregunta_FRM=id_pregunta)
-            respuesta = RespUsuarioFactorRiesgoMod.objects.filter(Rut=data.Rut, respuesta_FRM=opcion_respuesta_model.id)
+            respuesta = RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["Rut"], respuesta_FRM=opcion_respuesta_model.id)
         if data["tipo_pregunta"] == "AAA":
-            pregunta_model = PregFactorRiesgoNoMod.objects.get(pregunta_FRNM=data.nombre_pregunta)
+            pregunta_model = PregFactorRiesgoNoMod.objects.get(pregunta_FRNM=data["nombre_pregunta"])
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = OpcFactorRiesgoNoMod.objects.get(id_pregunta_FRNM=id_pregunta)
-            respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data.Rut, respuesta_FRNM=opcion_respuesta_model.id)
+            respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["Rut"], respuesta_FRNM=opcion_respuesta_model.id)
         
 
         return JsonResponse({
