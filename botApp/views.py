@@ -2327,6 +2327,7 @@ def consultar_estado_pregunta(request):
         try:
             data = json.loads(request.body)
             print(f"Datos recibidos: {data}")
+            return JsonResponse(data)
 
             usuario_model = Usuario.objects.get(Rut=data.Rut)
             id_usuario = usuario_model.id
