@@ -2322,13 +2322,15 @@ def obtener_usuario(request, usuario_id):
 
 
 @csrf_exempt
-def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
-    if request.method == "GET":
+def consultar_estado_pregunta(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        
         
         data = {
-            "Rut": Rut,
-            "tipo_pregunta": tipo_pregunta,
-            "nombre_pregunta": nombre_pregunta
+            "Rut": data.get("Rut", ""),
+            "tipo_pregunta": data.get("tipo_pregunta", ""),
+            "nombre_pregunta": data.get("nombre_pregunta", "")
         }
 
         #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()

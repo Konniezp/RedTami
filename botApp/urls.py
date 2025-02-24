@@ -75,5 +75,5 @@ urlpatterns = [
 
 
     #ver si respuesta existe
-    path('existe-respuesta/<Rut>/<tipo_pregunta>/<nombre_pregunta>', views.consultar_estado_pregunta, name='existe_respuesta'),
+    path('existe-respuesta/', views.consultar_estado_pregunta, name='existe_respuesta'),
 ]
