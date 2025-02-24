@@ -2324,6 +2324,7 @@ def obtener_usuario(request, usuario_id):
 @csrf_exempt
 def consultar_estado_pregunta(request):
     if request.method == "POST":
+        return JsonResponse(request.body)
         data = json.loads(request.body.decode('utf-8'))
         
         
