@@ -2336,7 +2336,7 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
 
 
 
-
+        respuesta = False
 
         if data["tipo_pregunta"] == "XXX":
             pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
@@ -2344,19 +2344,19 @@ def consultar_estado_pregunta(request, Rut, tipo_pregunta, nombre_pregunta):
 
             opcion_respuesta_model = PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta)
             respuesta = UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta=opcion_respuesta_model.id)
-        if data["tipo_pregunta"] == "YYY":
+        elif data["tipo_pregunta"] == "YYY":
             pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta)
             respuesta = RespDeterSalud.objects.filter(Rut=data["Rut"], respuesta_DS=opcion_respuesta_model.id)
-        if data["tipo_pregunta"] == "ZZZ":
+        elif data["tipo_pregunta"] == "ZZZ":
             pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta)
             respuesta = RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["Rut"], respuesta_FRM=opcion_respuesta_model.id)
-        if data["tipo_pregunta"] == "AAA":
+        elif data["tipo_pregunta"] == "AAA":
             pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
