@@ -2336,32 +2336,31 @@ def consultar_estado_pregunta(request):
 
         respuesta = False
 
-        if data["tipo_pregunta"] == "XXX":
+        if data["tipo_pregunta"] == "TM":
             pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            #return JsonResponse({"lista": opcion_respuesta_model})
             respuesta = list(UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
-            #return JsonResponse({respuesta})
-        elif data["tipo_pregunta"] == "YYY":
+    
+        elif data["tipo_pregunta"] == "DS":
             pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
-            opcion_respuesta_model = OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta)
-            respuesta = RespDeterSalud.objects.filter(Rut=data["Rut"], respuesta_DS=opcion_respuesta_model.id)
-        elif data["tipo_pregunta"] == "ZZZ":
+            opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
+            respuesta = list(RespDeterSalud.objects.filter(Rut=data["Rut"], respuesta_DS=opcion_respuesta_model.id).values_list("id", flat=True))
+        elif data["tipo_pregunta"] == "FRM":
             pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
-            opcion_respuesta_model = OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta)
-            respuesta = RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["Rut"], respuesta_FRM=opcion_respuesta_model.id)
-        elif data["tipo_pregunta"] == "AAA":
+            opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["Rut"], respuesta_FRM=opcion_respuesta_model.id).values_list("id", flat =True))
+        elif data["tipo_pregunta"] == "FRNM":
             pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
-            opcion_respuesta_model = OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta)
-            respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["Rut"], respuesta_FRNM=opcion_respuesta_model.id)
+            opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["Rut"], respuesta_FRNM=opcion_respuesta_model.id).values_list("id", flat=True))
         
 
         return JsonResponse({
@@ -2370,15 +2369,3 @@ def consultar_estado_pregunta(request):
 
     return JsonResponse({"error": "Método no permitido."}, status=405)
 
-def obtener_usuario(request, usuario_id):
-    try:
-        usuario = Usuario.objects.get(id=usuario_id)
-        fecha_formateada = usuario.AnioNacimiento.strftime("%d/%m/%Y") if usuario.AnioNacimiento else None
-
-        return JsonResponse({
-            "nombre": usuario.nombre,
-            "fecha_nacimiento": usuario.fecha_nacimiento,  # Campo CharField
-            "AnioNacimiento": fecha_formateada  # Campo DateField formateado
-        })
-    except Usuario.DoesNotExist:
-        return JsonResponse({"error": "Usuario no encontrado"}, status=404)
