@@ -28,7 +28,7 @@ class Usuario(models.Model):
     Rut = models.CharField(max_length=255)  # Se almacena cifrado
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=255)  # Se almacena cifrado
-    Email = models.EmailField(max_length=254, blank=True)
+    Email = models.CharField(max_length=255, blank=True) # Se almacena cifrado
     Comuna_Usuario = models.ForeignKey('comuna', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
     Fecha_Ingreso = models.DateTimeField(default=timezone.now)
@@ -40,6 +40,9 @@ class Usuario(models.Model):
 
     def get_whatsapp_descifrado(self):
         return decrypt_data(self.Whatsapp) if self.Whatsapp else None
+    
+    def get_email_descifrado (self):
+        return decrypt_data(self.Email) if self.Email else None
 
     def calculo_edad(self):
         if self.AnioNacimiento:
@@ -96,12 +99,15 @@ class Usuario(models.Model):
             except ValidationError as e:
                 raise e
 
-        # Cifrar Rut y Whatsapp si no están cifrados aún
+        # Cifrar Rut, Whatsapp e Email si no están cifrados aún
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
 
         if self.Whatsapp and not self.Whatsapp.startswith("gAAAA"):
             self.Whatsapp = encrypt_data(self.Whatsapp).decode()
+
+        if self.Email and not self.Email.startswith("gAAAA"):
+            self.Email = encrypt_data(self.Email).decode()
 
         # Calcular edad antes de guardar
         self.edad = self.calculo_edad()
@@ -203,13 +209,21 @@ class ultima_mamografia_anio(models.Model):
         tiempo_transc_ult_mamografia = anio_actual - self.anio_ult_mamografia
         return tiempo_transc_ult_mamografia
 
-    # Guardar tiempo transcurrido con método save
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
     def save(self, *args, **kwargs):
+        # Cifrar Rut si aún no está cifrado
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        
+        # Calcular tiempo transcurrido
         self.tiempo_transc_ult_mamografia = self.calculo_tiempo_transc_ult_mamografia()
+        
         super().save(*args, **kwargs)
 
     def _str_(self):
-        return f"{self.Rut} - {self.anio_ult_mamografia}"
+        return f"{self.get_rut_descifrado()} - {self.anio_ult_mamografia}"
 
 class region(models.Model):
     cod_region = models.CharField(primary_key=True, verbose_name= "Cod region", max_length=2)
@@ -342,11 +356,20 @@ class RespTextoFRM(models.Model):
     id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.Rut} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm"
-    
+        return f"{self.get_rut_descifrado()} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm"
+
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Guardamos el dato bruto primero
-        CalculoFRM.procesar_datos_brutos(self)  # Llamamos la limpieza
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode() 
+
+        super().save(*args, **kwargs)
+
+        # Procesa los datos brutos
+        CalculoFRM.procesar_datos_brutos(self)
+
+    def get_rut_descifrado(self):
+        #Devuelve el RUT descifrado
+        return decrypt_data(self.Rut) if self.Rut else None
 
 class CalculoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Cálculo FRM")
