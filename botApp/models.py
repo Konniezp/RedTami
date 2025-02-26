@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -8,18 +9,25 @@ from datetime import date, datetime
 from dateutil import parser
 from unidecode import unidecode 
 from fuzzywuzzy import fuzz
+from .utils import encrypt_data, decrypt_data
+from cryptography.fernet import Fernet
+import base64
+import os
+from django.conf import settings
 
 import locale
 import re
 
 locale.setlocale(locale.LC_TIME, 'es_ES') 
-    
+
+cipher_suite = Fernet(settings.ENCRYPT_KEY)
+
 class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)  # Se almacena cifrado
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
-    Whatsapp = models.CharField(max_length=200)
+    Whatsapp = models.CharField(max_length=255)  # Se almacena cifrado
     Email = models.EmailField(max_length=254, blank=True)
     Comuna_Usuario = models.ForeignKey('comuna', on_delete=models.CASCADE)
     Referencia = models.CharField(max_length=200)
@@ -27,7 +35,12 @@ class Usuario(models.Model):
     edad = models.IntegerField(default=0)
     fecha_nacimiento = models.CharField(max_length=30, null=True, blank=True)
 
-    # Cálculo de edad por medio de la fecha actual y la fecha de nacimiento (AnioNacimiento)
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+
+    def get_whatsapp_descifrado(self):
+        return decrypt_data(self.Whatsapp) if self.Whatsapp else None
+
     def calculo_edad(self):
         if self.AnioNacimiento:
             fecha_actual = date.today()
@@ -36,70 +49,67 @@ class Usuario(models.Model):
             return edad
         return 0
 
-    # Validación y guardado de fecha en save()
+    def validar_fecha_nacimiento(self):
+        if not self.fecha_nacimiento:
+            return None
+
+        meses_correctos = [
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        ]
+
+        fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
+
+        for mes in meses_correctos:
+            palabras_fecha = fecha_normalizada.split()
+            for palabra in palabras_fecha:
+                puntaje = fuzz.ratio(palabra, mes)
+                if puntaje > 70:
+                    fecha_normalizada = fecha_normalizada.replace(palabra, mes)
+
+        formatos_fecha = [
+            "%d/%m/%Y", "%d-%m-%Y", "%d %B %Y", "%d de %B de %Y",
+            "%d %m %Y", "%d/%m/%y", "%d-%m-%y", "%d %m %y",
+            "%d de %B del %Y", "%d de %B del %y", "%d de %B %y",
+            "%d de %B %Y", "%d de %b %Y", "%d de %b %y",
+            "%d de %b del %Y", "%d de %b del %y"
+        ]
+
+        for formato in formatos_fecha:
+            try:
+                fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
+                return fecha_convertida
+            except ValueError:
+                continue
+
+        raise ValidationError(
+            f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
+        )
+
     def save(self, *args, **kwargs):
-        if self.fecha_nacimiento:  # Solo si fecha_nacimiento está presente
-            # Lista de nombres de meses en español
-            meses_correctos = [
-                "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-            ]
+        # Validar y convertir fecha de nacimiento
+        if self.fecha_nacimiento:
+            try:
+                fecha_validada = self.validar_fecha_nacimiento()
+                if fecha_validada:
+                    self.AnioNacimiento = fecha_validada
+            except ValidationError as e:
+                raise e
 
-            # Normalizar el texto: convertir a minúsculas y eliminar acentos
-            fecha_normalizada = unidecode(self.fecha_nacimiento.lower())
+        # Cifrar Rut y Whatsapp si no están cifrados aún
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
 
-            # Reemplazar nombres de meses mal escritos
-            for mes in meses_correctos:
-                palabras_fecha = fecha_normalizada.split()
-                for palabra in palabras_fecha:
-                    puntaje = fuzz.ratio(palabra, mes)
-                    if puntaje > 70:  # Umbral de similitud
-                        fecha_normalizada = fecha_normalizada.replace(palabra, mes)
+        if self.Whatsapp and not self.Whatsapp.startswith("gAAAA"):
+            self.Whatsapp = encrypt_data(self.Whatsapp).decode()
 
-            # Formatos de fecha permitidos
-            formatos_fecha = [
-                "%d/%m/%Y",  # dd/mm/yyyy
-                "%d-%m-%Y",  # dd-mm-yyyy
-                "%d %B %Y",  # 12 noviembre 1990
-                "%d de %B de %Y",  # 12 de noviembre de 1990
-                "%d %m %Y",  # dd mm yyyy
-                "%d/%m/%y",  # dd/mm/yy
-                "%d-%m-%y",  # dd-mm-yy
-                "%d %m %y",  # dd mm yy
-                "%d de %B del %Y",  # 12 de noviembre del 1990
-                "%d de %B del %y",  # 12 de noviembre del 90
-                "%d de %B %y",  # 12 de noviembre 90
-                "%d de %B %Y",  # 12 de noviembre 1990
-                "%d de %b %Y",  # 12 de nov 1990
-                "%d de %b %y",  # 12 de nov 90
-                "%d de %b del %Y",  # 12 de nov del 1990
-                "%d de %b del %y"   # 12 de nov del 90
-            ]
-
-            fecha_valida = False
-
-            for formato in formatos_fecha:
-                try:
-                    # Intentamos convertir la fecha al formato DateField
-                    fecha_convertida = datetime.strptime(fecha_normalizada, formato).date()
-                    self.AnioNacimiento = fecha_convertida  # Guardamos en AnioNacimiento
-                    fecha_valida = True
-                    break  # Salimos si se convierte correctamente
-                except ValueError:
-                    continue
-
-            if not fecha_valida:
-                raise ValidationError(
-                    f"Formato de fecha inválido. Recibido: '{self.fecha_nacimiento}'. Usa dd/mm/yyyy, dd-mm-yyyy, o 'día de mes de año'."
-                )
-
-        # Calcula la edad si AnioNacimiento es válido
+        # Calcular edad antes de guardar
         self.edad = self.calculo_edad()
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.Rut} - {self.id}"
+        return f"{self.get_rut_descifrado()} - {self.id}"
     
 class Codigos_preg (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID códigos preguntas")
