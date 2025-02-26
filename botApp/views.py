@@ -95,7 +95,7 @@ def datosPreguntas(request):
     Datos = UsuarioRespuesta.objects.select_related(
         "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
         "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
-        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
+        "fecha_respuesta", "RutHash").order_by("-fecha_respuesta")
     data = {
         "Datos": Datos,
     }
@@ -113,11 +113,11 @@ def datosTextoPreguntas(request):
 def datosFRM(request):
     Datos = RespUsuarioFactorRiesgoMod.objects.select_related().values(
         "id",
-        "Rut",
+        "RutHash",
         "respuesta_FRM__id_pregunta_FRM_id__pregunta_FRM",
         "respuesta_FRM__opc_respuesta_FRM",
         "fecha_respuesta"
-    ).order_by("-Rut")
+    ).order_by("-RutHash")
     data = {
         "Datos": Datos,
     }
@@ -128,12 +128,12 @@ def datosFRM2(request):
     preguntas = PregFactorRiesgoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
         "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM"
-    ).values("Rut", "fecha_respuesta", "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
+    ).values( "RutHash", "fecha_respuesta", "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta["Rut"]
+        rut = respuesta["RutHash"]
         pregunta = respuesta["respuesta_FRM__id_pregunta_FRM__pregunta_FRM"]
         respuesta_usuario = respuesta["respuesta_FRM__opc_respuesta_FRM"]
         
@@ -156,11 +156,11 @@ def datosFRM2(request):
 def datosFRNM(request):
     Datos = RespUsuarioFactorRiesgoNoMod.objects.select_related().values(
         "id",
-        "Rut",
+        "RutHash",
         "respuesta_FRNM_id__id_pregunta_FRNM_id__pregunta_FRNM",
         "respuesta_FRNM_id__opc_respuesta_FRNM",
         "fecha_respuesta"
-    ).order_by("-Rut")
+    ).order_by("-RutHash")
     data = {
         "Datos": Datos,
     }
@@ -171,12 +171,12 @@ def datosFRNM2(request):
     preguntas = PregFactorRiesgoNoMod.objects.all()
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
         "respuesta_FRNM", "respuesta_FRM__id_pregunta_FRNM"
-    ).values("Rut", "fecha_respuesta", "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
+    ).values( "RutHash", "fecha_respuesta", "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta["Rut"]
+        rut = respuesta[ "RutHash"]
         pregunta = respuesta["respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM"]
         respuesta_usuario = respuesta["respuesta_FRNM__opc_respuesta_FRNM"]
         
@@ -199,11 +199,11 @@ def datosFRNM2(request):
 def datosDS(request):
     Datos = RespDeterSalud.objects.select_related().values(
         "id",
-        "Rut",
+        "RutHash",
         "respuesta_DS_id__id_pregunta_DS_id__pregunta_DS",
         "respuesta_DS_id__opc_respuesta_DS",
         "fecha_respuesta"
-    ).order_by("-Rut")
+    ).order_by("-RutHash")
     data = {
         "Datos": Datos,
     }
@@ -214,12 +214,12 @@ def datosDS2(request):
     preguntas = PregDeterSalud.objects.all()
     usuarios_respuestas = RespDeterSalud.objects.select_related(
         "respuesta_DS", "respuesta_DS__id_pregunta_DS"
-    ).values("Rut", "fecha_respuesta", "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
+    ).values("RutHash", "fecha_respuesta", "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta["Rut"]
+        rut = respuesta[ "RutHash"]
         pregunta = respuesta["respuesta_DS__id_pregunta_DS__pregunta_DS"]
         respuesta_usuario = respuesta["respuesta_DS__opc_respuesta_DS"]
         
@@ -242,11 +242,11 @@ def datosDS2(request):
 def datosListadoOrdenado(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
+            SELECT us.id, us.RutHash, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
+            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
             WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
@@ -287,17 +287,17 @@ def crear_excel_desde_db():
     ws_respuestas_usuario.title = 'Respuestas Usuario'
 
     preguntas = Pregunta.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta for pregunta in preguntas]
+    lista_preguntas = [ "RutHash"] + [pregunta.pregunta for pregunta in preguntas]
     ws_respuestas_usuario.append(lista_preguntas)
 
     usuarios_respuestas = UsuarioRespuesta.objects.select_related('id_opc_respuesta', 'id_opc_respuesta__id_pregunta').values(
-        'Rut', 'id_opc_respuesta__id_pregunta__pregunta', 'id_opc_respuesta__OPC_Respuesta'
+         'RutHash', 'id_opc_respuesta__id_pregunta__pregunta', 'id_opc_respuesta__OPC_Respuesta'
     )
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta[ 'RutHash']
         pregunta = respuesta['id_opc_respuesta__id_pregunta__pregunta']
         respuesta_usuario = respuesta['id_opc_respuesta__OPC_Respuesta']
         if rut not in dict_respuestas:
@@ -346,16 +346,16 @@ def crear_excel_desde_db():
     ws_FRM = wb.create_sheet(title='Factores riesgo modificables')
 
     preguntas =PregFactorRiesgoMod.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_FRM for pregunta in preguntas]
     ws_FRM.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
         respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
         if rut not in dict_respuestas:
@@ -378,11 +378,11 @@ def crear_excel_desde_db():
     ws_FRM_2 = wb.create_sheet(title='Factores Riesgo modificables 2')
 
     preguntas =PregFactorRiesgoMod.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_FRM_2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
 
     for respuesta in usuarios_respuestas:
 
@@ -390,7 +390,7 @@ def crear_excel_desde_db():
         respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,  
             respuesta_usuario, 
             fecha_respuesta,  
@@ -406,16 +406,16 @@ def crear_excel_desde_db():
     ws_FRNM = wb.create_sheet(title='Factores Riesgo No Mod')
 
     preguntas =PregFactorRiesgoNoMod.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
     ws_FRNM.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
         respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
         if rut not in dict_respuestas:
@@ -438,11 +438,11 @@ def crear_excel_desde_db():
     ws_FRNM_2 = wb.create_sheet(title='Factores Riesgo No Mod 2')
 
     preguntas =PregFactorRiesgoNoMod.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_FRNM_2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values( "RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('RutHash')
 
     for respuesta in usuarios_respuestas:
 
@@ -450,7 +450,7 @@ def crear_excel_desde_db():
         respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,
             respuesta_usuario,
             fecha_respuesta, 
@@ -464,16 +464,16 @@ def crear_excel_desde_db():
     # Hoja 6: Determinantes de Salud 
     ws_DS = wb.create_sheet(title='Determinantes de Salud')
     preguntas =PregDeterSalud.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_DS for pregunta in preguntas]
     ws_DS.append(lista_preguntas)
 
     usuarios_respuestas = RespDeterSalud.objects.select_related(
-    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values( "RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
         respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
         if rut not in dict_respuestas:
@@ -496,11 +496,11 @@ def crear_excel_desde_db():
     ws_DS_2 = wb.create_sheet(title='Determinantes de Salud 2')
 
     preguntas =PregDeterSalud.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_DS_2.append(lista_preguntas)
 
     usuarios_respuestas = RespDeterSalud.objects.select_related(
-    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values( "RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('RutHash')
 
     for respuesta in usuarios_respuestas:
 
@@ -508,7 +508,7 @@ def crear_excel_desde_db():
         respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,
             respuesta_usuario,
             fecha_respuesta, 
@@ -539,11 +539,11 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, Email, edad,                        
+            SELECT us.id, us.RutHash, Whatsapp, Email, edad,                        
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.Rut = rnm.Rut
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.Rut = ult.Rut  
+            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
             LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
             WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
@@ -581,13 +581,13 @@ def crear_excel_datos_preguntas(resquest):
     ws_datos_preg.title = "Preguntas generales"
 
     preguntas =Pregunta.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_datos_preg.append(lista_preguntas)
 
     usuarios_respuestas = UsuarioRespuesta.objects.select_related(
         "id_opc_respuesta", "id_opc_respuesta__id_pregunta").values("id",
         "id_opc_respuesta__id_pregunta__pregunta", "id_opc_respuesta__OPC_Respuesta",
-        "fecha_respuesta", "Rut").order_by("-fecha_respuesta")
+        "fecha_respuesta",  "RutHash").order_by("-fecha_respuesta")
     
 
     for respuesta in usuarios_respuestas:
@@ -596,7 +596,7 @@ def crear_excel_datos_preguntas(resquest):
         respuesta_usuario = respuesta['id_opc_respuesta__OPC_Respuesta']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,  
             respuesta_usuario, 
             fecha_respuesta,  
@@ -619,14 +619,14 @@ def crear_excel_preguntas_esp(resquest):
     ws_preg_esp = wb.active
     ws_preg_esp.title = "Preguntas especialistas"
 
-    lista_preguntas = ['Rut', 'Preguntas', 'Fecha Pregunta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Fecha Pregunta'] 
     ws_preg_esp.append(lista_preguntas)
 
     preguntas = UsuarioTextoPregunta.objects.all()
 
     for pregunta in preguntas:
         fila = [
-            pregunta.Rut,  
+            pregunta.RutHash,  
             pregunta.texto_pregunta,
             pregunta.fecha_pregunta.replace(tzinfo=None) if pregunta.fecha_pregunta else ''
         ]
@@ -649,11 +649,11 @@ def crear_excel_mod_V1(resquest):
     ws_FRM_V1.title = "Factores de riesgo mod"
 
     preguntas =PregFactorRiesgoMod.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_FRM_V1.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM").order_by('RutHash')
 
     for respuesta in usuarios_respuestas:
 
@@ -661,7 +661,7 @@ def crear_excel_mod_V1(resquest):
         respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,  
             respuesta_usuario, 
             fecha_respuesta,  
@@ -686,16 +686,16 @@ def crear_excel_mod_V2(request):
     ws_FRM_V2.title = "Factores de riesgo mod 2"
     
     preguntas =PregFactorRiesgoMod.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRM for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_FRM for pregunta in preguntas]
     ws_FRM_V2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("Rut", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_FRM__id_pregunta_FRM__pregunta_FRM']
         respuesta_usuario = respuesta['respuesta_FRM__opc_respuesta_FRM']
         if rut not in dict_respuestas:
@@ -727,11 +727,11 @@ def crear_excel_no_mod_V1(resquest):
     ws_FRNM_V1.title = "Factores de riesgo No mod"
 
     preguntas =PregFactorRiesgoNoMod.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_FRNM_V1.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('Rut')
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values( "RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM","respuesta_FRNM__opc_respuesta_FRNM").order_by('RutHash')
 
     for respuesta in usuarios_respuestas:
 
@@ -739,7 +739,7 @@ def crear_excel_no_mod_V1(resquest):
         respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,
             respuesta_usuario,
             fecha_respuesta, 
@@ -764,16 +764,16 @@ def crear_excel_no_mod_V2(resquest):
     ws_FRNM_V2.title = "Factores de riesgo no mod"
 
     preguntas =PregFactorRiesgoNoMod.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_FRNM for pregunta in preguntas]
     ws_FRNM_V2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("Rut", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values( "RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM']
         respuesta_usuario = respuesta['respuesta_FRNM__opc_respuesta_FRNM']
         if rut not in dict_respuestas:
@@ -804,11 +804,11 @@ def crear_excel_DS1(request):
     ws_DSV1.title = "Determinante Salud"
 
     preguntas =PregDeterSalud.objects.all()
-    lista_preguntas = ['Rut', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
+    lista_preguntas = ['RutHash', 'Preguntas', 'Respuestas', 'Fecha Respuesta'] 
     ws_DSV1.append(lista_preguntas)
 
     usuarios_respuestas = RespDeterSalud.objects.select_related(
-    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('Rut')
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS","respuesta_DS__opc_respuesta_DS").order_by('RutHash')
 
     for respuesta in usuarios_respuestas:
 
@@ -816,7 +816,7 @@ def crear_excel_DS1(request):
         respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
         fecha_respuesta = respuesta['fecha_respuesta'].replace(tzinfo=None) if respuesta['fecha_respuesta'] else ''
         fila = [
-            respuesta['Rut'],
+            respuesta['RutHash'],
             pregunta,
             respuesta_usuario,
             fecha_respuesta, 
@@ -841,16 +841,16 @@ def crear_excel_DS2(request):
     ws_DSV2.title = "Determinante Salud"
 
     preguntas =PregDeterSalud.objects.all()
-    lista_preguntas = ['Rut'] + [pregunta.pregunta_DS for pregunta in preguntas]
+    lista_preguntas = ['RutHash'] + [pregunta.pregunta_DS for pregunta in preguntas]
     ws_DSV2.append(lista_preguntas)
 
     usuarios_respuestas = RespDeterSalud.objects.select_related(
-    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("Rut", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values("RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
 
     dict_respuestas = {}
 
     for respuesta in usuarios_respuestas:
-        rut = respuesta['Rut']
+        rut = respuesta['RutHash']
         pregunta = respuesta['respuesta_DS__id_pregunta_DS__pregunta_DS']
         respuesta_usuario = respuesta['respuesta_DS__opc_respuesta_DS']
         if rut not in dict_respuestas:
@@ -1341,9 +1341,9 @@ def generar_grafico_mamografia_si_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.RutHash = us.RutHash
             WHERE id_opc_respuesta_id IN (1)
-            GROUP BY edad ORDER BY edad ASC
+            GROUP BY us.edad ORDER BY edad ASC
             """
         )
         resultados = cursor.fetchall()
@@ -1386,10 +1386,10 @@ def generar_grafico_mamo_si_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.RutHash) AS cantidad_respuestas
             FROM botApp_respusuariofactorriesgonomod r
-            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
-            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
+            JOIN botApp_usuariorespuesta u ON r.RutHash = u.RutHash
+            JOIN botApp_usuariorespuesta ur_mamo ON r.RutHash = ur_mamo.RutHash
             WHERE r.respuesta_FRNM_id IN (4, 5, 6)
             AND ur_mamo.id_opc_respuesta_id = 1 
             GROUP BY r.respuesta_FRNM_id;
@@ -1436,7 +1436,7 @@ def generar_grafico_mamografia_no_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.Rut = us.Rut
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.RutHash = us.RutHash
             WHERE id_opc_respuesta_id IN (2)
             GROUP BY edad ORDER BY edad ASC
             """
@@ -1477,10 +1477,10 @@ def generar_grafico_mamo_no_por_familiar_directo():
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.Rut) AS cantidad_respuestas
+            SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.RutHash) AS cantidad_respuestas
             FROM botApp_respusuariofactorriesgonomod r
-            JOIN botApp_usuariorespuesta u ON r.Rut = u.Rut
-            JOIN botApp_usuariorespuesta ur_mamo ON r.Rut = ur_mamo.Rut 
+            JOIN botApp_usuariorespuesta u ON r.RutHash = u.RutHash
+            JOIN botApp_usuariorespuesta ur_mamo ON r.RutHash = ur_mamo.RutHash 
             WHERE r.respuesta_FRNM_id IN (4, 5, 6)
             AND ur_mamo.id_opc_respuesta_id = 2
             GROUP BY r.respuesta_FRNM_id;
@@ -1527,7 +1527,7 @@ def mamografia_por_edad_si_no():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
             WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
@@ -1697,7 +1697,7 @@ def mamografia_por_edad_si_no_rango_edad():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
             WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
@@ -1769,7 +1769,7 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.Rut = us.Rut
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
             WHERE id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC
@@ -1832,7 +1832,7 @@ def grafico_prev_salud_por_rango_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad, ds.respuesta_DS_id
-            FROM botApp_usuario us JOIN  botApp_respdetersalud ds ON us.rut = ds.rut
+            FROM botApp_usuario us JOIN  botApp_respdetersalud ds ON us.RutHash = ds.RutHash
             WHERE ds.respuesta_DS_id IN(1,2,3)
             GROUP BY edad, respuesta_DS_id 
             ORDER BY edad ASC;
@@ -2341,26 +2341,26 @@ def consultar_estado_pregunta(request):
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(Rut=data["Rut"], id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(UsuarioRespuesta.objects.filter(Rut=data["RutHash"], id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
     
         elif data["tipo_pregunta"] == "DS":
             pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(Rut=data["Rut"], respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespDeterSalud.objects.filter(Rut=data["RutHash"], respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
         elif data["tipo_pregunta"] == "FRM":
             pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["Rut"], respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["RutHash"], respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
         elif data["tipo_pregunta"] == "FRNM":
             pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["Rut"], respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["RutHash"], respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
         
 
         return JsonResponse({

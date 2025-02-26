@@ -7,6 +7,7 @@ class UsuarioAdmin(admin.ModelAdmin):
         "id",
         "id_manychat",
         "Rut",
+        "RutHash",
         "Whatsapp",
         "Email",
         "Referencia",
@@ -20,6 +21,7 @@ class UsuarioAdmin(admin.ModelAdmin):
         "id",
         "id_manychat",
         "Rut",
+        "RutHash",
         "Whatsapp",
         "Email",
         "Referencia",
@@ -33,6 +35,7 @@ class UsuarioAdmin(admin.ModelAdmin):
         "id",
         "id_manychat",
         "Rut",
+        "RutHash",
         "Whatsapp",
         "Email",
         "Referencia",
@@ -53,18 +56,21 @@ class UsuarioRespuestaAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "Rut",
+        "RutHash",
         "id_opc_respuesta",
         "fecha_respuesta",
     )
     search_fields = (
         "id",
         "Rut",
+        "RutHash",
         "id_opc_respuesta",
         "fecha_respuesta",
     )
     list_filter = (
         "id",
         "Rut",
+        "RutHash",
         "id_opc_respuesta",
         "fecha_respuesta",
     )
@@ -76,9 +82,9 @@ class PreguntaOpcionRespuestaAdmin(admin.ModelAdmin):
     list_filter = ("id", "id_pregunta", "OPC_Respuesta")
 
 class UsuarioTextoPreguntaAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
-    search_fields = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
-    list_filter = ("id", "Rut", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    list_display = ("id", "Rut", "RutHash", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "RutHash", "texto_pregunta", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "RutHash", "texto_pregunta", "fecha_pregunta", "id_usuario")
     
 class MensajeContenidoAdmin(admin.ModelAdmin):
     list_display = ("id", "texto", "fecha")
@@ -91,9 +97,9 @@ class filtro_mensajeAdmin(admin.ModelAdmin):
     list_filter = ("id", "opcrespFRNM", "opcrespFRM", "opcrespDS", "opcresTM", "opcresUS", "mensaje_contenido_id")
 
 class ultima_mamografia_anioAdmin(admin.ModelAdmin):
-    list_display = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
-    search_fields = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
-    list_filter = ("id", "Rut", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    list_display = ("id", "Rut", "RutHash", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    search_fields = ("id", "Rut", "RutHash", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
+    list_filter = ("id", "Rut", "RutHash", "anio_ult_mamografia","tiempo_transc_ult_mamografia", "fecha_pregunta", "id_usuario")
 
 class regionAdmin(admin.ModelAdmin):
     list_display =("cod_region", "nombre_region")
@@ -121,9 +127,9 @@ class OpcFactorRiesgoModAdmin(admin.ModelAdmin):
     list_filter=("id", "opc_respuesta_FRM", "id_pregunta_FRM")
 
 class RespUsuarioFactorRiesgoModAdmin(admin.ModelAdmin):
-    list_display=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
-    search_fields=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
-    list_filter=("id", "Rut", "respuesta_FRM", "fecha_respuesta")
+    list_display=("id", "Rut", "RutHash", "respuesta_FRM", "fecha_respuesta")
+    search_fields=("id", "Rut", "RutHash", "respuesta_FRM", "fecha_respuesta")
+    list_filter=("id", "Rut", "RutHash", "respuesta_FRM", "fecha_respuesta")
 
 class PregFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_display=("id", "pregunta_FRNM", "codigo_preguntas")
@@ -136,9 +142,9 @@ class OpcFactorRiesgoNoModAdmin(admin.ModelAdmin):
     list_filter=("id", "opc_respuesta_FRNM", "id_pregunta_FRNM")
 
 class RespUsuarioFactorRiesgoNoModAdmin(admin.ModelAdmin):
-    list_display=("id", "Rut", "respuesta_FRNM", "fecha_respuesta")
-    search_fields=("id", "Rut", "respuesta_FRNM", "fecha_respuesta")
-    list_filter=("id", "Rut", "respuesta_FRNM",  "fecha_respuesta")
+    list_display=("id", "Rut",  "RutHash", "respuesta_FRNM", "fecha_respuesta")
+    search_fields=("id", "Rut", "RutHash", "respuesta_FRNM", "fecha_respuesta")
+    list_filter=("id", "Rut", "RutHash", "respuesta_FRNM",  "fecha_respuesta")
 
 class PregDeterSaludAdmin(admin.ModelAdmin):
     list_display =("id", "pregunta_DS", "codigo_preguntas")
@@ -151,14 +157,14 @@ class OpcDeterSaludAdmin(admin.ModelAdmin):
     list_filter=("id", "opc_respuesta_DS", "id_pregunta_DS")
 
 class RespDeterSaludAdmin(admin.ModelAdmin):
-    list_display =("id", "Rut", "respuesta_DS", "fecha_respuesta")
-    search_fields=("id", "Rut", "respuesta_DS", "fecha_respuesta")
-    list_filter=("id", "Rut", "respuesta_DS", "fecha_respuesta")
+    list_display =("id", "Rut", "RutHash", "respuesta_DS", "fecha_respuesta")
+    search_fields=("id", "Rut", "RutHash", "respuesta_DS", "fecha_respuesta")
+    list_filter=("id", "Rut", "RutHash", "respuesta_DS", "fecha_respuesta")
 
 class RespTextoFRMAdmin (admin.ModelAdmin):
-    list_display=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
-    search_fields=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
-    list_filter=("id","Rut", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    list_display=("id","Rut", "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    search_fields=("id","Rut", "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    list_filter=("id","Rut",  "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
 
 class Codigos_pregAdmin (admin.ModelAdmin):
     list_display=("id", "codigo_preguntas")
@@ -166,9 +172,9 @@ class Codigos_pregAdmin (admin.ModelAdmin):
     list_filter=("id", "codigo_preguntas")
 
 class CalculoFRMAdmin(admin.ModelAdmin):
-    list_display=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
-    search_fields=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
-    list_filter=("id", "Rut", "altura_mod", "peso_mod", "imc", "datos_originales")
+    list_display=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
+    search_fields=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
+    list_filter=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
