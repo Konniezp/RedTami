@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,6 +26,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-*qlm$yk0l)b2y03&qj)cbrqt_)v%^k01p-ej1#q)-wx((=2xty"
+
+#
+ENCRYPT_KEY = os.getenv('ENCRYPT_KEY')
+if not ENCRYPT_KEY:
+    raise ValueError("Falta la clave de cifrado 'ENCRYPT_KEY' en el archivo .env")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
