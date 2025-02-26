@@ -136,23 +136,38 @@ class PreguntaOpcionRespuesta(models.Model):
 
 class UsuarioRespuesta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario Respuesta")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     id_opc_respuesta = models.ForeignKey(PreguntaOpcionRespuesta, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        super().save(*args, **kwargs)
+
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
     def __str__(self):
-        return f"{self.Rut} - {self.id_opc_respuesta}"
+        return f"{self.get_rut_descifrado()} - {self.id_opc_respuesta}"
 
 class UsuarioTextoPregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Texto Pregunta")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     texto_pregunta = models.CharField(max_length=200)
     fecha_pregunta = models.DateTimeField(auto_now_add=True)
     id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.Rut} - {self.texto_pregunta}"
+    def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        super().save(*args, **kwargs)
 
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
+    def __str__(self):
+        return f"{self.get_rut_descifrado()} - {self.texto_pregunta}"
 
 class MensajeContenido(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Texto")
@@ -176,7 +191,7 @@ class filtro_mensaje(models.Model):
     
 class ultima_mamografia_anio(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
     tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
     fecha_pregunta = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -237,12 +252,20 @@ class OpcFactorRiesgoMod(models.Model):
 
 class RespUsuarioFactorRiesgoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     respuesta_FRM = models.ForeignKey(OpcFactorRiesgoMod, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        super().save(*args, **kwargs)
+
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+
     def __str__(self):
-        return f"{self.Rut} - {self.respuesta_FRM}"
+        return f"{self.get_rut_descifrado()} - {self.respuesta_FRM}"
 
 class PregFactorRiesgoNoMod(models.Model):
     id = models.AutoField(primary_key= True, verbose_name= "ID Factor de Riesgo No Mod")
@@ -262,12 +285,20 @@ class OpcFactorRiesgoNoMod(models.Model):
 
 class RespUsuarioFactorRiesgoNoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     respuesta_FRNM = models.ForeignKey(OpcFactorRiesgoNoMod, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        super().save(*args, **kwargs)
+    
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
     def __str__(self):
-        return f"{self.Rut} - {self.respuesta_FRNM}"
+        return f"{self.get_rut_descifrado()} - {self.respuesta_FRNM}"
     
 class PregDeterSalud(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Determinantes sociales salud")
@@ -287,16 +318,24 @@ class OpcDeterSalud(models.Model):
     
 class RespDeterSalud (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp determinante salud")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     respuesta_DS = models.ForeignKey(OpcDeterSalud, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode()
+        super().save(*args, **kwargs)
+
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
     def __str__(self):
-        return f"{self.Rut} - {self.respuesta_DS}"
+        return f"{self.get_rut_descifrado()} - {self.respuesta_DS}"
     
 class RespTextoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     peso_FRM6 = models.CharField(max_length= 3)  # Peso en kg
     altura_FRM5 = models.CharField(max_length= 4)  # Altura en cm
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
@@ -311,7 +350,7 @@ class RespTextoFRM(models.Model):
 
 class CalculoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Cálculo FRM")
-    Rut = models.CharField(max_length=10)
+    Rut = models.CharField(max_length=255)
     altura_mod = models.FloatField(default=0)
     peso_mod = models.FloatField(default=0)
     imc = models.FloatField(default=0.0) 
