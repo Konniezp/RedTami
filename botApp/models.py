@@ -11,6 +11,7 @@ from unidecode import unidecode
 from fuzzywuzzy import fuzz
 from .utils import encrypt_data, decrypt_data
 from cryptography.fernet import Fernet
+import hashlib
 import base64
 import os
 from django.conf import settings
@@ -26,6 +27,7 @@ class Usuario(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario")
     id_manychat = models.CharField(max_length=200)
     Rut = models.CharField(max_length=255)  # Se almacena cifrado
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     AnioNacimiento = models.DateField(verbose_name="Fecha de Nacimiento", null=True, blank=True)
     Whatsapp = models.CharField(max_length=255)  # Se almacena cifrado
     Email = models.CharField(max_length=255, blank=True) # Se almacena cifrado
@@ -35,6 +37,10 @@ class Usuario(models.Model):
     edad = models.IntegerField(default=0)
     fecha_nacimiento = models.CharField(max_length=30, null=True, blank=True)
 
+    # Generar Hash
+    def generar_hash(self, valor):
+        return hashlib.sha256(valor.encode()).hexdigest()
+    
     def get_rut_descifrado(self):
         return decrypt_data(self.Rut) if self.Rut else None
 
@@ -102,6 +108,7 @@ class Usuario(models.Model):
         # Cifrar Rut, Whatsapp e Email si no están cifrados aún
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = self.generar_hash(decrypt_data(self.Rut))
 
         if self.Whatsapp and not self.Whatsapp.startswith("gAAAA"):
             self.Whatsapp = encrypt_data(self.Whatsapp).decode()
@@ -143,12 +150,14 @@ class PreguntaOpcionRespuesta(models.Model):
 class UsuarioRespuesta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Usuario Respuesta")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     id_opc_respuesta = models.ForeignKey(PreguntaOpcionRespuesta, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
 
     def get_rut_descifrado(self):
@@ -160,6 +169,7 @@ class UsuarioRespuesta(models.Model):
 class UsuarioTextoPregunta(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Texto Pregunta")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     texto_pregunta = models.CharField(max_length=200)
     fecha_pregunta = models.DateTimeField(auto_now_add=True)
     id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE, null=True, blank=True)
@@ -167,6 +177,7 @@ class UsuarioTextoPregunta(models.Model):
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
 
     def get_rut_descifrado(self):
@@ -198,6 +209,7 @@ class filtro_mensaje(models.Model):
 class ultima_mamografia_anio(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID de última mamografía")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
     tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
     fecha_pregunta = models.DateTimeField(auto_now_add=True, null=True, blank=True)
@@ -216,12 +228,15 @@ class ultima_mamografia_anio(models.Model):
         # Cifrar Rut si aún no está cifrado
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
-        
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         # Calcular tiempo transcurrido
         self.tiempo_transc_ult_mamografia = self.calculo_tiempo_transc_ult_mamografia()
         
         super().save(*args, **kwargs)
 
+    def get_rut_descifrado(self):
+        return decrypt_data(self.Rut) if self.Rut else None
+    
     def _str_(self):
         return f"{self.get_rut_descifrado()} - {self.anio_ult_mamografia}"
 
@@ -267,12 +282,14 @@ class OpcFactorRiesgoMod(models.Model):
 class RespUsuarioFactorRiesgoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     respuesta_FRM = models.ForeignKey(OpcFactorRiesgoMod, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
 
     def get_rut_descifrado(self):
@@ -300,12 +317,14 @@ class OpcFactorRiesgoNoMod(models.Model):
 class RespUsuarioFactorRiesgoNoMod (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp Riesgo Mod")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     respuesta_FRNM = models.ForeignKey(OpcFactorRiesgoNoMod, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
     
     def get_rut_descifrado(self):
@@ -333,12 +352,14 @@ class OpcDeterSalud(models.Model):
 class RespDeterSalud (models.Model):
     id = models.AutoField(primary_key=True, verbose_name= "ID Resp determinante salud")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     respuesta_DS = models.ForeignKey(OpcDeterSalud, on_delete=models.CASCADE)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
 
     def get_rut_descifrado(self):
@@ -350,6 +371,7 @@ class RespDeterSalud (models.Model):
 class RespTextoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     peso_FRM6 = models.CharField(max_length= 3)  # Peso en kg
     altura_FRM5 = models.CharField(max_length= 4)  # Altura en cm
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
@@ -361,19 +383,19 @@ class RespTextoFRM(models.Model):
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode() 
-
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
 
         # Procesa los datos brutos
         CalculoFRM.procesar_datos_brutos(self)
 
     def get_rut_descifrado(self):
-        #Devuelve el RUT descifrado
         return decrypt_data(self.Rut) if self.Rut else None
 
 class CalculoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID Cálculo FRM")
     Rut = models.CharField(max_length=255)
+    RutHash = models.CharField(max_length=255, blank=True, null=True)
     altura_mod = models.FloatField(default=0)
     peso_mod = models.FloatField(default=0)
     imc = models.FloatField(default=0.0) 
@@ -386,6 +408,9 @@ class CalculoFRM(models.Model):
         return 0.0  # Retorna 0 si la altura no es válida
 
     def save(self, *args, **kwargs):
+        if self.Rut and not self.Rut.startswith("gAAAA"):  
+            self.Rut = encrypt_data(self.Rut).decode() 
+            self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         self.imc = self.calculo_imc() 
         super().save(*args, **kwargs)
     
