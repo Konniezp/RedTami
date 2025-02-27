@@ -453,8 +453,8 @@ class CalculoFRM(models.Model):
 
     @classmethod
     def procesar_datos_brutos(cls, instance):
-        peso_formateado = cls.limpiar_numero(instance.peso_FRM6)
-        altura_formateada = cls.limpiar_numero(instance.altura_FRM5, es_altura=True)
+        peso_formateado = cls.limpiar_numero(instance.peso_FRM5)
+        altura_formateada = cls.limpiar_numero(instance.altura_FRM4, es_altura=True)
         
         formateado, created = cls.objects.get_or_create(
             datos_originales=instance,
