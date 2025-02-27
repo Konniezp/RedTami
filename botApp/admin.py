@@ -162,9 +162,9 @@ class RespDeterSaludAdmin(admin.ModelAdmin):
     list_filter=("id", "Rut", "RutHash", "respuesta_DS", "fecha_respuesta")
 
 class RespTextoFRMAdmin (admin.ModelAdmin):
-    list_display=("id","Rut", "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
-    search_fields=("id","Rut", "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
-    list_filter=("id","Rut",  "RutHash", "peso_FRM6", "altura_FRM5", "fecha_respuesta", "id_usuario")
+    list_display=("id","Rut", "RutHash", "peso_FRM5", "altura_FRM4", "fecha_respuesta", "id_usuario")
+    search_fields=("id","Rut", "RutHash", "peso_FRM5", "altura_FRM4", "fecha_respuesta", "id_usuario")
+    list_filter=("id","Rut",  "RutHash", "peso_FRM5", "altura_FRM4", "fecha_respuesta", "id_usuario")
 
 class Codigos_pregAdmin (admin.ModelAdmin):
     list_display=("id", "codigo_preguntas")
@@ -175,6 +175,7 @@ class CalculoFRMAdmin(admin.ModelAdmin):
     list_display=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
     search_fields=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
     list_filter=("id", "Rut", "RutHash", "altura_mod", "peso_mod", "imc", "datos_originales")
+
 
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Pregunta, PreguntaAdmin)
