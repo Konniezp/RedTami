@@ -372,8 +372,8 @@ class RespTextoFRM(models.Model):
     id = models.AutoField(primary_key=True, verbose_name="ID índice antropométrico")
     Rut = models.CharField(max_length=255)
     RutHash = models.CharField(max_length=255, blank=True, null=True)
-    peso_FRM6 = models.CharField(max_length= 3)  # Peso en kg
-    altura_FRM5 = models.CharField(max_length= 4)  # Altura en cm
+    peso_FRM5 = models.CharField(max_length= 3)  # Peso en kg
+    altura_FRM4 = models.CharField(max_length= 4)  # Altura en cm
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
     id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
     
