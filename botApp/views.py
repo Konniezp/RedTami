@@ -2334,6 +2334,21 @@ def consultar_estado_pregunta(request):
 
         #return JsonResponse(data)
 
+        
+
+        
+        # Buscar el usuario por RutHash
+        usuario_model = Usuario.objects.filter(RutHash=data["RutHash"]).first()
+        
+        if not usuario_model:
+            return JsonResponse({"error": "Usuario no encontrado."}, status=404)
+
+        # Obtener Rut descifrado
+        rut_descifrado = usuario_model.get_rut_descifrado()
+        
+        if not rut_descifrado:
+            return JsonResponse({"error": "No se pudo descifrar el Rut."}, status=400)
+
         respuesta = False
 
         if data["tipo_pregunta"] == "TM":
@@ -2341,26 +2356,26 @@ def consultar_estado_pregunta(request):
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(Rut=data["RutHash"], id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(UsuarioRespuesta.objects.filter(Rut=rut_descifrado, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
     
         elif data["tipo_pregunta"] == "DS":
             pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(Rut=data["RutHash"], respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespDeterSalud.objects.filter(Rut=rut_descifrado, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
         elif data["tipo_pregunta"] == "FRM":
             pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["RutHash"], respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=rut_descifrado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
         elif data["tipo_pregunta"] == "FRNM":
             pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
             id_pregunta = pregunta_model.id
 
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["RutHash"], respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=rut_descifrado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
         
 
         return JsonResponse({
