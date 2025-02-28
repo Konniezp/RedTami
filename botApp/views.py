@@ -2354,31 +2354,29 @@ def consultar_estado_pregunta(request):
         if pregunta_model:
             id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(Rut=usuario_model.RutHash, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(UsuarioRespuesta.objects.filter(RutHash=rut_encriptado, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
 
     elif data["tipo_pregunta"] == "DS":
         pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
         if pregunta_model:
             id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(Rut=usuario_model.RutHash, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespDeterSalud.objects.filter(RutHash=rut_encriptado, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
 
     elif data["tipo_pregunta"] == "FRM":
         pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
         if pregunta_model:
             id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=usuario_model.RutHash, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
 
     elif data["tipo_pregunta"] == "FRNM":
         pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
         if pregunta_model:
             id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=usuario_model.RutHash, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
 
     return JsonResponse({
         "respondido": len(respuesta) > 0
     })
-
-
