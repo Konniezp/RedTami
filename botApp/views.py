@@ -2320,65 +2320,65 @@ def obtener_usuario(request, usuario_id):
     except Usuario.DoesNotExist:
         return JsonResponse({"error": "Usuario no encontrado"}, status=404)
 
-
+def generar_hash(valor):
+    """Genera el hash SHA-256 del Rut"""
+    return hashlib.sha256(valor.encode()).hexdigest()
 
 @csrf_exempt
 def consultar_estado_pregunta(request):
-    if request.method == "POST":
-        #data = json.loads(request.body.decode('utf-8'))
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+    try:
         data = JSONParser().parse(request)
-        
-        #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()
-        #id_usuario = usuario_model.id
-        #return JsonResponse(data)
+    except Exception:
+        return JsonResponse({"error": "Error al leer el JSON, asegúrate de que el formato es correcto."}, status=400)
 
-        if "Rut" not in data:
-            return JsonResponse({"error": "Rut no proporcionado."}, status=400)
+    # Validar que ManyChat envió el Rut
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
 
-        # Obtener el RUT original desde ManyChat
-        rut_many= data["Rut"]
+    # Encriptar el Rut con SHA-256 para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
 
-        # Generar el hash del RUT original desde ManyChat
-        RutHash_many = Usuario().generar_hash(rut_many)
-
-        # Buscar el usuario por RutHash
-        usuario_model = Usuario.objects.filter(RutHash=rut_many).first()
-        
-        if not usuario_model:
-            return JsonResponse({"error": "Usuario no encontrado."}, status=404)
-
-        respuesta = False
-
-        if data["tipo_pregunta"] == "TM":
-            pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
-
-            opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(RutHash=RutHash_many, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+    # Verificar si el usuario existe en la BD
+    usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
     
-        elif data["tipo_pregunta"] == "DS":
-            pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
+    if not usuario_model:
+        return JsonResponse({"error": "Usuario no encontrado."}, status=404)
 
+    respuesta = False
+
+    if data["tipo_pregunta"] == "TM":
+        pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
+            opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
+            respuesta = list(UsuarioRespuesta.objects.filter(Rut=usuario_model.RutHash, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+
+    elif data["tipo_pregunta"] == "DS":
+        pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(RutHash=RutHash_many, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
-        elif data["tipo_pregunta"] == "FRM":
-            pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
+            respuesta = list(RespDeterSalud.objects.filter(Rut=usuario_model.RutHash, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
 
+    elif data["tipo_pregunta"] == "FRM":
+        pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash= RutHash_many, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
-        elif data["tipo_pregunta"] == "FRNM":
-            pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=usuario_model.RutHash, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
+
+    elif data["tipo_pregunta"] == "FRNM":
+        pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
+        if pregunta_model:
             id_pregunta = pregunta_model.id
-
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=RutHash_many, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
-        
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=usuario_model.RutHash, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
 
-        return JsonResponse({
-            "respondido": len(respuesta) > 0
-        })
+    return JsonResponse({
+        "respondido": len(respuesta) > 0
+    })
 
-    return JsonResponse({"error": "Método no permitido."}, status=405)
 
