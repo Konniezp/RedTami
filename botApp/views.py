@@ -1127,7 +1127,7 @@ def generar_grafico_pregunta1():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -1279,7 +1279,7 @@ def generar_grafico_pregunta5():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -1855,11 +1855,11 @@ def grafico_prev_salud_por_rango_edad():
     for edad, cantidad, respuesta in resultados:
         index = 0 if edad < edad_min else (1 if edad <= edad_max else 2)
         
-        if respuesta == 1:
+        if respuesta == 4:
             cantidades_fonasa[index] += cantidad
-        elif respuesta == 2:
+        elif respuesta == 5:
             cantidades_isapre[index] += cantidad
-        elif respuesta == 3:
+        elif respuesta == 6:
             cantidades_otro[index] += cantidad
 
     # Crear el gráfico
