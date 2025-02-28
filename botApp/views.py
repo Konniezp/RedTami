@@ -2339,7 +2339,7 @@ def consultar_estado_pregunta(request):
         rut_many= data["Rut"]
 
         # Generar el hash del RUT original desde ManyChat
-        RutHash_many = hashlib.sha256(rut_many.encode()).hexdigest()
+        RutHash_many = Usuario().generar_hash(rut_many)
 
         # Buscar el usuario por RutHash
         usuario_model = Usuario.objects.filter(RutHash=rut_many).first()
