@@ -2347,49 +2347,19 @@ def consultar_estado_pregunta(request):
     if not usuario_model:
         return JsonResponse({"respondido": "false"})
 
-    respuesta = []  # Inicializamos respuesta como una lista vacía
+    # Inicializar respuesta como False
+    respondido = False
 
-    if data["tipo_pregunta"] == "TM":
-        pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
-        if pregunta_model:
-            id_pregunta = pregunta_model.id
-            opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(RutHash=rut_encriptado, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
-
-    elif data["tipo_pregunta"] == "DS":
-        pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
-        if pregunta_model:
-            id_pregunta = pregunta_model.id
-            opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(RutHash=rut_encriptado, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
-
-    elif data["tipo_pregunta"] == "FRM":
-        pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
-        if pregunta_model:
-            id_pregunta = pregunta_model.id
-            opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
-        
-            # Validación para peso y altura desde `CalculoFRM`
-        if "peso" in data["nombre_pregunta"].lower():
-            calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
-            if calculo_model and calculo_model.peso_mod > 0:
-                respuesta = [calculo_model.peso_mod]  # Sobrescribimos respuesta con el peso
-
-        if "altura" in data["nombre_pregunta"].lower():
-            calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
-            if calculo_model and calculo_model.altura_mod > 0:
-                respuesta = [calculo_model.altura_mod]  # Sobrescribimos respuesta con la altura
-                
-    elif data["tipo_pregunta"] == "FRNM":
-        pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
-        if pregunta_model:
-            id_pregunta = pregunta_model.id
-            opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
+    # Verificar si se está consultando peso y altura
+    if data["tipo_pregunta"] == "FRM" and data["nombre_pregunta"].lower() == "peso_y_altura":
+        # Buscar en la tabla CalculoFRM
+        calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+        if calculo_model:
+            # Verificar si ambos valores (peso y altura) están presentes y son mayores que 0
+            if calculo_model.peso_mod > 0 and calculo_model.altura_mod > 0:
+                respondido = True
 
     # Devolver la respuesta
     return JsonResponse({
-        "respondido": "true" if len(respuesta) > 0 else "false",
-        "valor": respuesta[0] if respuesta else None  # Devuelve el valor si existe
+        "respondido": "true" if respondido else "false"
     })
