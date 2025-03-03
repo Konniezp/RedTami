@@ -2347,7 +2347,7 @@ def consultar_estado_pregunta(request):
     if not usuario_model:
         return JsonResponse({"respondido": "false"})
 
-    respuesta = False
+    respuesta = []  # Inicializamos respuesta como una lista vacía
 
     if data["tipo_pregunta"] == "TM":
         pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
@@ -2370,6 +2370,17 @@ def consultar_estado_pregunta(request):
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
             respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
 
+            # Validación para peso y altura desde `CalculoFRM`
+            if "peso" in data["nombre_pregunta"].lower():
+                calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+                if calculo_model and calculo_model.peso_mod > 0:
+                    respuesta = [calculo_model.peso_mod]  # Sobrescribimos respuesta con el peso
+
+            if "altura" in data["nombre_pregunta"].lower():
+                calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+                if calculo_model and calculo_model.altura_mod > 0:
+                    respuesta = [calculo_model.altura_mod]  # Sobrescribimos respuesta con la altura
+
     elif data["tipo_pregunta"] == "FRNM":
         pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
         if pregunta_model:
@@ -2377,6 +2388,8 @@ def consultar_estado_pregunta(request):
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
             respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
 
+    # Devolver la respuesta
     return JsonResponse({
-    "respondido": "true" if len(respuesta) > 0 else "false"
-})
+        "respondido": "true" if len(respuesta) > 0 else "false",
+        "valor": respuesta[0] if respuesta else None  # Devuelve el valor si existe
+    })
