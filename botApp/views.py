@@ -2378,5 +2378,5 @@ def consultar_estado_pregunta(request):
             respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
 
     return JsonResponse({
-        "respondido": len(respuesta) > 0
-    })
+    "respondido": "true" if len(respuesta) > 0 else "false"
+})
