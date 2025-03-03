@@ -2369,18 +2369,18 @@ def consultar_estado_pregunta(request):
             id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
             respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
-
+        
             # Validación para peso y altura desde `CalculoFRM`
-            if "peso" in data["nombre_pregunta"].lower():
-                calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
-                if calculo_model and calculo_model.peso_mod > 0:
-                    respuesta = [calculo_model.peso_mod]  # Sobrescribimos respuesta con el peso
+        if "peso" in data["nombre_pregunta"].lower():
+            calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+            if calculo_model and calculo_model.peso_mod > 0:
+                respuesta = [calculo_model.peso_mod]  # Sobrescribimos respuesta con el peso
 
-            if "altura" in data["nombre_pregunta"].lower():
-                calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
-                if calculo_model and calculo_model.altura_mod > 0:
-                    respuesta = [calculo_model.altura_mod]  # Sobrescribimos respuesta con la altura
-
+        if "altura" in data["nombre_pregunta"].lower():
+            calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+            if calculo_model and calculo_model.altura_mod > 0:
+                respuesta = [calculo_model.altura_mod]  # Sobrescribimos respuesta con la altura
+                
     elif data["tipo_pregunta"] == "FRNM":
         pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
         if pregunta_model:
