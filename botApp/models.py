@@ -460,6 +460,7 @@ class CalculoFRM(models.Model):
             datos_originales=instance,
             defaults={
                 "Rut": instance.Rut,
+                "RutHash": instance.RutHash,
                 "peso_mod": peso_formateado,
                 "altura_mod": altura_formateada,
             }
