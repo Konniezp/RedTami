@@ -378,7 +378,7 @@ class RespTextoFRM(models.Model):
     id_usuario=models.ForeignKey(Usuario,on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
-        return f"{self.get_rut_descifrado()} - Peso: {self.peso_FRM6} kg - Altura: {self.altura_FRM5} cm"
+        return f"{self.get_rut_descifrado()} - Peso: {self.peso_FRM5} kg - Altura: {self.altura_FRM4} cm"
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
