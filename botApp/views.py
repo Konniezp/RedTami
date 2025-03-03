@@ -2345,7 +2345,7 @@ def consultar_estado_pregunta(request):
     usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
     
     if not usuario_model:
-        return JsonResponse({"false"}, status=404)
+        return JsonResponse({"error": "Usuario no encontrado."}, status=404)
 
     respuesta = False
 
