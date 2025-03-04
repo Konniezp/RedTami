@@ -2421,7 +2421,7 @@ def retorna_genero(request):
         opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
         respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).first()
         #opcion = OpcFactorRiesgoNoMod.objects.filter(id=respuesta.respuesta_FRNM)
-        return JsonResponse({"genero": respuesta.respuesta_FRNM.opc_respuesta_FRNM})
+        return JsonResponse({"genero": respuesta.respuesta_FRNM.id})
     else:
         return JsonResponse({"error": "usuario no existe"})
 
