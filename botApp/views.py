@@ -2395,3 +2395,36 @@ def consultar_estado_pregunta(request):
     return JsonResponse({
         "respondido": "true" if respondido else "false"
     })
+
+@csrf_exempt
+def retorna_genero(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+    try:
+        data = JSONParser().parse(request)
+    except Exception:
+        return JsonResponse({"error": "Error al leer el JSON, asegúrate de que el formato es correcto."}, status=400)
+
+    # Validar que ManyChat envió el Rut
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
+
+    # Encriptar el Rut con SHA-256 para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
+
+    # Verificar si el usuario existe en la BD
+    usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
+
+    if usuario_model:
+        pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM= "¿Cuál es tu género?").first()
+        id_pregunta = pregunta_model.id
+        opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
+        respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).first()
+        opcion = OpcFactorRiesgoNoMod.objects.filter(id=respuesta.respuesta_FRNM)
+        return JsonResponse({"genero": opcion.opc_respuesta_FRNM})
+    else:
+        return JsonResponse({"error": "usuario no existe"})
+
+    
+      
+
