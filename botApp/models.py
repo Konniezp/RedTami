@@ -159,6 +159,29 @@ class UsuarioRespuesta(models.Model):
             self.Rut = encrypt_data(self.Rut).decode()
             self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
         super().save(*args, **kwargs)
+    
+        if self.id_opc_respuesta.id in [10, 11, 12, 13]:
+                # Obtener el usuario asociado a la respuesta
+                usuario = Usuario.objects.get(RutHash=self.RutHash)
+
+                # Crear o actualizar la instancia de ultima_mamografia_anio
+                ultima_mamografia_anio.objects.update_or_create(
+                    id_usuario=usuario,
+                    defaults={
+                        "Rut": self.Rut,
+                        "RutHash": self.RutHash,
+                        "anio_ult_mamografia": self.obtener_anio_mamografia(),
+                    }
+                )
+
+    def obtener_anio_mamografia(self):
+    
+        respuestas_mamografia = {
+            10: 2024,  # ID 10 corresponde a Año 2024
+            11: 2023,  # ID 11 corresponde a Año 2023
+            12: 2022,  # ID 12 corresponde a Antes de 2022, para el cálculo se asume 2022. 
+        }
+        return respuestas_mamografia.get(self.id_opc_respuesta.id, 0)
 
     def get_rut_descifrado(self):
         return decrypt_data(self.Rut) if self.Rut else None
@@ -213,31 +236,27 @@ class ultima_mamografia_anio(models.Model):
     anio_ult_mamografia = models.IntegerField(default=0, verbose_name="Año de última mamografía")
     tiempo_transc_ult_mamografia = models.IntegerField(default=0, verbose_name="Tiempo transcurrido")
     fecha_pregunta = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    id_usuario=models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    id_usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
 
-    # Función para calcular tiempo transcurrido desde la última mamografía
     def calculo_tiempo_transc_ult_mamografia(self):
-        anio_actual = int(date.today().year)
-        tiempo_transc_ult_mamografia = anio_actual - self.anio_ult_mamografia
-        return tiempo_transc_ult_mamografia
+        anio_actual = date.today().year
+        return anio_actual - self.anio_ult_mamografia if self.anio_ult_mamografia else 0
 
-    def get_rut_descifrado(self):
-        return decrypt_data(self.Rut) if self.Rut else None
-    
     def save(self, *args, **kwargs):
-        # Cifrar Rut si aún no está cifrado
+        # Cifrar el RUT si no está cifrado
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
             self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
-        # Calcular tiempo transcurrido
+
         self.tiempo_transc_ult_mamografia = self.calculo_tiempo_transc_ult_mamografia()
-        
+
+        # Guardar la instancia
         super().save(*args, **kwargs)
 
     def get_rut_descifrado(self):
         return decrypt_data(self.Rut) if self.Rut else None
-    
-    def _str_(self):
+
+    def __str__(self):
         return f"{self.get_rut_descifrado()} - {self.anio_ult_mamografia}"
 
 class region(models.Model):
@@ -405,7 +424,7 @@ class CalculoFRM(models.Model):
         if self.altura_mod > 0 and self.peso_mod > 0:  
             altura_metros = self.altura_mod / 100  # Convierte de cm a metros
             return round(self.peso_mod / (altura_metros ** 2), 2)  # Redondear a 2 decimales
-        return 0.0  # Retorna 0 si la altura no es válida
+        return 0.0 
 
     def save(self, *args, **kwargs):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
@@ -419,7 +438,7 @@ class CalculoFRM(models.Model):
         if not valor:
             return 0.0
 
-        # Diccionario para convertir palabras a números
+        # Diccionario para convertir palabras a números, no ha sido probado con letras cuando estaba implementado. 
         palabras_a_numeros = {
             'cero': 0, 'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4,
             'cinco': 5, 'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9,
@@ -435,7 +454,7 @@ class CalculoFRM(models.Model):
             return palabras_a_numeros[valor_lower]
 
         # Limpieza de caracteres no numéricos
-        valor = valor.strip().replace(',', '.')  # Espacios y comas → puntos
+        valor = valor.strip().replace(',', '.')  # Espacios y comas por puntos
         valor = re.sub(r'[^0-9.]', '', valor)  # Quitar letras y símbolos
 
         partes = valor.split('.')
@@ -446,7 +465,7 @@ class CalculoFRM(models.Model):
         try:
             valor_numerico = float(valor)
             if es_altura and valor_numerico > 250:  
-                valor_numerico /= 10  # Corrige alturas mal escritas (ej. "1700" → "170")
+                valor_numerico /= 10  # Corrige alturas mal escritas
             return valor_numerico if valor_numerico > 0 else 0.0
         except ValueError:
             return 0.0
