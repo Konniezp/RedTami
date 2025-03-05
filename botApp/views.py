@@ -2425,6 +2425,3 @@ def retorna_genero(request):
     else:
         return JsonResponse({"error": "usuario no existe"})
 
-    
-      
-
