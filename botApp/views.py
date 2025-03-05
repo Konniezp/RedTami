@@ -350,7 +350,7 @@ def crear_excel_desde_db():
     ws_FRM.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values("RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
 
     dict_respuestas = {}
 
@@ -382,7 +382,7 @@ def crear_excel_desde_db():
     ws_FRM_2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM").order_by('Rut')
 
     for respuesta in usuarios_respuestas:
 
@@ -410,7 +410,7 @@ def crear_excel_desde_db():
     ws_FRNM.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values("RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
 
     dict_respuestas = {}
 
@@ -468,7 +468,7 @@ def crear_excel_desde_db():
     ws_DS.append(lista_preguntas)
 
     usuarios_respuestas = RespDeterSalud.objects.select_related(
-    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values( "RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS",        "respuesta_DS__opc_respuesta_DS")
+    "respuesta_DS", "respuesta_DS__id_pregunta_DS").values( "RutHash", "fecha_respuesta",  "respuesta_DS__id_pregunta_DS__pregunta_DS", "respuesta_DS__opc_respuesta_DS")
 
     dict_respuestas = {}
 
@@ -690,7 +690,7 @@ def crear_excel_mod_V2(request):
     ws_FRM_V2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoMod.objects.select_related(
-    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM",        "respuesta_FRM__opc_respuesta_FRM")
+    "respuesta_FRM", "respuesta_FRM__id_pregunta_FRM").values( "RutHash", "fecha_respuesta",  "respuesta_FRM__id_pregunta_FRM__pregunta_FRM", "respuesta_FRM__opc_respuesta_FRM")
 
     dict_respuestas = {}
 
@@ -768,7 +768,7 @@ def crear_excel_no_mod_V2(resquest):
     ws_FRNM_V2.append(lista_preguntas)
 
     usuarios_respuestas = RespUsuarioFactorRiesgoNoMod.objects.select_related(
-    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values( "RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM",        "respuesta_FRNM__opc_respuesta_FRNM")
+    "respuesta_FRNM", "respuesta_FRNM__id_pregunta_FRNM").values( "RutHash", "fecha_respuesta",  "respuesta_FRNM__id_pregunta_FRNM__pregunta_FRNM", "respuesta_FRNM__opc_respuesta_FRNM")
 
     dict_respuestas = {}
 
@@ -985,8 +985,6 @@ def generar_grafico_respuestas_por_dia():
     plt.xticks(rotation = 90)
     plt.tight_layout() 
     
-    
-
     # Agregar los valores de cada punto
     for fecha, cantidad in zip(fechas, cantidades):
         plt.annotate(f"{cantidad}", (fecha, cantidad), textcoords="offset points", xytext=(0,10), ha='center')
@@ -1021,7 +1019,7 @@ def generar_grafico_personas_por_genero_NUEVO():
         cantidades.append(cantidad)
 
     # Crear gráfico de barras con diferentes colores para cada barra
-    colores = {'Masculino': '#79addc', 'Femenino': 'pink', 'Otro': 'green'}
+    colores = {'Masculino': '#79addc', 'Femenino': '#EFB0C9', 'Otro': '#A5F8CE'}
     plt.bar(generos, cantidades, color=[colores[genero] for genero in generos])
 
     # Agregar los valores de cada barra
@@ -1127,7 +1125,7 @@ def generar_grafico_pregunta1():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -1279,7 +1277,7 @@ def generar_grafico_pregunta5():
 
     # Configurar el gráfico circular
     fig, ax = plt.subplots(figsize=(8, 8))
-    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9'])
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
     
     # Configurar las etiquetas del gráfico
     ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
@@ -1564,7 +1562,7 @@ def mamografia_por_edad_si_no():
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por Edad", pad=20)
-    plt.xticks(range(min(edades), max(edades) + 1, 1))  # Ajuste dinámico del rango de edades
+    plt.xticks(range(min(edades), max(edades) + 1, 1)) 
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_si
@@ -1855,11 +1853,11 @@ def grafico_prev_salud_por_rango_edad():
     for edad, cantidad, respuesta in resultados:
         index = 0 if edad < edad_min else (1 if edad <= edad_max else 2)
         
-        if respuesta == 1:
+        if respuesta == 4:
             cantidades_fonasa[index] += cantidad
-        elif respuesta == 2:
+        elif respuesta == 5:
             cantidades_isapre[index] += cantidad
-        elif respuesta == 3:
+        elif respuesta == 6:
             cantidades_otro[index] += cantidad
 
     # Crear el gráfico
@@ -2252,7 +2250,7 @@ class ObtenerID(APIView):
             # Si se encuentra un registro para la fecha de hoy, devolverlo
             return Response({'id': registro_hoy.id, 'texto': registro_hoy.texto, 'genero': registro_hoy.Genero_Usuario.OPC_Genero})
         else:
-            # Si no se encuentra ningún registro para la fecha de hoy, devolver un código de error (por ejemplo, "1")
+            # Si no se encuentra ningún registro para la fecha de hoy, devolver un código de error
             return Response({'error_code': '1'})
         
 class UsuarioRespuestFRNMaAPIView(APIView):
@@ -2279,34 +2277,7 @@ class RespTextoFRMAPIView(APIView):
         serializer = RespTextoFRMSerializer(respuestas, many=True)
         return Response(serializer.data)
 
-
-
-
-
 # --------------------- Api --------------------- #
-
-# ------------------Parseo fecha ---------------- #
-
-@csrf_exempt
-def guardar_fecha_nacimiento(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            print(f"Datos recibidos: {data}")
-            fecha_ingresada = data.get("fecha_nacimiento", "").strip()
-
-            # Crear el usuario con la fecha en formato de texto
-            usuario = Usuario(fecha_nacimiento=fecha_ingresada)
-            usuario.save()  # El método save() se encargará de la conversión
-
-            return JsonResponse({"mensaje": "Fecha guardada correctamente."})
-        except ValueError as e:
-            return JsonResponse({"error": str(e)}, status=400)
-        except Exception as e:
-            return JsonResponse({"error": f"Error inesperado: {str(e)}"}, status=500)
-
-    return JsonResponse({"error": "Método no permitido."}, status=405)
-
 def obtener_usuario(request, usuario_id):
     try:
         usuario = Usuario.objects.get(id=usuario_id)
@@ -2314,58 +2285,114 @@ def obtener_usuario(request, usuario_id):
 
         return JsonResponse({
             "nombre": usuario.nombre,
-            "fecha_nacimiento": usuario.fecha_nacimiento,  # Campo CharField
-            "AnioNacimiento": fecha_formateada  # Campo DateField formateado
+            "fecha_nacimiento": usuario.fecha_nacimiento,
+            "AnioNacimiento": fecha_formateada  
         })
     except Usuario.DoesNotExist:
         return JsonResponse({"error": "Usuario no encontrado"}, status=404)
 
-
+def generar_hash(valor):
+    """Genera el hash SHA-256 del Rut"""
+    return hashlib.sha256(valor.encode()).hexdigest()
 
 @csrf_exempt
 def consultar_estado_pregunta(request):
-    if request.method == "POST":
-        #data = json.loads(request.body.decode('utf-8'))
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+    try:
         data = JSONParser().parse(request)
-        
+    except Exception:
+        return JsonResponse({"error": "Error al leer el JSON, asegúrate de que el formato es correcto."}, status=400)
 
-        #usuario_model = Usuario.objects.filter(Rut=data["Rut"]).first()
-        #id_usuario = usuario_model.id
+    # Validar que ManyChat envió el Rut
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
 
-        #return JsonResponse(data)
+    # Encriptar el Rut para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
 
-        respuesta = False
-
-        if data["tipo_pregunta"] == "TM":
-            pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
-
-            opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
-            respuesta = list(UsuarioRespuesta.objects.filter(Rut=data["RutHash"], id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+    # Verificar si el usuario existe en la BD
+    usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
     
-        elif data["tipo_pregunta"] == "DS":
-            pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
+    if not usuario_model:
+        return JsonResponse({"respondido": "false"})
 
+    # Inicializar respuesta como False
+    respondido = False
+
+    # Verificar el tipo de pregunta
+    if data["tipo_pregunta"] == "TM":
+        pregunta_model = Pregunta.objects.filter(pregunta=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
+            opcion_respuesta_model = list(PreguntaOpcionRespuesta.objects.filter(id_pregunta=id_pregunta).values_list("id", flat=True))
+            respuesta = list(UsuarioRespuesta.objects.filter(RutHash=rut_encriptado, id_opc_respuesta__in=opcion_respuesta_model).values_list("id", flat=True))
+            respondido = len(respuesta) > 0
+
+    elif data["tipo_pregunta"] == "DS":
+        pregunta_model = PregDeterSalud.objects.filter(pregunta_DS=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcDeterSalud.objects.filter(id_pregunta_DS=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespDeterSalud.objects.filter(Rut=data["RutHash"], respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
-        elif data["tipo_pregunta"] == "FRM":
-            pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
-            id_pregunta = pregunta_model.id
+            respuesta = list(RespDeterSalud.objects.filter(RutHash=rut_encriptado, respuesta_DS__in=opcion_respuesta_model).values_list("id", flat=True))
+            respondido = len(respuesta) > 0
 
+    elif data["tipo_pregunta"] == "FRM":
+        pregunta_model = PregFactorRiesgoMod.objects.filter(pregunta_FRM=data["nombre_pregunta"]).first()
+        if pregunta_model:
+            id_pregunta = pregunta_model.id
             opcion_respuesta_model = list(OpcFactorRiesgoMod.objects.filter(id_pregunta_FRM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(Rut=data["RutHash"], respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat =True))
-        elif data["tipo_pregunta"] == "FRNM":
-            pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
+            respuesta = list(RespUsuarioFactorRiesgoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respondido = len(respuesta) > 0
+
+        # Verificación específica para peso y altura
+        """if "peso" in data["nombre_pregunta"].lower() or "altura" in data["nombre_pregunta"].lower():
+            calculo_model = CalculoFRM.objects.filter(RutHash=rut_encriptado).first()
+            if calculo_model:
+                # Verificar si ambos valores (peso y altura) están presentes y son mayores que 0
+                if calculo_model.peso_mod > 0 and calculo_model.altura_mod > 0:
+                    respondido = True"""
+
+    elif data["tipo_pregunta"] == "FRNM":
+        pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM=data["nombre_pregunta"]).first()
+        if pregunta_model:
             id_pregunta = pregunta_model.id
-
             opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
-            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(Rut=data["RutHash"], respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
-        
+            respuesta = list(RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).values_list("id", flat=True))
+            respondido = len(respuesta) > 0
 
-        return JsonResponse({
-            "respondido": len(respuesta) > 0
-        })
+    # Devolver la respuesta
+    return JsonResponse({
+        "respondido": "true" if respondido else "false"
+    })
 
-    return JsonResponse({"error": "Método no permitido."}, status=405)
+@csrf_exempt
+def retorna_genero(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+    try:
+        data = JSONParser().parse(request)
+    except Exception:
+        return JsonResponse({"error": "Error al leer el JSON, asegúrate de que el formato es correcto."}, status=400)
+
+    # Validar que ManyChat envió el Rut
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
+
+    # Encriptar el Rut para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
+
+    # Verificar si el usuario existe en la BD
+    usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
+
+    if usuario_model:
+        pregunta_model = PregFactorRiesgoNoMod.objects.filter(pregunta_FRNM= "¿Cuál es tu género?").first()
+        id_pregunta = pregunta_model.id
+        opcion_respuesta_model = list(OpcFactorRiesgoNoMod.objects.filter(id_pregunta_FRNM=id_pregunta).values_list("id", flat=True))
+        respuesta = RespUsuarioFactorRiesgoNoMod.objects.filter(RutHash=rut_encriptado, respuesta_FRNM__in=opcion_respuesta_model).first()
+        #opcion = OpcFactorRiesgoNoMod.objects.filter(id=respuesta.respuesta_FRNM)
+        return JsonResponse({"genero": respuesta.respuesta_FRNM.id})
+    else:
+        return JsonResponse({"error": "usuario no existe"})
 

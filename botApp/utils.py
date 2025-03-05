@@ -9,4 +9,4 @@ def encrypt_data(data):
 
 def decrypt_data(encrypted_data):
     """Descifra datos y retorna string en texto plano."""
-    return cipher_suite.decrypt(encrypted_data).decode()
+    return cipher_suite.decrypt(encrypted_data.encode()).decode()
