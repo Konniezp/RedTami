@@ -1601,11 +1601,10 @@ def generar_grafico_tiempo_trascurrido():
 
     rango_uno_etiqueta = "1"
     rango_dos_etiqueta = "2"
-    rango_tres_etiqueta = "3"
-    rango_cuatro_etiqueta = "Más de 3"
+    rango_tres_etiqueta = "Más de 3"
 
-    opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta, rango_cuatro_etiqueta]
-    cantidades = [0, 0, 0, 0]
+    opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta]
+    cantidades = [0, 0, 0]
 
     for resultado in resultados:
         anio, cantidad = resultado
@@ -1615,8 +1614,6 @@ def generar_grafico_tiempo_trascurrido():
             cantidades[1] += cantidad
         elif anio == 3:
             cantidades[2] += cantidad
-        elif anio > 3:
-            cantidades[3] += cantidad
 
     plt.figure(figsize=[18, 8])
     plt.bar(opciones_anios, cantidades, color="#79addc")
