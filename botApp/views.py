@@ -2493,4 +2493,34 @@ def retorna_genero(request):
         return JsonResponse({"genero": respuesta.respuesta_FRNM.id})
     else:
         return JsonResponse({"error": "usuario no existe"})
+    
+@csrf_exempt
+def verificar_usuario(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+    try:
+        data = JSONParser().parse(request)
+    except Exception as e:
+        return JsonResponse({"error": f"Error al leer el JSON: {str(e)}"}, status=400)
+
+    # Validar que el campo 'Rut' esté presente
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
+
+    # Encriptar el Rut para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
+
+    try:
+        # Verificar si el usuario existe en la BD
+        usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
+
+        if usuario_model:
+            return JsonResponse({"existe": True, "mensaje": "El usuario existe en la base de datos."})
+        else:
+            return JsonResponse({"existe": False, "mensaje": "El usuario no existe en la base de datos."}, status=404)
+
+    except Exception as e:
+        # Manejo de errores inesperados
+        return JsonResponse({"error": f"Error interno del servidor: {str(e)}"}, status=500)
 
