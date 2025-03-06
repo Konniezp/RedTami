@@ -242,7 +242,7 @@ def datosDS2(request):
 def datosListadoOrdenado(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.RutHash, Whatsapp, Email, edad,  
+            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
             FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
@@ -252,9 +252,40 @@ def datosListadoOrdenado(request):
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
-        datos = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        datos = cursor.fetchall()
 
-    return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos})
+    #Descifra datos 
+    datos_descifrados=[]
+    for row in datos:
+        id, Rut, Whatsapp, Email, edad, antecedentes, ultima_mamografia = row
+    
+        #Intenta descifrar cada campo encriptado
+        try:
+            Rut_descifrado = decrypt_data(Rut) if Rut else "No disponible"
+        except:
+            Rut_descifrado = "Error al descifrar Rut"
+        
+        try:
+            Whatsapp_descifrado = decrypt_data(Whatsapp) if Whatsapp else "No disponible"
+        except:
+            Whatsapp_descifrado = "Error al descifrar Whatsapp"
+
+        try:
+            Email_descifrado = decrypt_data(Email) if Email else "No disponible"
+        except:
+            Email_descifrado = "Error al descifrar Email"
+        
+        datos_descifrados.append({
+            "id": id,
+            "Rut": Rut_descifrado,
+            "Whatsapp": Whatsapp_descifrado,
+            "Email": Email_descifrado,
+            "edad": edad,
+            "Antecedentes_familiares": antecedentes,
+            "Ult_mamografia": ultima_mamografia,
+        })
+    return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos_descifrados})
+#Se agregan los datos descifrados a la lista
 
 #Ajustar anchos de columnas según el largo de la celda
 def ajustar_ancho_columnas(ws):
@@ -539,13 +570,14 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.RutHash, Whatsapp, Email, edad,                        
+            SELECT us.id, us.Rut, Whatsapp, Email, edad,                        
             COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
             COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
+            FROM botApp_usuario us 
+            JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
             LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
-            LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
+            LEFT JOIN botApp_opcfactorriesgonomod opc ON opc.id = rnm.respuesta_FRNM_id
+            WHERE opc.id IN (4,5,6) OR rnm.respuesta_FRNM_id IS NULL
             ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
@@ -560,8 +592,30 @@ def crear_excel_listado_ordenable(request):
     ws.append(columns)
 
     # Agregar los datos fila por fila
+    datos_descifrados = []
     for row in data:
-        ws.append(row)
+        id, Rut, Whatsapp, Email, edad, antecedentes, ultima_mamografia = row
+
+        # Intenta descifrar los datos
+        try:
+            Rut_descifrado = decrypt_data(Rut) if Rut else "No disponible"
+        except:
+            Rut_descifrado = "Error al descifrar Rut"
+
+        try:
+            Whatsapp_descifrado = decrypt_data(Whatsapp) if Whatsapp else "No disponible"
+        except:
+            Whatsapp_descifrado = "Error al descifrar Whatsapp"
+
+        try:
+            Email_descifrado = decrypt_data(Email) if Email else "No disponible"
+        except:
+            Email_descifrado = "Error al descifrar Email"
+
+        # Agregar los datos descifrados a la lista y a la hoja de Excel
+        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, antecedentes, ultima_mamografia)
+        datos_descifrados.append(fila_descifrada)
+        ws.append(fila_descifrada) 
 
     # Ajustar ancho de columnas y color de fondo 
     ajustar_ancho_columnas(ws)
