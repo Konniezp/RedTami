@@ -1053,8 +1053,9 @@ def generar_grafico_ingresos_por_comuna():
         cursor.execute(
             """
             SELECT c.nombre_comuna, COUNT(*) AS TotalIngresos 
-            FROM botApp_usuario u 
-            JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.cod_comuna 
+            FROM botApp_comuna c JOIN botApp_usuario u ON u.Comuna_Usuario_id = c.cod_comuna 
+            JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1)
             GROUP BY c.nombre_comuna
             """
         )
