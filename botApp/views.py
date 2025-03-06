@@ -2516,9 +2516,9 @@ def verificar_usuario(request):
         usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
 
         if usuario_model:
-            return JsonResponse({"existe": True, "mensaje": "El usuario existe en la base de datos."})
+            return JsonResponse({"existe": "true"})
         else:
-            return JsonResponse({"existe": False, "mensaje": "El usuario no existe en la base de datos."}, status=404)
+            return JsonResponse({"existe": "false"}, status=404)
 
     except Exception as e:
         # Manejo de errores inesperados
