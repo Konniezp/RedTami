@@ -890,7 +890,11 @@ def generar_grafico_usuario_por_edad():
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT edad, COUNT(*) FROM botApp_usuario GROUP BY edad ORDER BY edad "
+            """SELECT edad, COUNT(*) 
+            FROM botApp_usuario u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1)
+            GROUP BY edad 
+            ORDER BY edad; """
         )
         resultados = cursor.fetchall()
 
@@ -928,7 +932,10 @@ def generar_grafico_usuario_por_edad():
 def generar_grafico_anio_nacimiento():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT YEAR(AnioNacimiento) as anio, COUNT(*) FROM botApp_usuario GROUP BY YEAR(AnioNacimiento) ORDER BY anio ASC;"
+            """SELECT YEAR(AnioNacimiento) as anio, COUNT(*) 
+            FROM botApp_usuario u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1)
+            GROUP BY YEAR(AnioNacimiento) ORDER BY anio ASC;"""
         )
         resultados = cursor.fetchall()
 
@@ -965,7 +972,10 @@ def generar_grafico_anio_nacimiento():
 def generar_grafico_respuestas_por_dia():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT DATE(Fecha_Ingreso), COUNT(*) FROM botApp_usuario GROUP BY DATE(Fecha_Ingreso)"
+            """SELECT DATE(Fecha_Ingreso), COUNT(*) 
+            FROM botApp_usuario u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1)
+            GROUP BY DATE(Fecha_Ingreso); """
         )
         resultados = cursor.fetchall()
 
@@ -1043,7 +1053,7 @@ def generar_grafico_ingresos_por_comuna():
         cursor.execute(
             """
             SELECT c.nombre_comuna, COUNT(*) AS TotalIngresos 
-            FROM botApp_usuario u
+            FROM botApp_usuario u 
             JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.cod_comuna 
             GROUP BY c.nombre_comuna
             """
@@ -1076,9 +1086,10 @@ def generar_grafico_ingresos_por_comuna():
 def generar_grafico_referencias():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT u.Referencia, COUNT(*) AS TotalIngresos "
-            "FROM botApp_usuario u "
-            "GROUP BY u.Referencia"
+            """SELECT u.Referencia, COUNT(*) AS TotalIngresos 
+            FROM botApp_usuario u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+             WHERE respuesta_FRNM_id IN (1)
+            GROUP BY u.Referencia;"""
         )
         resultados = cursor.fetchall()
 
@@ -1108,7 +1119,10 @@ def generar_grafico_referencias():
 def generar_grafico_pregunta1():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (1, 2, 3) GROUP BY id_opc_respuesta_id"
+            """SELECT id_opc_respuesta_id, COUNT(*) 
+            FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1, 2, 3) 
+            GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1146,7 +1160,10 @@ def generar_grafico_pregunta1():
 def generar_grafico_pregunta2():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (7, 8, 9) GROUP BY id_opc_respuesta_id"
+            """SELECT id_opc_respuesta_id, COUNT(*) 
+            FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (7, 8, 9) 
+            GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1184,7 +1201,10 @@ def generar_grafico_pregunta2():
 def generar_grafico_pregunta3():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (10,11,12,13) GROUP BY id_opc_respuesta_id"
+            """SELECT id_opc_respuesta_id, COUNT(*) 
+            FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (10,11,12,13) 
+            GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1222,7 +1242,10 @@ def generar_grafico_pregunta3():
 def generar_grafico_pregunta4():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (14, 15, 16, 17) GROUP BY id_opc_respuesta_id"
+            """SELECT id_opc_respuesta_id, COUNT(*) 
+            FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (14, 15, 16, 17) 
+            GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1260,7 +1283,10 @@ def generar_grafico_pregunta4():
 def generar_grafico_pregunta5():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id_opc_respuesta_id, COUNT(*) FROM botApp_usuariorespuesta WHERE id_opc_respuesta_id IN (18, 19, 20) GROUP BY id_opc_respuesta_id"
+            """SELECT id_opc_respuesta_id, COUNT(*) 
+            FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (18, 19, 20) 
+            GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1298,7 +1324,15 @@ def generar_grafico_pregunta5():
 def generar_grafico_pregunta6():
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT respuesta_FRNM_id, COUNT(*) FROM botApp_respusuariofactorriesgonomod WHERE respuesta_FRNM_id IN (4, 5, 6) GROUP BY respuesta_FRNM_id"
+            """SELECT respuesta_FRNM_id, COUNT(*) 
+               FROM botApp_respusuariofactorriesgonomod
+               WHERE RutHash IN (
+               SELECT RutHash
+               FROM botApp_respusuariofactorriesgonomod
+               WHERE respuesta_FRNM_id = 1
+            )
+               AND respuesta_FRNM_id IN (4, 5, 6)
+               GROUP BY respuesta_FRNM_id;"""
         )
         resultados = cursor.fetchall()
 
@@ -1339,9 +1373,10 @@ def generar_grafico_mamografia_si_por_edad():
         cursor.execute(
             """
             SELECT us.edad, COUNT(*) as Cantidad 
-            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.RutHash = us.RutHash
-            WHERE id_opc_respuesta_id IN (1)
-            GROUP BY us.edad ORDER BY edad ASC
+            FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.RutHash = us.RutHash 
+            JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1)
+            GROUP BY us.edad ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
@@ -1385,13 +1420,16 @@ def generar_grafico_mamo_si_por_familiar_directo():
         cursor.execute(
             """
             SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.RutHash) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod r
-            JOIN botApp_usuariorespuesta u ON r.RutHash = u.RutHash
+            FROM botApp_respusuariofactorriesgonomod r 
             JOIN botApp_usuariorespuesta ur_mamo ON r.RutHash = ur_mamo.RutHash
             WHERE r.respuesta_FRNM_id IN (4, 5, 6)
-            AND ur_mamo.id_opc_respuesta_id = 1 
+            AND r.RutHash IN (
+            SELECT DISTINCT r2.RutHash
+            FROM botApp_respusuariofactorriesgonomod r2
+            WHERE r2.respuesta_FRNM_id = 1
+            )
+            AND ur_mamo.id_opc_respuesta_id = 1  
             GROUP BY r.respuesta_FRNM_id;
-
             """
         )
         resultados = cursor.fetchall()
@@ -1435,8 +1473,9 @@ def generar_grafico_mamografia_no_por_edad():
             """
             SELECT us.edad, COUNT(*) as Cantidad 
             FROM botApp_usuariorespuesta ur JOIN botApp_usuario us ON ur.RutHash = us.RutHash
-            WHERE id_opc_respuesta_id IN (2)
-            GROUP BY edad ORDER BY edad ASC
+            JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (2)
+            GROUP BY edad ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
@@ -1476,13 +1515,17 @@ def generar_grafico_mamo_no_por_familiar_directo():
         cursor.execute(
             """
             SELECT r.respuesta_FRNM_id, COUNT(DISTINCT r.RutHash) AS cantidad_respuestas
-            FROM botApp_respusuariofactorriesgonomod r
-            JOIN botApp_usuariorespuesta u ON r.RutHash = u.RutHash
-            JOIN botApp_usuariorespuesta ur_mamo ON r.RutHash = ur_mamo.RutHash 
+            FROM botApp_respusuariofactorriesgonomod r 
+            JOIN botApp_usuariorespuesta ur_mamo ON r.RutHash = ur_mamo.RutHash
             WHERE r.respuesta_FRNM_id IN (4, 5, 6)
+            AND r.RutHash IN (
+            SELECT DISTINCT r2.RutHash
+            FROM botApp_respusuariofactorriesgonomod r2
+            WHERE r2.respuesta_FRNM_id = 1
+            )
             AND ur_mamo.id_opc_respuesta_id = 2
             GROUP BY r.respuesta_FRNM_id;
-            
+
            """
 
         )
@@ -1525,10 +1568,10 @@ def mamografia_por_edad_si_no():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
-            WHERE id_opc_respuesta_id IN (1,2)
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2) 
             GROUP BY edad, ur.id_opc_respuesta_id 
-            ORDER BY edad ASC
+            ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
@@ -1593,19 +1636,19 @@ def generar_grafico_tiempo_trascurrido():
         cursor.execute(
             """
             SELECT tiempo_transc_ult_mamografia, COUNT(*) 
-            FROM botApp_ultima_mamografia_anio  
-            GROUP BY tiempo_transc_ult_mamografia ORDER BY tiempo_transc_ult_mamografia ASC 
+            FROM botApp_ultima_mamografia_anio u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) 
+            GROUP BY tiempo_transc_ult_mamografia ORDER BY tiempo_transc_ult_mamografia ASC;
             """
         )
         resultados = cursor.fetchall()
 
     rango_uno_etiqueta = "1"
     rango_dos_etiqueta = "2"
-    rango_tres_etiqueta = "3"
-    rango_cuatro_etiqueta = "Más de 3"
+    rango_tres_etiqueta = "Más de 3"
 
-    opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta, rango_cuatro_etiqueta]
-    cantidades = [0, 0, 0, 0]
+    opciones_anios = [rango_uno_etiqueta, rango_dos_etiqueta, rango_tres_etiqueta]
+    cantidades = [0, 0, 0]
 
     for resultado in resultados:
         anio, cantidad = resultado
@@ -1615,8 +1658,6 @@ def generar_grafico_tiempo_trascurrido():
             cantidades[1] += cantidad
         elif anio == 3:
             cantidades[2] += cantidad
-        elif anio > 3:
-            cantidades[3] += cantidad
 
     plt.figure(figsize=[18, 8])
     plt.bar(opciones_anios, cantidades, color="#79addc")
@@ -1645,8 +1686,9 @@ def generar_grafico_por_rango_edad():
         cursor.execute(
             """
             SELECT edad, COUNT(*) 
-            FROM botApp_usuario 
-            GROUP BY edad ORDER BY edad
+            FROM botApp_usuario  u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) 
+            GROUP BY edad ORDER BY edad;
             """
         )
         resultados = cursor.fetchall()
@@ -1695,10 +1737,10 @@ def mamografia_por_edad_si_no_rango_edad():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
-            WHERE id_opc_respuesta_id IN (1,2)
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash  JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
-            ORDER BY edad ASC
+            ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
@@ -1767,10 +1809,10 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
-            JOIN botApp_usuario us ON ur.RutHash = us.RutHash
-            WHERE id_opc_respuesta_id IN (1,2)
+            JOIN botApp_usuario us ON ur.RutHash = us.RutHash JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2)
             GROUP BY edad, ur.id_opc_respuesta_id 
-            ORDER BY edad ASC
+            ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
@@ -1831,7 +1873,8 @@ def grafico_prev_salud_por_rango_edad():
             """
             SELECT us.edad, COUNT(*) as Cantidad, ds.respuesta_DS_id
             FROM botApp_usuario us JOIN  botApp_respdetersalud ds ON us.RutHash = ds.RutHash
-            WHERE ds.respuesta_DS_id IN(4,5,6)
+            JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND ds.respuesta_DS_id IN(4,5,6)
             GROUP BY edad, respuesta_DS_id 
             ORDER BY edad ASC;
             """
@@ -1900,9 +1943,9 @@ def grafico_escolaridad():
         cursor.execute(
             """
             SELECT respuesta_DS_id, COUNT(*) 
-            FROM botApp_respdetersalud       
-            WHERE respuesta_DS_id IN (1,2,3) 
-            GROUP BY respuesta_DS_id
+            FROM botApp_respdetersalud us JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND respuesta_DS_id IN (1,2,3) 
+            GROUP BY respuesta_DS_id;
             """
         )
         resultados = cursor.fetchall()
@@ -1943,9 +1986,9 @@ def grafico_frecuencia_alcohol():
         cursor.execute(
             """
             SELECT respuesta_FRM_id, COUNT(*) 
-            FROM botApp_respusuariofactorriesgomod
-            WHERE respuesta_FRM_id IN (3,4,5) 
-            GROUP BY respuesta_FRM_id
+            FROM botApp_respusuariofactorriesgomod us JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND respuesta_FRM_id IN (3,4,5) 
+            GROUP BY respuesta_FRM_id;
             """
         )
         resultados = cursor.fetchall()
