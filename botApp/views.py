@@ -2518,7 +2518,7 @@ def verificar_usuario(request):
         if usuario_model:
             return JsonResponse({"existe": "true"})
         else:
-            return JsonResponse({"existe": "false"}, status=404)
+            return JsonResponse({"existe": "false"})
 
     except Exception as e:
         # Manejo de errores inesperados
