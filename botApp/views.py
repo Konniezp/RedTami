@@ -240,21 +240,67 @@ def datosDS2(request):
 
 @login_required
 def datosListadoOrdenado(request):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT us.id, us.RutHash, Whatsapp, Email, edad,  
-            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
-            LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
-        """)
-        columns = [col[0] for col in cursor.description]
-        datos = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    if request.method == "POST":
+        password_ingresada = request.POST.get("password")
+        if password_ingresada == settings.ACCESO_LISTADO:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
+                    COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+                    COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
+                    FROM botApp_comuna co LEFT JOIN botApp_usuario us
+                    ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
+                    ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
+                    ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
+                    ON opc.id = rnm.respuesta_FRNM_id 
+                    WHERE us.RutHash IN (
+                            SELECT RutHash 
+                            FROM botApp_respusuariofactorriesgonomod 
+                            WHERE respuesta_FRNM_id = 1)
+                            AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+                    ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+                    """)
+                columns = [col[0] for col in cursor.description]
+                datos = cursor.fetchall()
 
-    return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos})
+            #Descifra datos 
+            datos_descifrados=[]
+            for row in datos:
+                id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
+            
+                #Intenta descifrar cada campo encriptado
+                try:
+                    Rut_descifrado = decrypt_data(Rut) if Rut else "No disponible"
+                except:
+                    Rut_descifrado = "Error al descifrar Rut"
+                
+                try:
+                    Whatsapp_descifrado = decrypt_data(Whatsapp) if Whatsapp else "No disponible"
+                except:
+                    Whatsapp_descifrado = "Error al descifrar Whatsapp"
+
+                try:
+                    Email_descifrado = decrypt_data(Email) if Email else "No disponible"
+                except:
+                    Email_descifrado = "Error al descifrar Email"
+                
+                datos_descifrados.append({
+                    "id": id,
+                    "Rut": Rut_descifrado,
+                    "Whatsapp": Whatsapp_descifrado,
+                    "Email": Email_descifrado,
+                    "edad": edad,
+                    "comuna": comuna,
+                    "Antecedentes_familiares": antecedentes,
+                    "Ult_mamografia": ultima_mamografia,
+                })
+            return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos_descifrados})
+        else:
+            error = "Contraseña incorrecta"
+    else:
+        error = None
+    
+    return render(request, "respuestas/form_contrasena_listado.html", {"error": error})
 
 #Ajustar anchos de columnas según el largo de la celda
 def ajustar_ancho_columnas(ws):
@@ -539,14 +585,20 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.RutHash, Whatsapp, Email, edad,                        
-            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
-            LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+        SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
+        COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+        COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
+        FROM botApp_comuna co LEFT JOIN botApp_usuario us
+        ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
+        ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
+        ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
+        ON opc.id = rnm.respuesta_FRNM_id 
+        WHERE us.RutHash IN (
+                SELECT RutHash 
+                FROM botApp_respusuariofactorriesgonomod 
+                WHERE respuesta_FRNM_id = 1)
+                AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+        ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
@@ -560,8 +612,30 @@ def crear_excel_listado_ordenable(request):
     ws.append(columns)
 
     # Agregar los datos fila por fila
+    datos_descifrados = []
     for row in data:
-        ws.append(row)
+        id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
+
+        # Intenta descifrar los datos
+        try:
+            Rut_descifrado = decrypt_data(Rut) if Rut else "No disponible"
+        except:
+            Rut_descifrado = "Error al descifrar Rut"
+
+        try:
+            Whatsapp_descifrado = decrypt_data(Whatsapp) if Whatsapp else "No disponible"
+        except:
+            Whatsapp_descifrado = "Error al descifrar Whatsapp"
+
+        try:
+            Email_descifrado = decrypt_data(Email) if Email else "No disponible"
+        except:
+            Email_descifrado = "Error al descifrar Email"
+
+        # Agregar los datos descifrados a la lista y a la hoja de Excel
+        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, comuna, antecedentes, ultima_mamografia)
+        datos_descifrados.append(fila_descifrada)
+        ws.append(fila_descifrada) 
 
     # Ajustar ancho de columnas y color de fondo 
     ajustar_ancho_columnas(ws)
@@ -1053,8 +1127,9 @@ def generar_grafico_ingresos_por_comuna():
         cursor.execute(
             """
             SELECT c.nombre_comuna, COUNT(*) AS TotalIngresos 
-            FROM botApp_usuario u 
-            JOIN botApp_comuna c ON u.Comuna_Usuario_id = c.cod_comuna 
+            FROM botApp_comuna c JOIN botApp_usuario u ON u.Comuna_Usuario_id = c.cod_comuna 
+            JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1)
             GROUP BY c.nombre_comuna
             """
         )
@@ -2438,4 +2513,34 @@ def retorna_genero(request):
         return JsonResponse({"genero": respuesta.respuesta_FRNM.id})
     else:
         return JsonResponse({"error": "usuario no existe"})
+    
+@csrf_exempt
+def verificar_usuario(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Método no permitido."}, status=405)
+
+    try:
+        data = JSONParser().parse(request)
+    except Exception as e:
+        return JsonResponse({"error": f"Error al leer el JSON: {str(e)}"}, status=400)
+
+    # Validar que el campo 'Rut' esté presente
+    if "Rut" not in data:
+        return JsonResponse({"error": "El campo 'Rut' es obligatorio en la petición."}, status=400)
+
+    # Encriptar el Rut para compararlo con RutHash
+    rut_encriptado = generar_hash(data["Rut"])
+
+    try:
+        # Verificar si el usuario existe en la BD
+        usuario_model = Usuario.objects.filter(RutHash=rut_encriptado).first()
+
+        if usuario_model:
+            return JsonResponse({"existe": "true"})
+        else:
+            return JsonResponse({"existe": "false"})
+
+    except Exception as e:
+        # Manejo de errores inesperados
+        return JsonResponse({"error": f"Error interno del servidor: {str(e)}"}, status=500)
 

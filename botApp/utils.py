@@ -8,5 +8,8 @@ def encrypt_data(data):
     return cipher_suite.encrypt(data.encode())
 
 def decrypt_data(encrypted_data):
-    """Descifra datos y retorna string en texto plano."""
-    return cipher_suite.decrypt(encrypted_data.encode()).decode()
+    """Descifra datos y retorna el texto original."""
+    try:
+        return cipher_suite.decrypt(encrypted_data.encode()).decode()
+    except Exception as e:
+        return f"Error al descifrar: {str(e)}" 
