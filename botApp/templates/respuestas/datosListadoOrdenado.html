@@ -13,7 +13,7 @@
         <table border="1">
             <thead>
                 <tr>
-                    <td colspan="8"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                    <td colspan="9"><b>Total de respuestas: {{ Datos|length }}</b></td>
                 </tr>
                 <tr>
                     <th>#</th>
@@ -22,6 +22,7 @@
                     <th>WhatsApp</th>
                     <th>Email usuario</th>
                     <th>Edad</th>
+                    <th>Comuna</th>
                     <th>Antecedentes familiares</th>
                     <th>Tiempo transcurrido</th>
                 </tr>
@@ -35,6 +36,7 @@
                     <td>{{ dato.Whatsapp }}</td>
                     <td>{{ dato.Email }}</td>
                     <td>{{ dato.edad }}</td>
+                    <td>{{ dato.comuna }}</td>
                     <td>{{ dato.Antecedentes_familiares}}</td>
                     <td>{{ dato.Ult_mamografia }}</td>
                 </tr>

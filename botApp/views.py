@@ -242,14 +242,20 @@ def datosDS2(request):
 def datosListadoOrdenado(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, Email, edad,  
-            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
-            LEFT JOIN botApp_opcfactorriesgonomod opc ON  opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN(4,5,6) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+        SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
+        COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+        COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
+        FROM botApp_comuna co LEFT JOIN botApp_usuario us
+        ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
+        ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
+        ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
+        ON opc.id = rnm.respuesta_FRNM_id 
+        WHERE us.RutHash IN (
+                SELECT RutHash 
+                FROM botApp_respusuariofactorriesgonomod 
+                WHERE respuesta_FRNM_id = 1)
+                AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+        ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
         datos = cursor.fetchall()
@@ -257,7 +263,7 @@ def datosListadoOrdenado(request):
     #Descifra datos 
     datos_descifrados=[]
     for row in datos:
-        id, Rut, Whatsapp, Email, edad, antecedentes, ultima_mamografia = row
+        id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
     
         #Intenta descifrar cada campo encriptado
         try:
@@ -281,6 +287,7 @@ def datosListadoOrdenado(request):
             "Whatsapp": Whatsapp_descifrado,
             "Email": Email_descifrado,
             "edad": edad,
+            "comuna": comuna,
             "Antecedentes_familiares": antecedentes,
             "Ult_mamografia": ultima_mamografia,
         })
@@ -570,15 +577,20 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT us.id, us.Rut, Whatsapp, Email, edad,                        
-            COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-            COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-            FROM botApp_usuario us 
-            JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash
-            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash  
-            LEFT JOIN botApp_opcfactorriesgonomod opc ON opc.id = rnm.respuesta_FRNM_id
-            WHERE opc.id IN (4,5,6) OR rnm.respuesta_FRNM_id IS NULL
-            ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+        SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
+        COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+        COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
+        FROM botApp_comuna co LEFT JOIN botApp_usuario us
+        ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
+        ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
+        ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
+        ON opc.id = rnm.respuesta_FRNM_id 
+        WHERE us.RutHash IN (
+                SELECT RutHash 
+                FROM botApp_respusuariofactorriesgonomod 
+                WHERE respuesta_FRNM_id = 1)
+                AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+        ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
@@ -594,7 +606,7 @@ def crear_excel_listado_ordenable(request):
     # Agregar los datos fila por fila
     datos_descifrados = []
     for row in data:
-        id, Rut, Whatsapp, Email, edad, antecedentes, ultima_mamografia = row
+        id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
 
         # Intenta descifrar los datos
         try:
@@ -613,7 +625,7 @@ def crear_excel_listado_ordenable(request):
             Email_descifrado = "Error al descifrar Email"
 
         # Agregar los datos descifrados a la lista y a la hoja de Excel
-        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, antecedentes, ultima_mamografia)
+        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, comuna, antecedentes, ultima_mamografia)
         datos_descifrados.append(fila_descifrada)
         ws.append(fila_descifrada) 
 
