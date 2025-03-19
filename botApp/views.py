@@ -1669,7 +1669,7 @@ def mamografia_por_edad_si_no():
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.RutHash = us.RutHash JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
-            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2) 
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2,3) 
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC;
             """
@@ -1679,6 +1679,7 @@ def mamografia_por_edad_si_no():
     edades = []
     cantidades_si = []
     cantidades_no = []
+    cantidades_no_recuerdo = []
 
     # Iteramos sobre los resultados
     for resultado in resultados:
@@ -1689,6 +1690,7 @@ def mamografia_por_edad_si_no():
             edades.append(edad)
             cantidades_si.append(0)  
             cantidades_no.append(0)  
+            cantidades_no_recuerdo.append(0)
 
         # Obtenemos el índice correspondiente a la edad
         index = edades.index(edad)
@@ -1697,29 +1699,29 @@ def mamografia_por_edad_si_no():
             cantidades_si[index] += cantidad
         elif respuesta == 2: 
             cantidades_no[index] += cantidad
-
+        elif respuesta == 3: 
+            cantidades_no_recuerdo[index] += cantidad
+        
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
     plt.bar(edades, cantidades_si, color="#79addc", label="Cantidad Sí")
     plt.bar(edades, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
+    plt.bar(edades, cantidades_no_recuerdo, color="#A5F8CE", bottom=np.array(cantidades_si) + np.array(cantidades_no), label="Cantidad No recuerdo")
     plt.xlabel("Edad")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por Edad", pad=20)
-    plt.xticks(range(min(edades), max(edades) + 1, 1)) 
+    plt.xticks(np.arange(min(edades), max(edades) + 1, 1)) 
     plt.legend()
 
-    # Agregar etiquetas para las barras de cantidades_si
-    for edad, cantidad_si, cantidad_no in zip(edades, cantidades_si, cantidades_no):
+    for edad, cantidad_si, cantidad_no, cantidad_no_recuerdo in zip(edades, cantidades_si, cantidades_no, cantidades_no_recuerdo):
         if cantidad_si > 0:
-            plt.text(edad, cantidad_si - cantidad_si / 2,  
-                 str(cantidad_si), ha='center', va='bottom', color='black')
-
-    # Agregar etiquetas para las barras de cantidades_no
-    for edad, cantidad_si, cantidad_no in zip(edades, cantidades_si, cantidades_no):
+            plt.text(edad, cantidad_si / 2, str(cantidad_si), ha='center', va='bottom', color='black')
         if cantidad_no > 0:
-            plt.text(edad, cantidad_si + cantidad_no - cantidad_no / 2,  
-                str(cantidad_no), ha='center', va='top', color='black')
-
+            plt.text(edad, cantidad_si + cantidad_no / 2, str(cantidad_no), ha='center', va='bottom', color='black')
+        if cantidad_no_recuerdo > 0:
+            plt.text(edad, cantidad_si + cantidad_no + cantidad_no_recuerdo / 2, str(cantidad_no_recuerdo), 
+                     ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+            
    # Guardar la imagen en un buffer
     buffer = BytesIO()
     plt.savefig(buffer, format="png")
@@ -1779,7 +1781,6 @@ def generar_grafico_tiempo_trascurrido():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
-
 def generar_grafico_por_rango_edad():
 
     with connection.cursor() as cursor:
@@ -1838,7 +1839,7 @@ def mamografia_por_edad_si_no_rango_edad():
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.RutHash = us.RutHash  JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
-            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2)
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2,3)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC;
             """
@@ -1851,47 +1852,48 @@ def mamografia_por_edad_si_no_rango_edad():
     opciones_anios = [r_uno_edad_eti, r_dos_edad_eti, r_tres_edad_eti]
     cantidades_si = [0, 0, 0]
     cantidades_no = [0, 0, 0]
+    cantidades_no_recuerdo = [0, 0, 0]
 
     edad_min = 50
     edad_max = 69
 
-    # Iteramos sobre los resultados
-    for resultado in resultados:
-        edad, cantidad, respuesta = resultado
-
-        if edad < edad_min and respuesta == 1:
-            cantidades_si[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 1:
-            cantidades_si[1] += cantidad
-        elif edad > edad_max and respuesta == 1:
-            cantidades_si[2] += cantidad 
-        elif edad < edad_min and respuesta == 2:
-            cantidades_no[0] += cantidad
-        elif edad >= edad_min and edad <= edad_max and respuesta == 2:
-            cantidades_no[1] += cantidad
-        elif edad > edad_max and respuesta == 2:
-            cantidades_no[2] += cantidad 
+        # Iteramos sobre los resultados
+    for edad, cantidad, respuesta in resultados:
+        index = 0 if edad < edad_min else (1 if edad <= edad_max else 2)
+        
+        if respuesta == 1:
+            cantidades_si[index] += cantidad
+        elif respuesta == 2:
+            cantidades_no[index] += cantidad
+        elif respuesta == 3:
+            cantidades_no_recuerdo[index] += cantidad
 
     # Crear el gráfico
     plt.figure(figsize=[18, 8])
     plt.bar(opciones_anios, cantidades_si, color="#79addc", label="Cantidad Sí")
     plt.bar(opciones_anios, cantidades_no, color="#EFB0C9", bottom=cantidades_si, label="Cantidad No")
+    plt.bar(opciones_anios, cantidades_no_recuerdo, color="#A5F8CE", bottom=np.array(cantidades_si) + np.array(cantidades_no), label="Cantidad No recuerdo")
     plt.xlabel("Rango de edad según guía clínica")
     plt.ylabel("Número de Usuarias")
     plt.title("Mamografías por rango de Edad", pad=20)
     plt.legend()
 
     # Agregar etiquetas para las barras de cantidades_si
-    for edad, cantidad_si, cantidad_no in zip(opciones_anios, cantidades_si, cantidades_no):
+    for i, (edad, cantidad_si) in enumerate (zip(opciones_anios, cantidades_si)):
         if cantidad_si > 0:
-            plt.text(edad, cantidad_si - cantidad_si / 2,  
-                 str(cantidad_si), ha='center', va='bottom', color='black')
+            plt.text (i, cantidad_si / 2,  
+                str(cantidad_si), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
 
     # Agregar etiquetas para las barras de cantidades_no
-    for edad, cantidad_si, cantidad_no in zip(opciones_anios, cantidades_si, cantidades_no):
+    for i, (edad, cantidad_si, cantidad_no) in enumerate (zip(opciones_anios, cantidades_si, cantidades_no)):
         if cantidad_no > 0:
-            plt.text(edad, cantidad_si + cantidad_no - cantidad_no / 2,  
-                str(cantidad_no), ha='center', va='top', color='black')
+            plt.text(i, cantidad_si + cantidad_no / 2,
+                str(cantidad_no), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
+
+    # Agregar etiquetas para la barra de cantidades_otro
+    for i, (edad, cantidad_si, cantidad_no, cantidad_otro) in enumerate(zip(opciones_anios, cantidades_si, cantidades_no, cantidades_no_recuerdo)):
+        if cantidad_otro > 0:
+            plt.text(i, cantidad_si + cantidad_no + cantidad_otro / 2, str(cantidad_otro), ha='center', va='center', color='black', fontsize=10, fontweight='bold')
 
    # Guardar la imagen en un buffer
     buffer = BytesIO()
@@ -1910,40 +1912,42 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
             SELECT us.edad, COUNT(*) as Cantidad, ur.id_opc_respuesta_id
             FROM botApp_usuariorespuesta ur 
             JOIN botApp_usuario us ON ur.RutHash = us.RutHash JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
-            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2)
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (1,2,3)
             GROUP BY edad, ur.id_opc_respuesta_id 
             ORDER BY edad ASC;
             """
         )
         resultados = cursor.fetchall()
 
-    opciones_anios = ["Menores de 50", "50 a 69", "Desde los 70"]
+    r_uno_edad_eti = "Menor de 50 años"
+    r_dos_edad_eti = "Entre 50 y 69 años"
+    r_tres_edad_eti = "Mayor a 69 años"
+    opciones_anios = [r_uno_edad_eti, r_dos_edad_eti, r_tres_edad_eti]
     cantidades_si = [0, 0, 0]
     cantidades_no = [0, 0, 0]
+    cantidades_no_recuerdo = [0, 0, 0]
+
+    edad_min = 50
+    edad_max = 69
 
     # Iteramos sobre los resultados
-    for resultado in resultados:
-        edad, cantidad, respuesta = resultado
-
-        if edad < 50 and respuesta == 1:
-            cantidades_si[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 1:
-            cantidades_si[1] += cantidad
-        elif edad > 69 and respuesta == 1:
-            cantidades_si[2] += cantidad 
-        elif edad < 50 and respuesta == 2:
-            cantidades_no[0] += cantidad
-        elif edad >= 50 and edad <= 69 and respuesta == 2:
-            cantidades_no[1] += cantidad
-        elif edad > 69 and respuesta == 2:
-            cantidades_no[2] += cantidad 
+    for edad, cantidad, respuesta in resultados:
+        index = 0 if edad < edad_min else (1 if edad <= edad_max else 2)
+        
+        if respuesta == 1:
+            cantidades_si[index] += cantidad
+        elif respuesta == 2:
+            cantidades_no[index] += cantidad
+        elif respuesta == 3:
+            cantidades_no_recuerdo[index] += cantidad
 
     x = np.arange(len(opciones_anios))  
-    width = 0.35  
+    width = 0.25  
 
     fig, ax = plt.subplots(figsize=[18, 8])
-    rects1 = ax.bar(x - width/2, cantidades_si, width, label='Cantidad Sí', color = '#79addc')
-    rects2 = ax.bar(x + width/2, cantidades_no, width, label='Cantidad No', color="#EFB0C9")
+    rects1 = ax.bar(x - width, cantidades_si, width, label='Cantidad Sí', color = '#79addc')
+    rects2 = ax.bar(x, cantidades_no, width, label='Cantidad No', color="#EFB0C9")
+    rects3 = ax.bar(x + width, cantidades_no_recuerdo, width, label='Cantidad No Recuerdo', color="#A5F8CE")
 
     ax.set_xlabel("Rango de edad guía clínica")
     ax.set_ylabel("Número de Usuarias")
@@ -1956,6 +1960,7 @@ def mamografia_por_edad_si_no_rango_edad_agrupado():
     # Etiquetas en las barras
     ax.bar_label(rects1, padding=3, color="black")
     ax.bar_label(rects2, padding=3, color="black")
+    ax.bar_label(rects3, padding=3, color="black")
 
    # Guardar la imagen en un buffer
     buffer = BytesIO()
