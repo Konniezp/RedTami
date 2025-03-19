@@ -158,30 +158,30 @@ class UsuarioRespuesta(models.Model):
         if self.Rut and not self.Rut.startswith("gAAAA"):  
             self.Rut = encrypt_data(self.Rut).decode()
             self.RutHash = Usuario().generar_hash(decrypt_data(self.Rut))
+
         super().save(*args, **kwargs)
-    
-        if self.id_opc_respuesta.id in [10, 11, 12, 13]:
-                # Obtener el usuario asociado a la respuesta
-                usuario = Usuario.objects.get(RutHash=self.RutHash)
 
-                # Crear o actualizar la instancia de ultima_mamografia_anio
-                ultima_mamografia_anio.objects.update_or_create(
-                    id_usuario=usuario,
-                    defaults={
-                        "Rut": self.Rut,
-                        "RutHash": self.RutHash,
-                        "anio_ult_mamografia": self.obtener_anio_mamografia(),
-                    }
-                )
-
+        if self.id_opc_respuesta.id in [10, 11, 12, 13]: 
+            anio = self.obtener_anio_mamografia()
+            
+            if anio:  
+                usuario = Usuario.objects.filter(RutHash=self.RutHash).first()
+                if usuario:
+                    ultima_mamografia_anio.objects.update_or_create(
+                        id_usuario=usuario,
+                        defaults={
+                            "Rut": self.Rut,
+                            "RutHash": self.RutHash,
+                            "anio_ult_mamografia": anio,
+                        }
+                    )
     def obtener_anio_mamografia(self):
-    
         respuestas_mamografia = {
-            10: 2024,  # ID 10 corresponde a Año 2024
-            11: 2023,  # ID 11 corresponde a Año 2023
-            12: 2022,  # ID 12 corresponde a Antes de 2022, para el cálculo se asume 2022. 
+            10: 2024,  # id 10: Año 2024
+            11: 2023,  # id 11: Año 2023
+            12: 2022,  # id 12: Antes de 2022 
         }
-        return respuestas_mamografia.get(self.id_opc_respuesta.id, 0)
+        return respuestas_mamografia.get(self.id_opc_respuesta.id)
 
     def get_rut_descifrado(self):
         return decrypt_data(self.Rut) if self.Rut else None
