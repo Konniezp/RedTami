@@ -246,23 +246,31 @@ def datosListadoOrdenado(request):
             with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
-                    COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-                    opm.opc_respuesta_FRM AS Percepción_peso,          
-                    COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-                    FROM botApp_comuna co LEFT JOIN botApp_usuario us
-                    ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
-                    ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
-                    ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
-                    ON opc.id = rnm.respuesta_FRNM_id LEFT JOIN botApp_respusuariofactorriesgomod frm 
-                    ON us.RutHash = frm.RutHash LEFT JOIN botApp_opcfactorriesgomod opm 
-                    ON opm.id = frm.respuesta_FRM_id 
-                    WHERE us.RutHash IN (
-                            SELECT RutHash 
-                            FROM botApp_respusuariofactorriesgonomod 
-                            WHERE respuesta_FRNM_id = 1)
-                            AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
-                            AND (opm.id IN (9, 10, 11) OR frm.respuesta_FRM_id IS NULL)
-                    ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+                        CASE 
+                            WHEN COUNT(opc.opc_respuesta_FRNM) > 0 
+                            THEN GROUP_CONCAT(DISTINCT opc.opc_respuesta_FRNM SEPARATOR ', ') 
+                            ELSE 'No aplica' 
+                        END AS Antecedentes_familiares,
+                        CASE 
+                            WHEN COUNT(opm.opc_respuesta_FRM) > 0 
+                            THEN GROUP_CONCAT(DISTINCT opm.opc_respuesta_FRM SEPARATOR ', ') 
+                            ELSE 'No aplica' 
+                        END AS Percepción_peso,
+                        COALESCE(MIN(ult.tiempo_transc_ult_mamografia), 1000) AS Ult_mamografia
+                    FROM botApp_comuna co 
+                    LEFT JOIN botApp_usuario us ON co.cod_comuna = us.Comuna_Usuario_id 
+                    LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash 
+                    LEFT JOIN botApp_opcfactorriesgonomod opc ON opc.id = rnm.respuesta_FRNM_id 
+                        AND opc.id IN (4, 5, 6) 
+                    LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash 
+                    LEFT JOIN botApp_respusuariofactorriesgomod frm ON us.RutHash = frm.RutHash 
+                    LEFT JOIN botApp_opcfactorriesgomod opm ON opm.id = frm.respuesta_FRM_id 
+                        AND opm.id IN (9, 10, 11) 
+                    WHERE us.RutHash IN (  
+                        SELECT RutHash FROM botApp_respusuariofactorriesgonomod WHERE respuesta_FRNM_id = 1
+                    )
+                    GROUP BY us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna
+                    ORDER BY MIN(ult.tiempo_transc_ult_mamografia) DESC;
                     """)
                 columns = [col[0] for col in cursor.description]
                 datos = cursor.fetchall()
@@ -590,24 +598,32 @@ def descargar_excel(request):
 def crear_excel_listado_ordenable(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-        SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
-        COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
-        opm.opc_respuesta_FRM AS Percepción_peso,
-        COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
-        FROM botApp_comuna co LEFT JOIN botApp_usuario us
-        ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
-        ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
-        ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
-        ON opc.id = rnm.respuesta_FRNM_id LEFT JOIN botApp_respusuariofactorriesgomod frm 
-        ON us.RutHash = frm.RutHash LEFT JOIN botApp_opcfactorriesgomod opm 
-        ON opm.id = frm.respuesta_FRM_id 
-        WHERE us.RutHash IN (
-                SELECT RutHash 
-                FROM botApp_respusuariofactorriesgonomod 
-                WHERE respuesta_FRNM_id = 1)
-                AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
-                AND (opm.id IN (9, 10, 11) OR frm.respuesta_FRM_id IS NULL)
-        ORDER BY ult.tiempo_transc_ult_mamografia DESC;
+            SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
+                CASE 
+                    WHEN COUNT(opc.opc_respuesta_FRNM) > 0 
+                    THEN GROUP_CONCAT(DISTINCT opc.opc_respuesta_FRNM SEPARATOR ', ') 
+                    ELSE 'No aplica' 
+                END AS Antecedentes_familiares,
+                CASE 
+                    WHEN COUNT(opm.opc_respuesta_FRM) > 0 
+                    THEN GROUP_CONCAT(DISTINCT opm.opc_respuesta_FRM SEPARATOR ', ') 
+                    ELSE 'No aplica' 
+                END AS Percepción_peso,
+                COALESCE(MIN(ult.tiempo_transc_ult_mamografia), 1000) AS Ult_mamografia
+            FROM botApp_comuna co 
+            LEFT JOIN botApp_usuario us ON co.cod_comuna = us.Comuna_Usuario_id 
+            LEFT JOIN botApp_respusuariofactorriesgonomod rnm ON us.RutHash = rnm.RutHash 
+            LEFT JOIN botApp_opcfactorriesgonomod opc ON opc.id = rnm.respuesta_FRNM_id 
+                AND opc.id IN (4, 5, 6) 
+            LEFT JOIN botApp_ultima_mamografia_anio ult ON us.RutHash = ult.RutHash 
+            LEFT JOIN botApp_respusuariofactorriesgomod frm ON us.RutHash = frm.RutHash 
+            LEFT JOIN botApp_opcfactorriesgomod opm ON opm.id = frm.respuesta_FRM_id 
+                AND opm.id IN (9, 10, 11) 
+                WHERE us.RutHash IN (  
+                    SELECT RutHash FROM botApp_respusuariofactorriesgonomod WHERE respuesta_FRNM_id = 1
+                )
+                GROUP BY us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna
+                ORDER BY MIN(ult.tiempo_transc_ult_mamografia) DESC;
         """)
         columns = [col[0] for col in cursor.description]
         data = cursor.fetchall()
