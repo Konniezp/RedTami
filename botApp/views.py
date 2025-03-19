@@ -1303,7 +1303,7 @@ def generar_grafico_pregunta3():
         cursor.execute(
             """SELECT id_opc_respuesta_id, COUNT(*) 
             FROM botApp_usuariorespuesta u JOIN botApp_respusuariofactorriesgonomod r ON u.RutHash = r.RutHash
-            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (10,11,12,13) 
+            WHERE respuesta_FRNM_id IN (1) AND id_opc_respuesta_id IN (10,11,12) 
             GROUP BY id_opc_respuesta_id;"""
         )
         resultados = cursor.fetchall()
