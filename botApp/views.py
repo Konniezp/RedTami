@@ -247,17 +247,21 @@ def datosListadoOrdenado(request):
                 cursor.execute("""
                     SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
                     COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+                    opm.opc_respuesta_FRM AS Percepción_peso,          
                     COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
                     FROM botApp_comuna co LEFT JOIN botApp_usuario us
                     ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
                     ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
                     ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
-                    ON opc.id = rnm.respuesta_FRNM_id 
+                    ON opc.id = rnm.respuesta_FRNM_id LEFT JOIN botApp_respusuariofactorriesgomod frm 
+                    ON us.RutHash = frm.RutHash LEFT JOIN botApp_opcfactorriesgomod opm 
+                    ON opm.id = frm.respuesta_FRM_id 
                     WHERE us.RutHash IN (
                             SELECT RutHash 
                             FROM botApp_respusuariofactorriesgonomod 
                             WHERE respuesta_FRNM_id = 1)
                             AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+                            AND (opm.id IN (9, 10, 11) OR frm.respuesta_FRM_id IS NULL)
                     ORDER BY ult.tiempo_transc_ult_mamografia DESC;
                     """)
                 columns = [col[0] for col in cursor.description]
@@ -266,7 +270,7 @@ def datosListadoOrdenado(request):
             #Descifra datos 
             datos_descifrados=[]
             for row in datos:
-                id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
+                id, Rut, Whatsapp, Email, edad, comuna, antecedentes, percepcion_peso, ultima_mamografia = row
             
                 #Intenta descifrar cada campo encriptado
                 try:
@@ -292,6 +296,7 @@ def datosListadoOrdenado(request):
                     "edad": edad,
                     "comuna": comuna,
                     "Antecedentes_familiares": antecedentes,
+                    "Percepcion_peso": percepcion_peso,
                     "Ult_mamografia": ultima_mamografia,
                 })
             return render(request, "respuestas/datosListadoOrdenado.html", {"Datos": datos_descifrados})
@@ -587,17 +592,21 @@ def crear_excel_listado_ordenable(request):
         cursor.execute("""
         SELECT us.id, us.Rut, us.Whatsapp, us.Email, us.edad, co.nombre_comuna,
         COALESCE(opc_respuesta_FRNM, 'No aplica') AS Antecedentes_familiares,
+        opm.opc_respuesta_FRM AS Percepción_peso,
         COALESCE(ult.tiempo_transc_ult_mamografia, 1000) AS Ult_mamografia
         FROM botApp_comuna co LEFT JOIN botApp_usuario us
         ON co.cod_comuna = us.Comuna_Usuario_id LEFT JOIN botApp_respusuariofactorriesgonomod rnm 
         ON us.RutHash = rnm.RutHash LEFT JOIN botApp_ultima_mamografia_anio ult 
         ON us.RutHash = ult.RutHash LEFT JOIN botApp_opcfactorriesgonomod opc 
-        ON opc.id = rnm.respuesta_FRNM_id 
+        ON opc.id = rnm.respuesta_FRNM_id LEFT JOIN botApp_respusuariofactorriesgomod frm 
+        ON us.RutHash = frm.RutHash LEFT JOIN botApp_opcfactorriesgomod opm 
+        ON opm.id = frm.respuesta_FRM_id 
         WHERE us.RutHash IN (
                 SELECT RutHash 
                 FROM botApp_respusuariofactorriesgonomod 
                 WHERE respuesta_FRNM_id = 1)
                 AND (opc.id IN (4, 5, 6) OR rnm.respuesta_FRNM_id IS NULL)
+                AND (opm.id IN (9, 10, 11) OR frm.respuesta_FRM_id IS NULL)
         ORDER BY ult.tiempo_transc_ult_mamografia DESC;
         """)
         columns = [col[0] for col in cursor.description]
@@ -614,7 +623,7 @@ def crear_excel_listado_ordenable(request):
     # Agregar los datos fila por fila
     datos_descifrados = []
     for row in data:
-        id, Rut, Whatsapp, Email, edad, comuna, antecedentes, ultima_mamografia = row
+        id, Rut, Whatsapp, Email, edad, comuna, antecedentes, percepcion_peso, ultima_mamografia = row
 
         # Intenta descifrar los datos
         try:
@@ -633,7 +642,7 @@ def crear_excel_listado_ordenable(request):
             Email_descifrado = "Error al descifrar Email"
 
         # Agregar los datos descifrados a la lista y a la hoja de Excel
-        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, comuna, antecedentes, ultima_mamografia)
+        fila_descifrada = (id, Rut_descifrado, Whatsapp_descifrado, Email_descifrado, edad, comuna, antecedentes, percepcion_peso, ultima_mamografia)
         datos_descifrados.append(fila_descifrada)
         ws.append(fila_descifrada) 
 
@@ -2099,6 +2108,90 @@ def grafico_frecuencia_alcohol():
     imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return imagen_base64
 
+def grafico_percepcion_peso_circular():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT respuesta_FRM_id, COUNT(*) 
+            FROM botApp_respusuariofactorriesgomod us JOIN botApp_respusuariofactorriesgonomod r ON us.RutHash = r.RutHash
+            WHERE respuesta_FRNM_id IN (1) AND respuesta_FRM_id IN (9,10,11) 
+            GROUP BY respuesta_FRM_id;
+            """
+        )
+        resultados = cursor.fetchall()
+
+    labels = []
+    sizes = []
+    counts = []
+
+    for resultado in resultados:
+        id_opc_respuesta, cantidad = resultado
+        opcion_respuesta = OpcFactorRiesgoMod.objects.get(id=id_opc_respuesta)
+        labels.append(opcion_respuesta.opc_respuesta_FRM)
+        sizes.append(cantidad)
+        counts.append(f"{opcion_respuesta.opc_respuesta_FRM} - {cantidad}")
+
+    # Configurar el gráfico circular
+    fig, ax = plt.subplots(figsize=(8, 8))
+    wedges, texts, autotexts = ax.pie(sizes, labels=None, autopct='%1.1f%%', startangle=90, colors=['#79addc', '#EFB0C9', '#A5F8CE'])
+    
+    # Configurar las etiquetas del gráfico
+    ax.legend(wedges, counts, title="Respuestas", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+    
+    # Mostrar el gráfico
+    plt.title('Percepción del peso', pad=20)
+
+    # Guardar la imagen en un buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png", bbox_inches='tight')
+    buffer.seek(0)
+    plt.close()
+
+    # Convertir la imagen a base64
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
+def grafico_percepcion_peso_barra():
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT respuesta_FRM_id, Count(*)
+            FROM botApp_respusuariofactorriesgomod
+            WHERE respuesta_FRM_id IN(9,10,11)
+            group by respuesta_FRM_id; """
+            
+        )
+        resultados = cursor.fetchall()
+
+    pesos = []
+    cantidades = []
+
+    for resultado in resultados:
+        peso_id, cantidad = resultado
+        peso = OpcFactorRiesgoMod.objects.get(id=peso_id)
+        pesos.append(peso.opc_respuesta_FRM)
+        cantidades.append(cantidad)
+
+    # Crear gráfico de barras con diferentes colores para cada barra
+    colores = {'Normal o bajo peso': '#79addc', 'Sobrepeso': '#EFB0C9', 'Obesidad': '#A5F8CE'}
+    plt.bar(pesos, cantidades, color=[colores[genero] for genero in pesos])
+
+    # Agregar los valores de cada barra
+    for i in range(len(pesos)):
+        plt.text(i, cantidades[i], str(cantidades[i]), ha='center', va='bottom')
+   
+    plt.xlabel("Percepción personal del peso")
+    plt.ylabel("Número de Personas")
+    plt.title("Ingresos por Percepción personal de peso", pad=20)
+
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    plt.close()
+
+    imagen_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return imagen_base64
+
 @login_required
 def reportes(request):
     data = {
@@ -2125,7 +2218,9 @@ def reportes(request):
         "imagen_base64_grafico_prev_salud_por_rango_edad":grafico_prev_salud_por_rango_edad(),
         "imagen_base64_grafico_consumo_alcohol":grafico_frecuencia_alcohol(),
         "imagen_base64_grafico_escolaridad":grafico_escolaridad(),
-        "imagen_base64_grafico_genero_nuevo":generar_grafico_personas_por_genero_NUEVO(), 
+        "imagen_base64_grafico_genero_nuevo":generar_grafico_personas_por_genero_NUEVO(),
+        "imagen_base64_grafico_percepcion_peso_circular": grafico_percepcion_peso_circular(), 
+        "imagen_base64_grafico_percepcion_peso_barra": grafico_percepcion_peso_barra(),
         
         }
     return render(request, "reportes.html", data)
