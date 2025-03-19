@@ -13,7 +13,7 @@
         <table border="1">
             <thead>
                 <tr>
-                    <td colspan="9"><b>Total de respuestas: {{ Datos|length }}</b></td>
+                    <td colspan="10"><b>Total de respuestas: {{ Datos|length }}</b></td>
                 </tr>
                 <tr>
                     <th>#</th>
@@ -24,6 +24,7 @@
                     <th>Edad</th>
                     <th>Comuna</th>
                     <th>Antecedentes familiares</th>
+                    <th>Percepción peso</th>
                     <th>Tiempo transcurrido</th>
                 </tr>
             </thead>
@@ -38,6 +39,7 @@
                     <td>{{ dato.edad }}</td>
                     <td>{{ dato.comuna }}</td>
                     <td>{{ dato.Antecedentes_familiares}}</td>
+                    <td>{{ dato.Percepcion_peso}}</td>
                     <td>{{ dato.Ult_mamografia }}</td>
                 </tr>
                 {% endfor %}
