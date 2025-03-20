@@ -164,7 +164,7 @@ class UsuarioRespuesta(models.Model):
         if self.id_opc_respuesta.id in [10, 11, 12]: 
             anio = self.obtener_anio_mamografia()
             
-            if anio:  
+            if anio and anio != 0:
                 usuario = Usuario.objects.filter(RutHash=self.RutHash).first()
                 if usuario:
                     ultima_mamografia_anio.objects.update_or_create(
