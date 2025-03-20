@@ -161,7 +161,7 @@ class UsuarioRespuesta(models.Model):
 
         super().save(*args, **kwargs)
 
-        if self.id_opc_respuesta.id in [10, 11, 12, 13]: 
+        if self.id_opc_respuesta.id in [10, 11, 12]: 
             anio = self.obtener_anio_mamografia()
             
             if anio:  
